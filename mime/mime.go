@@ -1,0 +1,70 @@
+package mime // import "gopkg.in/webnice/web.v1/mime"
+
+const charsetUTF8 = "charset=utf-8"
+const (
+	// ApplicationJSON MIME type
+	ApplicationJSON = `application/json`
+
+	// ApplicationJSONCharsetUTF8 MIME type
+	ApplicationJSONCharsetUTF8 = ApplicationJSON + `; ` + charsetUTF8
+
+	// ApplicationJavaScript MIME type
+	ApplicationJavaScript = `application/javascript`
+
+	// ApplicationJavaScriptCharsetUTF8 MIME type
+	ApplicationJavaScriptCharsetUTF8 = ApplicationJavaScript + `; ` + charsetUTF8
+
+	// ApplicationXML MIME type
+	ApplicationXML = `application/xml`
+
+	// ApplicationXMLCharsetUTF8 MIME type
+	ApplicationXMLCharsetUTF8 = ApplicationXML + `; ` + charsetUTF8
+
+	// ApplicationForm MIME type
+	ApplicationForm = `application/x-www-form-urlencoded`
+
+	// ApplicationProtobuf MIME type
+	ApplicationProtobuf = `application/protobuf`
+
+	// ApplicationMsgpack MIME type
+	ApplicationMsgpack = `application/msgpack`
+
+	// TextHTML MIME type
+	TextHTML = `text/html`
+
+	// TextHTMLCharsetUTF8 MIME type
+	TextHTMLCharsetUTF8 = TextHTML + `; ` + charsetUTF8
+
+	// TextCSS MIME type
+	TextCSS = `text/css`
+
+	// TextCSSCharsetUTF8 MIME type
+	TextCSSCharsetUTF8 = TextCSS + `; ` + charsetUTF8
+
+	// TextPlain MIME type
+	TextPlain = `text/plain`
+
+	// TextPlainCharsetUTF8 MIME type
+	TextPlainCharsetUTF8 = TextPlain + `; ` + charsetUTF8
+
+	// TextXML MIME type
+	TextXML = `text/xml`
+
+	// TextXMLCharsetUTF8 MIME type
+	TextXMLCharsetUTF8 = TextXML + `; ` + charsetUTF8
+
+	// MultipartForm MIME type
+	MultipartForm = `multipart/form-data`
+
+	// OctetStream MIME type
+	OctetStream = `application/octet-stream`
+
+	// FavIcon MIME type
+	FavIcon = `image/vnd.microsoft.icon`
+
+	// ImagePNG MIME type
+	ImagePNG = `image/png`
+
+	// ImageSVG MIME type
+	ImageSVG = `image/svg+xml`
+)
