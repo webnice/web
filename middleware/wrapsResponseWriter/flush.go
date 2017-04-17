@@ -6,7 +6,4 @@ import (
 	"net/http"
 )
 
-func (f *flush) Flush() {
-	fl := f.basic.ResponseWriter.(http.Flusher)
-	fl.Flush()
-}
+func (f *flush) Flush() { f.basic.ResponseWriter.(http.Flusher).Flush() }

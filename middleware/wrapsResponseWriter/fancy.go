@@ -10,25 +10,21 @@ import (
 )
 
 func (f *httpFancyWriter) CloseNotify() <-chan bool {
-	cn := f.basic.ResponseWriter.(http.CloseNotifier)
-	return cn.CloseNotify()
+	return f.basic.ResponseWriter.(http.CloseNotifier).CloseNotify()
 }
 
-func (f *httpFancyWriter) Flush() {
-	fl := f.basic.ResponseWriter.(http.Flusher)
-	fl.Flush()
-}
+func (f *httpFancyWriter) Flush() { f.basic.ResponseWriter.(http.Flusher).Flush() }
 
 func (f *httpFancyWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
-	hj := f.basic.ResponseWriter.(http.Hijacker)
-	return hj.Hijack()
+	return f.basic.ResponseWriter.(http.Hijacker).Hijack()
 }
 
 func (f *httpFancyWriter) ReadFrom(r io.Reader) (int64, error) {
+	var rf io.ReaderFrom
 	if f.basic.tee != nil {
 		return io.Copy(&f.basic, r)
 	}
-	rf := f.basic.ResponseWriter.(io.ReaderFrom)
+	rf = f.basic.ResponseWriter.(io.ReaderFrom)
 	f.basic.maybeWriteHeader()
 	return rf.ReadFrom(r)
 }
@@ -36,13 +32,10 @@ func (f *httpFancyWriter) ReadFrom(r io.Reader) (int64, error) {
 // HTTP2
 
 func (f *http2FancyWriter) CloseNotify() <-chan bool {
-	cn := f.basic.ResponseWriter.(http.CloseNotifier)
-	return cn.CloseNotify()
+	return f.basic.ResponseWriter.(http.CloseNotifier).CloseNotify()
 }
-func (f *http2FancyWriter) Flush() {
-	fl := f.basic.ResponseWriter.(http.Flusher)
-	fl.Flush()
-}
+
+func (f *http2FancyWriter) Flush() { f.basic.ResponseWriter.(http.Flusher).Flush() }
 
 // Go 1.8 http Push
 
