@@ -1,4 +1,4 @@
-package status // import "gopkg.in/webnice/web.v1/status"
+package status //import "gopkg.in/webnice/web.v1/status"
 
 const (
 	// Continue Continue. Частично переданные на сервер данные проверены и сервер удовлетворён начальными данными. Клиент может продолжать отправку заголовков и данных
