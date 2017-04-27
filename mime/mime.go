@@ -67,4 +67,13 @@ const (
 
 	// ImageSVG MIME type
 	ImageSVG = `image/svg+xml`
+
+	// MessageDeliveryStatus MIME type of RFC3464
+	MessageDeliveryStatus = `message/delivery-status`
+
+	// MessageRfc822 MIME type of RFC822
+	MessageRfc822 = `message/rfc822`
+
+	// TextRfc822Headers MIME type of RFC822
+	TextRfc822Headers = `text/rfc822-headers`
 )
