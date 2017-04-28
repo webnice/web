@@ -197,7 +197,7 @@ func BenchmarkTreeGet(b *testing.B) {
 	tr.InsertRoute(mGET, "/ping/:id", h2)
 	tr.InsertRoute(mGET, "/ping/:id/woop", h2)
 	tr.InsertRoute(mGET, "/ping/:id/:opt", h2)
-	tr.InsertRoute(mGET, "/pinggggg", h2)
+	tr.InsertRoute(mGET, "/pings", h2)
 	tr.InsertRoute(mGET, "/hello", h1)
 
 	b.ReportAllocs()
@@ -207,6 +207,6 @@ func BenchmarkTreeGet(b *testing.B) {
 		// params := map[string]string{}
 		mctx := NewRouteContext()
 		tr.FindRoute(mctx, "/ping/123/456")
-		// tr.Find("/pingggg", params)
+		// tr.Find("/pings", params)
 	}
 }

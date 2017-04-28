@@ -55,8 +55,9 @@ type Method int64
 
 // All return all http methods
 func All() (ret []Method) {
-	for n := range methodMap {
-		ret = append(ret, methodMap[n])
+	var key string
+	for key = range methodMap {
+		ret = append(ret, methodMap[key])
 	}
 	return
 }

@@ -17,9 +17,9 @@ func (rou *impl) NotFoundHandler() http.HandlerFunc {
 
 // NotFound sets a custom http.HandlerFunc for routing paths that could not be found
 func (rou *impl) NotFound(handlerFn http.HandlerFunc) {
+	var tmp = rou
+	var hFn = handlerFn
 	// Build NotFound handler chain
-	tmp := rou
-	hFn := handlerFn
 	if rou.inline && rou.parent != nil {
 		tmp = rou.parent
 		hFn = rou.Chain(rou.middlewares...).HandlerFunc(hFn).ServeHTTP

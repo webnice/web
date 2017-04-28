@@ -17,9 +17,9 @@ func (rou *impl) MethodNotAllowedHandler() http.HandlerFunc {
 
 // MethodNotAllowed sets a custom http.HandlerFunc for routing paths where the method is unresolved
 func (rou *impl) MethodNotAllowed(handlerFn http.HandlerFunc) {
+	var tmp = rou
+	var hFn = handlerFn
 	// Build MethodNotAllowed handler chain
-	tmp := rou
-	hFn := handlerFn
 	if rou.inline && rou.parent != nil {
 		tmp = rou.parent
 		hFn = rou.Chain(rou.middlewares...).HandlerFunc(hFn).ServeHTTP

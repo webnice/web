@@ -18,9 +18,9 @@ func (rou *impl) InternalServerErrorHandler() http.HandlerFunc {
 
 // InternalServerError defines a handler to respond whenever a internal server error
 func (rou *impl) InternalServerError(handlerFn http.HandlerFunc) {
+	var tmp = rou
+	var hFn = handlerFn
 	// Build InternalServerError handler chain
-	tmp := rou
-	hFn := handlerFn
 	if rou.inline && rou.parent != nil {
 		tmp = rou.parent
 		hFn = rou.Chain(rou.middlewares...).HandlerFunc(hFn).ServeHTTP

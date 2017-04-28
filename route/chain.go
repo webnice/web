@@ -29,6 +29,7 @@ func (mws Middlewares) HandlerFunc(hfn http.HandlerFunc) http.Handler {
 // chain builds a http.Handler composed of an inline middleware stack and endpoint
 // handler in the order they are passed
 func chain(middlewares []func(http.Handler) http.Handler, endpoint http.Handler) (ret http.Handler) {
+	var i int
 	// Return ahead of time if there aren't any middlewares for the chain
 	if len(middlewares) == 0 {
 		ret = endpoint
@@ -36,7 +37,7 @@ func chain(middlewares []func(http.Handler) http.Handler, endpoint http.Handler)
 	}
 	// Wrap the end handler with the middleware chain
 	ret = middlewares[len(middlewares)-1](endpoint)
-	for i := len(middlewares) - 2; i >= 0; i-- {
+	for i = len(middlewares) - 2; i >= 0; i-- {
 		ret = middlewares[i](ret)
 	}
 	return

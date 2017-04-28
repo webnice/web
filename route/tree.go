@@ -67,11 +67,13 @@ func (ns nodes) Sort()              { sort.Sort(ns) }
 
 // FindRoute Поиск роутинга и методов
 func (n *node) FindRoute(ctx context.Interface, path string) methodHandlers {
+	var rn *node
+
 	// Reset the context routing pattern
 	ctx.Route().Pattern("")
 
 	// Find the routing handlers for the path
-	rn := n.findRoute(ctx, path)
+	rn = n.findRoute(ctx, path)
 	if rn == nil {
 		return nil
 	}
@@ -87,8 +89,9 @@ func (n *node) FindRoute(ctx context.Interface, path string) methodHandlers {
 
 // InsertRoute Добавление роутинга и обработчика
 func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handler) *node {
-	var parent *node
-	search := pattern
+	var cn, parent, child, subchild *node
+	var search = pattern
+	var p, commonPrefix int
 
 	for {
 		// Handle key exhaustion
@@ -105,7 +108,7 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 
 		// No edge, create one
 		if n == nil {
-			cn := &node{label: search[0], prefix: search, pattern: pattern}
+			cn = &node{label: search[0], prefix: search, pattern: pattern}
 			cn.setHandler(mtd, handler)
 			parent.addChild(pattern, cn)
 			return cn
@@ -114,7 +117,7 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 		if n.typ > ntStatic {
 			// We found a wildcard node, meaning search path starts with
 			// a wild prefix. Trim off the wildcard search path and continue
-			p := strings.Index(search, "/")
+			p = strings.Index(search, "/")
 			if p < 0 {
 				p = len(search)
 			}
@@ -124,7 +127,7 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 
 		// Static nodes fall below here
 		// Determine longest prefix of the search key on match
-		commonPrefix := n.longestPrefix(search, n.prefix)
+		commonPrefix = n.longestPrefix(search, n.prefix)
 		if commonPrefix == len(n.prefix) {
 			// the common prefix is as long as the current node's prefix we're attempting to insert
 			// keep the search going.
@@ -133,7 +136,7 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 		}
 
 		// Split the node
-		child := &node{
+		child = &node{
 			typ:    ntStatic,
 			prefix: search[:commonPrefix],
 		}
@@ -153,7 +156,7 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 		}
 
 		// Create a new edge for the node
-		subchild := &node{
+		subchild = &node{
 			typ:     ntStatic,
 			label:   search[0],
 			prefix:  search,
@@ -167,8 +170,12 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 
 // Поиск шаблона
 func (n *node) findPattern(pattern string) *node {
-	nn := n
-	for _, nds := range nn.children {
+	var nn *node
+	var nds nodes
+	var idx int
+	var xpattern string
+	nn = n
+	for _, nds = range nn.children {
 		if len(nds) == 0 {
 			continue
 		}
@@ -178,8 +185,8 @@ func (n *node) findPattern(pattern string) *node {
 			continue
 		}
 
-		idx := n.longestPrefix(pattern, n.prefix)
-		xpattern := pattern[idx:]
+		idx = n.longestPrefix(pattern, n.prefix)
+		xpattern = pattern[idx:]
 
 		if len(xpattern) == 0 {
 			return n
@@ -195,15 +202,20 @@ func (n *node) findPattern(pattern string) *node {
 func (n *node) isLeaf() bool { return n.handlers != nil }
 
 func (n *node) addChild(pattern string, child *node) {
-	search := child.prefix
+	var search string
+	var i int
+	var handlers methodHandlers
+	var ntyp nodeTyp
+
+	search = child.prefix
 
 	// Find any wildcard segments
-	p := strings.IndexAny(search, ":*")
+	i = strings.IndexAny(search, ":*")
 
 	// Determine new node type
-	ntyp := child.typ
-	if p >= 0 {
-		switch search[p] {
+	ntyp = child.typ
+	if i >= 0 {
+		switch search[i] {
 		case ':':
 			ntyp = ntParam
 		case '*':
@@ -211,27 +223,27 @@ func (n *node) addChild(pattern string, child *node) {
 		}
 	}
 
-	if p == 0 {
+	if i == 0 {
 		// Path starts with a wildcard
 
-		handlers := child.handlers
+		handlers = child.handlers
 		child.typ = ntyp
 
 		if ntyp == ntCatchAll {
-			p = -1
+			i = -1
 		} else {
-			p = strings.IndexByte(search, '/')
+			i = strings.IndexByte(search, '/')
 		}
-		if p < 0 {
-			p = len(search)
+		if i < 0 {
+			i = len(search)
 		}
-		child.prefix = search[:p]
+		child.prefix = search[:i]
 
-		if p != len(search) {
+		if i != len(search) {
 			// add edge for the remaining part, split the end
 			child.handlers = nil
 
-			search = search[p:]
+			search = search[i:]
 
 			child.addChild(pattern, &node{
 				typ:      ntStatic,
@@ -242,17 +254,17 @@ func (n *node) addChild(pattern string, child *node) {
 			})
 		}
 
-	} else if p > 0 {
+	} else if i > 0 {
 		// Path has some wildcard
 
 		// starts with a static segment
-		handlers := child.handlers
+		handlers = child.handlers
 		child.typ = ntStatic
-		child.prefix = search[:p]
+		child.prefix = search[:i]
 		child.handlers = nil
 
 		// add the wild edge node
-		search = search[p:]
+		search = search[i:]
 
 		child.addChild(pattern, &node{
 			typ:      ntyp,
@@ -273,37 +285,41 @@ func (n *node) addChild(pattern string, child *node) {
 }
 
 func (n *node) replaceChild(label byte, child *node) {
-	for i := 0; i < len(n.children[child.typ]); i++ {
+	const missingChild = `replacing missing child`
+	var i int
+	for i = 0; i < len(n.children[child.typ]); i++ {
 		if n.children[child.typ][i].label == label {
 			n.children[child.typ][i] = child
 			n.children[child.typ][i].label = label
 			return
 		}
 	}
-
-	panic("chi: replacing missing child")
+	panic(missingChild)
 }
 
-func (n *node) getEdge(label byte) *node {
-	for _, nds := range n.children {
-		num := len(nds)
-		for i := 0; i < num; i++ {
+func (n *node) getEdge(label byte) (ret *node) {
+	var nds nodes
+	var i, num int
+	for _, nds = range n.children {
+		num = len(nds)
+		for i = 0; i < num; i++ {
 			if nds[i].label == label {
-				return nds[i]
+				ret = nds[i]
 			}
 		}
 	}
-	return nil
+	return
 }
 
 func (n *node) findEdge(ntyp nodeTyp, label byte) *node {
-	nds := n.children[ntyp]
-	num := len(nds)
-	idx := 0
+	var nds = n.children[ntyp]
+	var num = len(nds)
+	var idx = int(0)
+	var i, j int
 
 	switch ntyp {
 	case ntStatic:
-		i, j := 0, num-1
+		i, j = 0, num-1
 		for i <= j {
 			idx = i + (j-i)/2
 			if label > nds[idx].label {
@@ -319,8 +335,10 @@ func (n *node) findEdge(ntyp nodeTyp, label byte) *node {
 		}
 		return nds[idx]
 
-	default: // wild nodes
-		// TODO: right now we match them all.. but regexp should
+	default:
+		// TODO
+		// wild nodes
+		// right now we match them all, but regexp should
 		// run through regexp matcher
 		return nds[idx]
 	}
@@ -329,30 +347,36 @@ func (n *node) findEdge(ntyp nodeTyp, label byte) *node {
 // Recursive edge traversal by checking all nodeTyp groups along the way
 // It's like searching through a multi-dimensional radix trie
 func (n *node) findRoute(ctx context.Interface, path string) *node {
-	var nn = n
-	var search = path
+	var nn, xn, fin *node
+	var nds nodes
+	var ntyp nodeTyp
+	var t, p int
+	var label byte
+	var search, xsearch string
 
-	for t, nds := range nn.children {
-		ntyp := nodeTyp(t)
+	nn = n
+	search = path
+	for t, nds = range nn.children {
+		ntyp = nodeTyp(t)
 		if len(nds) == 0 {
 			continue
 		}
 
 		// search subset of edges of the index for a matching node
-		var label byte
+		label = 0
 		if search != "" {
 			label = search[0]
 		}
 
-		xn := nn.findEdge(ntyp, label) // next node
+		xn = nn.findEdge(ntyp, label) // next node
 		if xn == nil {
 			continue
 		}
 
 		// Prepare next search path by trimming prefix from requested path
-		xsearch := search
+		xsearch = search
 		if xn.typ > ntStatic {
-			p := -1
+			p = -1
 			if xn.typ < ntCatchAll {
 				p = strings.IndexByte(xsearch, '/')
 			}
@@ -381,7 +405,7 @@ func (n *node) findRoute(ctx context.Interface, path string) *node {
 		}
 
 		// recursively find the next node..
-		fin := xn.findRoute(ctx, xsearch)
+		fin = xn.findRoute(ctx, xsearch)
 		if fin != nil {
 			// found a node, return it
 			return fin
@@ -401,21 +425,23 @@ func (n *node) findRoute(ctx context.Interface, path string) *node {
 }
 
 // finds the length of the shared prefix of two strings
-func (n *node) longestPrefix(k1, k2 string) int {
-	max := len(k1)
-	if l := len(k2); l < max {
+func (n *node) longestPrefix(k1, k2 string) (i int) {
+	var max, l int
+	max = len(k1)
+	if l = len(k2); l < max {
 		max = l
 	}
-	var i int
 	for i = 0; i < max; i++ {
 		if k1[i] != k2[i] {
 			break
 		}
 	}
-	return i
+	return
 }
 
 func (n *node) setHandler(mtd method.Method, handler http.Handler) {
+	var m method.Method
+
 	if n.handlers == nil {
 		n.handlers = make(methodHandlers, 0)
 	}
@@ -426,7 +452,7 @@ func (n *node) setHandler(mtd method.Method, handler http.Handler) {
 	}
 	if mtd&method.Any == method.Any {
 		n.handlers[method.Any] = handler
-		for _, m := range method.All() {
+		for _, m = range method.All() {
 			n.handlers[m] = handler
 		}
 	} else {
@@ -434,65 +460,74 @@ func (n *node) setHandler(mtd method.Method, handler http.Handler) {
 	}
 }
 
-func (n *node) isEmpty() bool {
-	for _, nds := range n.children {
+func (n *node) isEmpty() (ret bool) {
+	var nds nodes
+	for _, nds = range n.children {
 		if len(nds) > 0 {
-			return false
+			return
 		}
 	}
-	return true
+	ret = true
+	return
 }
 
 func (n *node) routes() []Route {
-	rts := []Route{}
+	var rts []Route
 
-	n.walkRoutes(n.prefix, n, func(pattern string, handlers methodHandlers, subroutes Routes) bool {
+	n.walkRoutes(n.prefix, n, func(pattern string, handlers methodHandlers, subroutes Routes) (ret bool) {
+		var h http.Handler
+		var mt method.Method
+		var hs map[string]http.Handler
+		var m string
+
 		if handlers[method.Stub] != nil && subroutes == nil {
-			return false
+			return
 		}
-
 		if subroutes != nil && len(pattern) > 2 {
 			pattern = pattern[:len(pattern)-2]
 		}
-
-		var hs = make(map[string]http.Handler, 0)
+		hs = make(map[string]http.Handler, 0)
 		if handlers[method.Any] != nil {
 			hs["*"] = handlers[method.Any]
 		}
-		for mt, h := range handlers {
+		for mt, h = range handlers {
 			if h == nil {
 				continue
 			}
-			m := mt.String()
+			m = mt.String()
 			if m == "" {
 				continue
 			}
 			hs[m] = h
 		}
-
-		rt := Route{pattern, hs, subroutes}
-		rts = append(rts, rt)
-		return false
+		rts = append(rts, Route{pattern, hs, subroutes})
+		ret = true
+		return
 	})
 
 	return rts
 }
 
-func (n *node) walkRoutes(pattern string, nd *node, fn walkFn) bool {
+func (n *node) walkRoutes(pattern string, nd *node, fn walkFn) (ret bool) {
+	var nds nodes
+	var nn *node
+
 	pattern = nd.pattern
 
 	// Visit the leaf values if any
 	if (nd.handlers != nil || nd.subroutes != nil) && fn(pattern, nd.handlers, nd.subroutes) {
-		return true
+		ret = true
+		return
 	}
 
 	// Recurse on the children
-	for _, nds := range nd.children {
-		for _, nd := range nds {
-			if n.walkRoutes(pattern, nd, fn) {
-				return true
+	for _, nds = range nd.children {
+		for _, nn = range nds {
+			if n.walkRoutes(pattern, nn, fn) {
+				ret = true
+				return
 			}
 		}
 	}
-	return false
+	return
 }

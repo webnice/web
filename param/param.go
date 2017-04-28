@@ -18,7 +18,8 @@ func (ps *Params) Add(key string, value string) {
 
 // Get value by key from heap
 func (ps Params) Get(key string) (ret string) {
-	for _, p := range ps {
+	var p Param
+	for _, p = range ps {
 		if p.Key == key {
 			ret = p.Value
 		}
@@ -28,8 +29,10 @@ func (ps Params) Get(key string) (ret string) {
 
 // Set value by key to heap
 func (ps *Params) Set(key string, value string) {
-	idx := -1
-	for i, p := range *ps {
+	var p Param
+	var i, idx int
+	idx = -1
+	for i, p = range *ps {
 		if p.Key == key {
 			idx = i
 			break

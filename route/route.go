@@ -131,6 +131,8 @@ func (rou *impl) Chain(middlewares ...func(http.Handler) http.Handler) Middlewar
 
 // With adds inline middlewares for an endpoint handler
 func (rou *impl) With(middlewares ...func(http.Handler) http.Handler) Interface {
+	var im *impl
+
 	// Similarly as in handle(), we must build the route handler once further
 	// middleware registration isn't allowed for this stack, like now
 	if !rou.inline && rou.handler == nil {
@@ -145,14 +147,14 @@ func (rou *impl) With(middlewares ...func(http.Handler) http.Handler) Interface 
 	}
 	mws = append(mws, middlewares...)
 
-	im := &impl{inline: true, parent: rou, tree: rou.tree, middlewares: mws}
+	im = &impl{inline: true, parent: rou, tree: rou.tree, middlewares: mws}
 	return im
 }
 
 // Group creates a new inline-route with a fresh middleware stack. It's useful
 // for a group of handlers along the same routing path that use an additional set of middlewares
 func (rou *impl) Group(fn func(r Interface)) Interface {
-	im := rou.With().(*impl)
+	var im = rou.With().(*impl)
 	if fn != nil {
 		fn(im)
 	}
@@ -162,7 +164,7 @@ func (rou *impl) Group(fn func(r Interface)) Interface {
 // Route creates a new route with a fresh middleware stack and mounts it
 // along the `pattern` as a subrouter. Effectively, this is a short-hand call to Mount
 func (rou *impl) Route(pattern string, fn func(r Interface)) Interface {
-	subRouter := New()
+	var subRouter = New()
 	if fn != nil {
 		fn(subRouter)
 	}
@@ -178,6 +180,13 @@ func (rou *impl) Route(pattern string, fn func(r Interface)) Interface {
 // routing at the `handler`, which in most cases is another router.
 // As a result, if you define two Mount() routes on the exact same pattern the mount will panic
 func (rou *impl) Mount(pattern string, handler http.Handler) {
+	var subr *impl
+	var ok bool
+	var mtd method.Method
+	var n *node
+	var subHandler http.HandlerFunc
+	var subroutes Routes
+
 	// Provide runtime safety for ensuring a pattern isn't mounted on an existing routing pattern
 	if rou.tree.findPattern(pattern+"*") != nil || rou.tree.findPattern(pattern+"/*") != nil {
 		var mountError = fmt.Sprintf("attempting to Mount() a handler on an existing path, '%s'", pattern)
@@ -185,7 +194,7 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 	}
 
 	// Assign sub-Router's with the parent not found & method not allowed handler if not specified.
-	subr, ok := handler.(*impl)
+	subr, ok = handler.(*impl)
 	if ok && subr.notFoundHandler == nil && rou.notFoundHandler != nil {
 		subr.NotFound(rou.notFoundHandler)
 	}
@@ -194,7 +203,7 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 	}
 
 	// Wrap the sub-router in a handlerFunc to scope the request path for routing.
-	subHandler := http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {
+	subHandler = http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {
 		var ctx context.Interface
 		ctx = context.ContextFromRequest(rq)
 		ctx.Route().Path("/", ctx.Route().UrnParams().Del("*"))
@@ -207,12 +216,12 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 		pattern += "/"
 	}
 
-	mtd := method.Any
-	subroutes, _ := handler.(Routes)
+	mtd = method.Any
+	subroutes, _ = handler.(Routes)
 	if subroutes != nil {
 		mtd |= method.Stub
 	}
-	n := rou.handle(mtd, pattern+"*", subHandler)
+	n = rou.handle(mtd, pattern+"*", subHandler)
 
 	if subroutes != nil {
 		n.subroutes = subroutes
@@ -299,8 +308,11 @@ func (rou *impl) routeHTTP(wr http.ResponseWriter, rq *http.Request) {
 
 // Recursively update data on child routers
 func (rou *impl) updateSubRoutes(fn func(subMux *impl)) {
-	for _, r := range rou.tree.routes() {
-		subMux, ok := r.SubRoutes.(*impl)
+	var r Route
+	var ok bool
+	var subMux *impl
+	for _, r = range rou.tree.routes() {
+		subMux, ok = r.SubRoutes.(*impl)
 		if !ok {
 			continue
 		}
