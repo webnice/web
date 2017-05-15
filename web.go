@@ -3,10 +3,8 @@ package web // import "gopkg.in/webnice/web.v1"
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 import (
-	"context"
 	"fmt"
 	"net"
-	"net/http"
 	"os"
 
 	"gopkg.in/webnice/web.v1/route"
@@ -87,21 +85,6 @@ func (wsv *web) Wait() { wsv.doCloseDone.Wait() }
 // Error Return last error of web server
 func (wsv *web) Error() error { return wsv.err }
 
-// Stop web server
-func (wsv *web) Stop() {
-	var ctx context.Context
-	if wsv.server != nil {
-		if wsv.conf.ShutdownTimeout > 0 {
-			ctx, _ = context.WithTimeout(context.Background(), wsv.conf.ShutdownTimeout)
-		} else {
-			ctx = context.Background()
-		}
-		wsv.server.Shutdown(ctx)
-	} else if wsv.listener != nil {
-		wsv.listener.Close()
-	}
-}
-
 // Route interface
 func (wsv *web) Route() route.Interface { return wsv.route }
 
@@ -125,15 +108,8 @@ func (wsv *web) run() {
 	}()
 
 	// Configure net/http web server
-	wsv.server = &http.Server{
-		Addr:              wsv.conf.HostPort,
-		IdleTimeout:       wsv.conf.IdleTimeout,
-		ReadHeaderTimeout: wsv.conf.ReadHeaderTimeout,
-		ReadTimeout:       wsv.conf.ReadTimeout,
-		WriteTimeout:      wsv.conf.WriteTimeout,
-		MaxHeaderBytes:    wsv.conf.MaxHeaderBytes,
-		Handler:           wsv.route,
-	}
+	wsv.server = wsv.loadConfiguration()
+
 	// Configure keep alives of web server
 	if wsv.conf.KeepAliveDisable {
 		wsv.server.SetKeepAlivesEnabled(false)

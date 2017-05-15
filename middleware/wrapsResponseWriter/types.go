@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	_ http.Pusher        = &http2FancyWriter{}
 	_ http.Flusher       = &flush{}
 	_ http.CloseNotifier = &httpFancyWriter{}
 	_ http.Flusher       = &httpFancyWriter{}

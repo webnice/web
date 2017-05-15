@@ -36,9 +36,3 @@ func (f *http2FancyWriter) CloseNotify() <-chan bool {
 }
 
 func (f *http2FancyWriter) Flush() { f.basic.ResponseWriter.(http.Flusher).Flush() }
-
-// Go 1.8 http Push
-
-func (f *http2FancyWriter) Push(target string, opts *http.PushOptions) error {
-	return f.basic.ResponseWriter.(http.Pusher).Push(target, opts)
-}
