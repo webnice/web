@@ -1,9 +1,8 @@
-package contexterror // import "gopkg.in/webnice/web.v1/context/contexterror"
+package errors // import "gopkg.in/webnice/web.v1/context/errors"
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 import "gopkg.in/webnice/web.v1/param"
-import ()
 
 // This is an inplementation
 type impl struct {

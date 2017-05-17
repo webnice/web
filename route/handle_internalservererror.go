@@ -38,5 +38,5 @@ func (rou *impl) InternalServerError(handlerFn http.HandlerFunc) {
 func internalServerErrorHandler(wr http.ResponseWriter, rq *http.Request) {
 	wr.WriteHeader(status.InternalServerError)
 	wr.Write(status.Bytes(status.InternalServerError))
-	wr.Write([]byte(", " + context.ContextFromRequest(rq).Error().Get(_KeyInternalServerError)))
+	wr.Write([]byte(", " + context.New(rq).Errors().Get(_KeyInternalServerError)))
 }

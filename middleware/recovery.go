@@ -14,8 +14,8 @@ func Recover(next http.Handler) http.Handler {
 	var fn = func(wr http.ResponseWriter, rq *http.Request) {
 		defer func() {
 			if e := recover(); e != nil {
-				var ctx = context.ContextFromRequest(rq)
-				ctx.Error().Set("InternalServerError", fmt.Sprintf("Panic: %v\nStack:\n%s", e, string(debug.Stack())))
+				var ctx = context.New(rq)
+				ctx.Errors().Set("InternalServerError", fmt.Sprintf("Panic: %v\nStack:\n%s", e, string(debug.Stack())))
 				ctx.InternalServerError().ServeHTTP(wr, rq)
 			}
 		}()
