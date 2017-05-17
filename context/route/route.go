@@ -26,12 +26,7 @@ func (rt *impl) Reset() {
 func (rt *impl) UrnParams() *param.Params { return rt.Params }
 
 // Path Routing path override used by subrouters
-func (rt *impl) Path(str ...string) string {
-	if len(str) > 0 {
-		rt.path = strings.Join(str, ``)
-	}
-	return rt.path
-}
+func (rt *impl) Path(str ...string) string { rt.path = strings.Join(str, ``); return rt.path }
 
 // Pattern Routing pattern matching the path
 func (rt *impl) Pattern(str ...string) string {
@@ -44,14 +39,12 @@ func (rt *impl) Pattern(str ...string) string {
 // Patterns Routing patterns throughout the lifecycle of the request, across all connected routers
 func (rt *impl) Patterns(items ...[]string) []string {
 	var i int
-	if len(items) > 0 {
-		for i = range items {
-			if i == 0 {
-				rt.patterns = items[i]
-			} else {
-				rt.patterns = append(rt.patterns, items[i]...)
-			}
+	for i = range items {
+		if i == 0 {
+			rt.patterns = items[i]
+			continue
 		}
+		rt.patterns = append(rt.patterns, items[i]...)
 	}
 	return rt.patterns
 }

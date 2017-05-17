@@ -161,9 +161,9 @@ func (rou *impl) Group(fn func(r Interface)) Interface {
 	return im
 }
 
-// Route creates a new route with a fresh middleware stack and mounts it
+// SubRoute creates a new route with a fresh middleware stack and mounts it
 // along the `pattern` as a subrouter. Effectively, this is a short-hand call to Mount
-func (rou *impl) Route(pattern string, fn func(r Interface)) Interface {
+func (rou *impl) SubRoute(pattern string, fn func(r Interface)) Interface {
 	var subRouter = New()
 	if fn != nil {
 		fn(subRouter)
@@ -222,7 +222,6 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 		mtd |= method.Stub
 	}
 	n = rou.handle(mtd, pattern+"*", subHandler)
-
 	if subroutes != nil {
 		n.subroutes = subroutes
 	}
