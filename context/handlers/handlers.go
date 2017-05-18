@@ -2,16 +2,17 @@ package handlers // import "gopkg.in/webnice/web.v1/context/handlers"
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-//import "gopkg.in/webnice/web.v1/context/errors"
+import "gopkg.in/webnice/web.v1/context/errors"
 import "gopkg.in/webnice/web.v1/status"
 import (
 	"net/http"
 )
 
 // New returns new context object
-func New() Interface {
+func New(errors errors.Interface) Interface {
 	var hndl = new(impl)
 	hndl.handlers = make(handlers)
+	hndl.errors = errors
 	return hndl
 }
 
@@ -62,12 +63,10 @@ func (hndl *impl) InternalServerError(fn http.HandlerFunc) (ret http.HandlerFunc
 }
 
 func (hndl *impl) defaultInternalServerError(wr http.ResponseWriter, rq *http.Request) {
-	//	var err error
+	var err error
 	wr.WriteHeader(status.InternalServerError)
 	wr.Write(status.Bytes(status.InternalServerError))
-
-	//	if err = context.New(rq).Errors().InternalServerError(nil); err != nil {
-	//		wr.Write([]byte(", " + err.Error()))
-	//	}
-	//	wr.Write([]byte("AAAAAAAAAAAAA ЯЯЯЯЯ!"))
+	if err = hndl.errors.InternalServerError(nil); err != nil {
+		wr.Write([]byte(err.Error()))
+	}
 }

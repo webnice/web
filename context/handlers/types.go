@@ -2,6 +2,7 @@ package handlers // import "gopkg.in/webnice/web.v1/context/handlers"
 
 // import "gopkg.in/webnice/debug.v1"
 // import "gopkg.in/webnice/log.v2"
+import "gopkg.in/webnice/web.v1/context/errors"
 import (
 	"net/http"
 )
@@ -15,6 +16,7 @@ type handlers map[uint16][]http.HandlerFunc
 // This is an inplementation
 type impl struct {
 	handlers handlers
+	errors   errors.Interface
 }
 
 // Interface is an interface of package

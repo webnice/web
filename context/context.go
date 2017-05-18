@@ -37,7 +37,7 @@ func New(obj ...interface{}) Interface {
 	ctx = new(impl)
 	ctx.route = route.New()
 	ctx.errors = errors.New()
-	ctx.handlers = handlers.New()
+	ctx.handlers = handlers.New(ctx.errors)
 
 	return ctx
 }
