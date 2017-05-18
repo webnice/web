@@ -33,6 +33,7 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	if !context.IsContext(rq) {
 		ctx = rou.pool.Get().(context.Interface)
 		ctx.Route().Reset()
+		ctx.Errors().Reset()
 		ctx.Handlers().InternalServerError(rou.internalServerErrorHandler)
 		rq = ctx.NewRequest(rq)
 		defer rou.pool.Put(ctx)

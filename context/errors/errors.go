@@ -12,21 +12,21 @@ func New() Interface {
 
 // Add adds the key, value pair to the errors.
 // It appends to any existing values associated with key
-func (h errors) Add(key uint16, value error) {
+func (h errors) Add(key uint32, value error) {
 	h[key] = append(h[key], value)
 }
 
 // Set sets the params entries associated with key to
 // the single element value. It replaces any existing
 // values associated with key
-func (h errors) Set(key uint16, value error) {
+func (h errors) Set(key uint32, value error) {
 	h[key] = []error{value}
 }
 
 // Get gets the first value associated with the given key.
 // If there are no values associated with the key, Get returns nil.
 // To access multiple values of a key, or to use access the map directly
-func (h errors) Get(key uint16) error {
+func (h errors) Get(key uint32) error {
 	if h == nil {
 		return nil
 	}
@@ -38,11 +38,14 @@ func (h errors) Get(key uint16) error {
 }
 
 // Del deletes the values associated with key
-func (h errors) Del(key uint16) error {
+func (h errors) Del(key uint32) error {
 	var val = h.Get(key)
 	delete(h, key)
 	return val
 }
+
+// Reset all stored errors
+func (ce *impl) Reset() { ce.errors = make(errors) }
 
 // InternalServerError Set description about internal server error
 func (ce *impl) InternalServerError(value error) (ret error) {

@@ -88,6 +88,8 @@ func (wsv *web) Error() error { return wsv.err }
 // Route interface
 func (wsv *web) Route() route.Interface { return wsv.route }
 
+//func (wsv *web) Errors() { wsv.route. }
+
 // Goroutine of the web server
 func (wsv *web) run() {
 	defer wsv.doCloseDone.Done()

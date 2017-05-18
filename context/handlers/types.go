@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	_InternalServerError uint16 = iota
+	_InternalServerError uint32 = iota
 )
 
-type handlers map[uint16][]http.HandlerFunc
+type handlers map[uint32][]http.HandlerFunc
 
 // This is an inplementation
 type impl struct {
@@ -21,6 +21,9 @@ type impl struct {
 
 // Interface is an interface of package
 type Interface interface {
+	// Reset all stored handlers
+	Reset()
+
 	// Set and get InternalServerError handler function
 	InternalServerError(fn http.HandlerFunc) http.HandlerFunc
 }

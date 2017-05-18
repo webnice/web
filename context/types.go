@@ -10,15 +10,14 @@ import (
 )
 
 var (
-	_ContextKey = &key{`RwAQ7mHz4gd8agG2cx7jJ9pQQGk7n3J2dsJFuAd5TjP7NSAVfCRZ9ruxCPpH6mJg`}
+	_ContextKey = &key{`2EA70633-A7DF-44AD-9DE4-C7593085B685`}
 )
 
 // This is the default routing context implementation
 type impl struct {
-	route               route.Interface    // Routing interface
-	errors              errors.Interface   // Errors interface
-	handlers            handlers.Interface // Handlers interface
-	internalServerError http.HandlerFunc   // InternalServerError handler function
+	route    route.Interface    // Routing interface
+	errors   errors.Interface   // Errors interface
+	handlers handlers.Interface // Handlers interface
 }
 
 // Interface is an interface of package
