@@ -22,7 +22,7 @@ const (
 	// Head HTTP Method "HEAD"
 	Head
 
-	// Patch HTTP Method "PATCH"
+	// Patch HTTP Method "PATCH" RFC 5789
 	Patch
 
 	// Options HTTP Method "OPTIONS"
@@ -31,7 +31,7 @@ const (
 	// Trace HTTP Method "TRACE"
 	Trace
 
-	// Stub HTTP Method "STUB"
+	// Stub internal Method "STUB"
 	Stub
 
 	// Any http method

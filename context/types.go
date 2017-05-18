@@ -4,6 +4,7 @@ package context // import "gopkg.in/webnice/web.v1/context"
 //import "gopkg.in/webnice/log.v2"
 import "gopkg.in/webnice/web.v1/context/route"
 import "gopkg.in/webnice/web.v1/context/errors"
+import "gopkg.in/webnice/web.v1/context/handlers"
 import (
 	"net/http"
 )
@@ -14,9 +15,10 @@ var (
 
 // This is the default routing context implementation
 type impl struct {
-	route               route.Interface  // Routing context space
-	errors              errors.Interface // Errors context space
-	internalServerError http.HandlerFunc // InternalServerError handler function
+	route               route.Interface    // Routing interface
+	errors              errors.Interface   // Errors interface
+	handlers            handlers.Interface // Handlers interface
+	internalServerError http.HandlerFunc   // InternalServerError handler function
 }
 
 // Interface is an interface of package
@@ -27,8 +29,8 @@ type Interface interface {
 	// Error context interface
 	Errors() errors.Interface
 
-	// Set and get InternalServerError handler function
-	InternalServerError(...http.HandlerFunc) http.HandlerFunc
+	// Handlers interface
+	Handlers() handlers.Interface
 
 	// NewRequest Create new http.Request and copy context from parent request to new request
 	NewRequest(*http.Request) *http.Request

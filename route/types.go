@@ -8,10 +8,6 @@ import (
 	"sync"
 )
 
-const (
-	_KeyInternalServerError = `InternalServerError`
-)
-
 // Interface is an interface of router consisting of the core routing methods, using only the standard net/http
 type Interface interface {
 	http.Handler

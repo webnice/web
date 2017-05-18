@@ -33,15 +33,16 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	if !context.IsContext(rq) {
 		ctx = rou.pool.Get().(context.Interface)
 		ctx.Route().Reset()
-		ctx.InternalServerError(rou.InternalServerErrorHandler())
+		ctx.Handlers().InternalServerError(rou.internalServerErrorHandler)
 		rq = ctx.NewRequest(rq)
 		defer rou.pool.Put(ctx)
 	}
 
 	// Ensure the route has some routes defined on the route
 	if rou.handler == nil {
-		context.New(rq).Errors().Set(_KeyInternalServerError, "Attempting to route with no handlers")
-		rou.InternalServerErrorHandler()(wr, rq)
+		ctx = context.New(rq)
+		ctx.Errors().InternalServerError(fmt.Errorf("Attempting to route with no handlers"))
+		ctx.Handlers().InternalServerError(nil)(wr, rq)
 		rou.pool.Put(ctx)
 		return
 	}
@@ -63,7 +64,7 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 func (rou *impl) Use(middlewares ...func(http.Handler) http.Handler) {
 	const errorMiddlewares = "all middlewares must be defined before use"
 	if rou.handler != nil {
-		rou.context.Errors().Set(_KeyInternalServerError, errorMiddlewares)
+		rou.context.Errors().InternalServerError(fmt.Errorf(errorMiddlewares))
 		panic(errorMiddlewares)
 	}
 	rou.middlewares = append(rou.middlewares, middlewares...)

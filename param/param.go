@@ -3,57 +3,38 @@ package param // import "gopkg.in/webnice/web.v1/param"
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 
-// Param structure
-type Param struct {
-	Key   string
-	Value string
+type Params map[string][]string
+
+// Add adds the key, value pair to the params.
+// It appends to any existing values associated with key
+func (h Params) Add(key, value string) {
+	h[key] = append(h[key], value)
 }
 
-type Params []Param
-
-// Add key value param to heap
-func (ps *Params) Add(key string, value string) {
-	*ps = append(*ps, Param{key, value})
+// Set sets the params entries associated with key to
+// the single element value. It replaces any existing
+// values associated with key
+func (h Params) Set(key, value string) {
+	h[key] = []string{value}
 }
 
-// Get value by key from heap
-func (ps Params) Get(key string) (ret string) {
-	var p Param
-	for _, p = range ps {
-		if p.Key == key {
-			ret = p.Value
-		}
+// Get gets the first value associated with the given key.
+// If there are no values associated with the key, Get returns "".
+// To access multiple values of a key, or to use access the map directly
+func (h Params) Get(key string) string {
+	if h == nil {
+		return ""
 	}
-	return
+	v := h[key]
+	if len(v) == 0 {
+		return ""
+	}
+	return v[0]
 }
 
-// Set value by key to heap
-func (ps *Params) Set(key string, value string) {
-	var p Param
-	var i, idx int
-	idx = -1
-	for i, p = range *ps {
-		if p.Key == key {
-			idx = i
-			break
-		}
-	}
-	if idx < 0 {
-		(*ps).Add(key, value)
-	} else {
-		(*ps)[idx] = Param{key, value}
-	}
-}
-
-// Del Delete value by key from heap
-func (ps *Params) Del(key string) (ret string) {
-	var p Param
-	var i int
-	for i, p = range *ps {
-		if p.Key == key {
-			*ps = append((*ps)[:i], (*ps)[i+1:]...)
-			ret = p.Value
-		}
-	}
-	return
+// Del deletes the values associated with key
+func (h Params) Del(key string) string {
+	var val = h.Get(key)
+	delete(h, key)
+	return val
 }
