@@ -3,6 +3,8 @@ package web // import "gopkg.in/webnice/web.v1"
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 import "gopkg.in/webnice/web.v1/route"
+import "gopkg.in/webnice/web.v1/context/errors"
+import "gopkg.in/webnice/web.v1/context/handlers"
 import (
 	"net"
 	"net/http"
@@ -33,6 +35,12 @@ type Interface interface {
 
 	// Route interface
 	Route() route.Interface
+
+	// Errors interface
+	Errors() errors.Interface
+
+	// Handlers interface
+	Handlers() handlers.Interface
 }
 
 // Is an private implementation of web server

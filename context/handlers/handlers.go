@@ -10,47 +10,61 @@ import (
 // New returns new context object
 func New(errors errors.Interface) Interface {
 	var hndl = new(impl)
-	hndl.handlers = make(handlers)
+	hndl.handlers = new(handlers)
 	hndl.errors = errors
 	return hndl
 }
 
-// Add adds the key, value pair to the errors.
-// It appends to any existing values associated with key
-func (h handlers) Add(key uint32, fn http.HandlerFunc) {
-	h[key] = append(h[key], fn)
+// Add key value param to heap
+func (itm *handlers) Add(key uint32, value http.HandlerFunc) {
+	*itm = append(*itm, item{key, value})
 }
 
-// Set sets the params entries associated with key to
-// the single element value. It replaces any existing
-// values associated with key
-func (h handlers) Set(key uint32, fn http.HandlerFunc) {
-	h[key] = []http.HandlerFunc{fn}
-}
-
-// Get gets the first value associated with the given key.
-// If there are no values associated with the key, Get returns nil.
-// To access multiple values of a key, or to use access the map directly
-func (h handlers) Get(key uint32) http.HandlerFunc {
-	if h == nil {
-		return nil
+// Get value by key from heap
+func (itm handlers) Get(key uint32) (ret http.HandlerFunc) {
+	var p item
+	for _, p = range itm {
+		if p.Key == key {
+			ret = p.Value
+			break
+		}
 	}
-	v := h[key]
-	if len(v) == 0 {
-		return nil
-	}
-	return v[0]
+	return
 }
 
-// Del deletes the values associated with key
-func (h handlers) Del(key uint32) http.HandlerFunc {
-	var val = h.Get(key)
-	delete(h, key)
-	return val
+// Set value by key to heap
+func (itm *handlers) Set(key uint32, value http.HandlerFunc) {
+	var p item
+	var i, idx int
+	idx = -1
+	for i, p = range *itm {
+		if p.Key == key {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		(*itm).Add(key, value)
+	} else {
+		(*itm)[idx] = item{key, value}
+	}
+}
+
+// Del Delete value by key from heap
+func (itm *handlers) Del(key uint32) (ret http.HandlerFunc) {
+	var p item
+	var i int
+	for i, p = range *itm {
+		if p.Key == key {
+			*itm = append((*itm)[:i], (*itm)[i+1:]...)
+			ret = p.Value
+		}
+	}
+	return
 }
 
 // Reset all stored handlers
-func (hndl *impl) Reset() { hndl.handlers = make(handlers) }
+func (hndl *impl) Reset() { hndl.handlers = new(handlers) }
 
 // Set and get InternalServerError handler function
 func (hndl *impl) InternalServerError(fn http.HandlerFunc) (ret http.HandlerFunc) {

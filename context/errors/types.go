@@ -7,11 +7,16 @@ const (
 	_InternalServerError uint32 = iota
 )
 
-type errors map[uint32][]error
+type item struct {
+	Key   uint32
+	Value error
+}
+
+type errors []item
 
 // This is an inplementation
 type impl struct {
-	errors errors
+	errors *errors
 }
 
 // Interface is an interface of package

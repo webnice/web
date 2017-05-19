@@ -13,7 +13,8 @@ import (
 // New returns a new routing context object
 // You can pass the following types of objects as arguments:
 // from "net/http" type *http.Request;
-// fom "context" interface context.Context.
+// from "context" interface context.Context;
+// from Interface of this package.
 // If an invalid argument type is passed, the function will return nil
 func New(obj ...interface{}) Interface {
 	var ctx *impl
@@ -25,6 +26,19 @@ func New(obj ...interface{}) Interface {
 			ctx = request(val)
 		case stdContext.Context:
 			ctx = context(val)
+		case Interface:
+			ctx = new(impl)
+			if val.(*impl).errors != nil {
+				ctx.errors = val.(*impl).errors
+			} else {
+				ctx.errors = errors.New()
+			}
+			if val.(*impl).handlers != nil {
+				ctx.handlers = val.(*impl).handlers
+			} else {
+				ctx.handlers = handlers.New(ctx.errors)
+			}
+			ctx.route = route.New()
 		default:
 			// invalid argument type is passed
 			return nil

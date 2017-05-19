@@ -25,7 +25,7 @@ type Interface interface {
 	// Route context interface
 	Route() route.Interface
 
-	// Error context interface
+	// Errors interface
 	Errors() errors.Interface
 
 	// Handlers interface

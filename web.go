@@ -2,6 +2,8 @@ package web // import "gopkg.in/webnice/web.v1"
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
+import "gopkg.in/webnice/web.v1/context/errors"
+import "gopkg.in/webnice/web.v1/context/handlers"
 import (
 	"fmt"
 	"net"
@@ -88,7 +90,11 @@ func (wsv *web) Error() error { return wsv.err }
 // Route interface
 func (wsv *web) Route() route.Interface { return wsv.route }
 
-//func (wsv *web) Errors() { wsv.route. }
+// Errors interface
+func (wsv *web) Errors() errors.Interface { return wsv.route.Errors() }
+
+// Handlers interface
+func (wsv *web) Handlers() handlers.Interface { return wsv.route.Handlers() }
 
 // Goroutine of the web server
 func (wsv *web) run() {

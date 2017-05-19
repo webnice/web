@@ -3,6 +3,8 @@ package route // import "gopkg.in/webnice/web.v1/route"
 // import "gopkg.in/webnice/debug.v1"
 // import "gopkg.in/webnice/log.v2"
 import "gopkg.in/webnice/web.v1/context"
+import "gopkg.in/webnice/web.v1/context/handlers"
+import "gopkg.in/webnice/web.v1/context/errors"
 import (
 	"net/http"
 	"sync"
@@ -54,6 +56,12 @@ type Interface interface {
 	// Trace http method
 	Trace(string, http.HandlerFunc)
 
+	// Errors interface
+	Errors() errors.Interface
+
+	// Handlers interface
+	Handlers() handlers.Interface
+
 	// Set custom handler's
 
 	// NotFound defines a handler to respond whenever a route could not be found
@@ -63,7 +71,7 @@ type Interface interface {
 	MethodNotAllowed(http.HandlerFunc)
 
 	// InternalServerError defines a handler to respond whenever a internal server error
-	InternalServerError(http.HandlerFunc)
+	//InternalServerError(http.HandlerFunc)
 }
 
 // Routes interface adds two methods for router traversal
@@ -104,7 +112,4 @@ type impl struct {
 
 	// Custom method not allowed handler
 	methodNotAllowedHandler http.HandlerFunc
-
-	// Custom internal server error handler
-	internalServerErrorHandler http.HandlerFunc
 }

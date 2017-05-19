@@ -11,11 +11,17 @@ const (
 	_InternalServerError uint32 = iota
 )
 
-type handlers map[uint32][]http.HandlerFunc
+// internal storage structure
+type item struct {
+	Key   uint32
+	Value http.HandlerFunc
+}
+
+type handlers []item
 
 // This is an inplementation
 type impl struct {
-	handlers handlers
+	handlers *handlers
 	errors   errors.Interface
 }
 

@@ -1,12 +1,13 @@
 package middleware // import "gopkg.in/webnice/web.v1/middleware"
 
-//import "gopkg.in/webnice/debug.v1"
+import "gopkg.in/webnice/debug.v1"
+
 //import "gopkg.in/webnice/log.v2"
 import "gopkg.in/webnice/web.v1/context"
 import (
 	"fmt"
 	"net/http"
-	"runtime/debug"
+	runtimeDebug "runtime/debug"
 )
 
 // Recover is a middleware that recovers from panics
@@ -15,8 +16,12 @@ func Recover(next http.Handler) http.Handler {
 		defer func() {
 			if e := recover(); e != nil {
 				var ctx = context.New(rq)
-				ctx.Errors().InternalServerError(fmt.Errorf("Panic: %v\nStack:\n%s", e, string(debug.Stack())))
-				ctx.Handlers().InternalServerError(nil).ServeHTTP(wr, rq)
+				ctx.Errors().InternalServerError(fmt.Errorf("Catch panic: %v\nGoroutine stack is:\n%s", e, string(runtimeDebug.Stack())))
+				if ctx.Handlers().InternalServerError(nil) == nil {
+					debug.Dumper("FUCK!!!")
+				} else {
+					ctx.Handlers().InternalServerError(nil).ServeHTTP(wr, rq)
+				}
 			}
 		}()
 		next.ServeHTTP(wr, rq)

@@ -10,20 +10,20 @@ import (
 // New returns a new routing context object
 func New() Interface {
 	var rt = new(impl)
-	rt.Params = make(param.Params)
+	rt.Params = param.New()
 	return rt
 }
 
 // Reset a routing context to its initial state
 func (rt *impl) Reset() {
-	rt.Params = make(param.Params)
+	rt.Params = param.New()
 	rt.path = ""
 	rt.pattern = ""
 	rt.patterns = rt.patterns[:0]
 }
 
 // UrnParams Return routing URN parameters key and values
-func (rt *impl) UrnParams() param.Params { return rt.Params }
+func (rt *impl) UrnParams() param.Interface { return rt.Params }
 
 // Path Routing path override used by subrouters
 func (rt *impl) Path(str ...string) string { rt.path = strings.Join(str, ``); return rt.path }

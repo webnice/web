@@ -3,6 +3,8 @@ package route // import "gopkg.in/webnice/web.v1/route"
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 import "gopkg.in/webnice/web.v1/context"
+import "gopkg.in/webnice/web.v1/context/handlers"
+import "gopkg.in/webnice/web.v1/context/errors"
 import "gopkg.in/webnice/web.v1/method"
 import (
 	"fmt"
@@ -12,13 +14,20 @@ import (
 // New returns a newly initialized router object that implements the Router interface
 func New() Interface {
 	var rou = &impl{tree: &node{}}
+	rou.context = context.New()
 	rou.pool.New = func() interface{} {
 		var ctx context.Interface
-		ctx = context.New()
+		ctx = context.New(rou.context)
 		return ctx
 	}
 	return rou
 }
+
+// Errors interface
+func (rou *impl) Errors() errors.Interface { return rou.context.Errors() }
+
+// Handlers interface
+func (rou *impl) Handlers() handlers.Interface { return rou.context.Handlers() }
 
 // ServeHTTP is the single method of the http.Handler interface that makes
 // route interoperable with the standard library.
@@ -34,7 +43,7 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 		ctx = rou.pool.Get().(context.Interface)
 		ctx.Route().Reset()
 		ctx.Errors().Reset()
-		ctx.Handlers().InternalServerError(rou.internalServerErrorHandler)
+		ctx.Handlers().InternalServerError(rou.context.Handlers().InternalServerError(nil))
 		rq = ctx.NewRequest(rq)
 		defer rou.pool.Put(ctx)
 	}
@@ -46,11 +55,6 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 		ctx.Handlers().InternalServerError(nil)(wr, rq)
 		rou.pool.Put(ctx)
 		return
-	}
-
-	// Context interface
-	if rou.context == nil {
-		rou.context = context.New(rq)
 	}
 
 	rou.handler.ServeHTTP(wr, rq)
