@@ -26,10 +26,17 @@ func (rt *impl) Reset() {
 func (rt *impl) UrnParams() param.Interface { return rt.Params }
 
 // Path Routing path override used by subrouters
-func (rt *impl) Path(str ...string) string { rt.path = strings.Join(str, ``); return rt.path }
+func (rt *impl) Path(str ...string) string {
+	// if str > 0 do not override!
+	if len(str) > 0 {
+		rt.path = strings.Join(str, ``)
+	}
+	return rt.path
+}
 
 // Pattern Routing pattern matching the path
 func (rt *impl) Pattern(str ...string) string {
+	// if str > 0 do not override!
 	if len(str) > 0 {
 		rt.pattern = strings.Join(str, ``)
 	}
