@@ -69,9 +69,6 @@ type Interface interface {
 
 	// MethodNotAllowed defines a handler to respond whenever a method is not allowed
 	MethodNotAllowed(http.HandlerFunc)
-
-	// InternalServerError defines a handler to respond whenever a internal server error
-	//InternalServerError(http.HandlerFunc)
 }
 
 // Routes interface adds two methods for router traversal

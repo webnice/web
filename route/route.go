@@ -1,7 +1,7 @@
 package route // import "gopkg.in/webnice/web.v1/route"
 
-//import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
+import "gopkg.in/webnice/debug.v1"
 import "gopkg.in/webnice/web.v1/context"
 import "gopkg.in/webnice/web.v1/context/handlers"
 import "gopkg.in/webnice/web.v1/context/errors"
@@ -20,6 +20,7 @@ func New() Interface {
 		ctx = context.New(rou.context)
 		return ctx
 	}
+	debug.Nop()
 	return rou
 }
 
@@ -212,7 +213,7 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 	subHandler = http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {
 		var ctx context.Interface
 		ctx = context.New(rq)
-		ctx.Route().Path("/", ctx.Route().UrnParams().Del("*"))
+		ctx.Route().Path("/" + ctx.Route().UrnParams().Del("*"))
 		handler.ServeHTTP(wr, rq)
 	})
 
