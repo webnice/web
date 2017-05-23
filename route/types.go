@@ -25,8 +25,8 @@ type Interface interface {
 	// path, with a fresh middleware stack for the inline-router
 	Group(func(r Interface)) Interface
 
-	// SubRoute mounts a sub-Router along a `pattern` string
-	SubRoute(string, func(r Interface)) Interface
+	// Subroute mounts a sub-Router along a `pattern` string
+	Subroute(string, func(r Interface)) Interface
 
 	// Mount attaches another http.Handler along ./pattern/*
 	Mount(string, http.Handler)
