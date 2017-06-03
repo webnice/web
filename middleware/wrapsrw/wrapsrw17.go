@@ -1,6 +1,6 @@
-// +build go1.8
+// +build go1.7,!go1.8
 
-package wrapsResponseWriter // import "gopkg.in/webnice/web.v1/middleware/wrapsResponseWriter"
+package wrapsrw // import "gopkg.in/webnice/web.v1/middleware/wrapsrw"
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
@@ -11,7 +11,7 @@ import (
 
 // New Proxy around an http.ResponseWriter that allows you to hook into various parts of the response process
 func New(wr http.ResponseWriter, protoMajor int) WrapsResponseWriter {
-	var cn, fl, ps, hj, rf bool
+	var cn, fl, hj, rf bool
 	var ba = basic{
 		ResponseWriter: wr,
 	}
@@ -20,8 +20,7 @@ func New(wr http.ResponseWriter, protoMajor int) WrapsResponseWriter {
 	_, fl = wr.(http.Flusher)
 	switch protoMajor {
 	case 2:
-		_, ps = wr.(http.Pusher)
-		if cn && fl && ps {
+		if cn && fl {
 			return &http2FancyWriter{ba}
 		}
 	default:

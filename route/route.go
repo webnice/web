@@ -1,7 +1,7 @@
 package route // import "gopkg.in/webnice/web.v1/route"
 
+//import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/debug.v1"
 import "gopkg.in/webnice/web.v1/context"
 import "gopkg.in/webnice/web.v1/context/handlers"
 import "gopkg.in/webnice/web.v1/context/errors"
@@ -20,7 +20,6 @@ func New() Interface {
 		ctx = context.New(rou.context)
 		return ctx
 	}
-	debug.Nop()
 	return rou
 }
 
