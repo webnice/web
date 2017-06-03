@@ -1,4 +1,4 @@
-package header // import "gopkg.in/webnice/web.v1/header"
+package header
 
 const (
 	// Accept header

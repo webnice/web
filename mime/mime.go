@@ -1,4 +1,4 @@
-package mime // import "gopkg.in/webnice/web.v1/mime"
+package mime
 
 const charsetUTF8 = "charset=utf-8"
 const (

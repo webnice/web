@@ -1,4 +1,4 @@
-package method // import "gopkg.in/webnice/web.v1/method"
+package method
 
 import "strings"
 import "fmt"

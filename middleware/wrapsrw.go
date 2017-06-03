@@ -1,4 +1,4 @@
-package middleware // import "gopkg.in/webnice/web.v1/middleware"
+package middleware
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
