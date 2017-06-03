@@ -36,5 +36,5 @@ func (rou *impl) NotFound(handlerFn http.HandlerFunc) {
 // is a helper function to respond with a 404, not found
 func notFoundHandler(wr http.ResponseWriter, rq *http.Request) {
 	wr.WriteHeader(status.NotFound)
-	wr.Write(status.Bytes(status.NotFound))
+	_, _ = wr.Write(status.Bytes(status.NotFound))
 }

@@ -1,5 +1,7 @@
 package method
 
+//import "gopkg.in/webnice/debug.v1"
+//import "gopkg.in/webnice/log.v2"
 import (
 	"strings"
 	"testing"
@@ -53,7 +55,7 @@ func TestAll(t *testing.T) {
 		sum += m.Int64()
 	}
 	if sum != Any.Int64() {
-		t.Errorf("Error method All()", sum, Any.Int64())
+		t.Errorf("Error method All()")
 	}
 }
 
@@ -70,7 +72,7 @@ func TestParse(t *testing.T) {
 		}
 	}
 	_, err = Parse(`KhGJjvhgv`)
-	if err != nil {
+	if err == nil {
 		t.Errorf("Error method Parse()")
 	}
 }

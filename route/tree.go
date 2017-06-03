@@ -16,9 +16,9 @@ import (
 
 const (
 	ntStatic   nodeTyp = iota // /string
-	ntRegexp                  // /:id([0-9]+) or #id^[0-9]+$
 	ntParam                   // /:variable
 	ntCatchAll                // /api/v1.0/*
+	//ntRegexp                  // /:id([0-9]+) or #id^[0-9]+$
 )
 
 type (
@@ -27,6 +27,7 @@ type (
 	methodHandlers map[method.Method]http.Handler // is a mapping of http method constants to handlers for a given route
 )
 
+// Route structure
 type Route struct {
 	Pattern   string
 	Handlers  map[string]http.Handler
@@ -443,7 +444,7 @@ func (n *node) setHandler(mtd method.Method, handler http.Handler) {
 	var m method.Method
 
 	if n.handlers == nil {
-		n.handlers = make(methodHandlers, 0)
+		n.handlers = make(methodHandlers)
 	}
 	if mtd.Int64()&method.Stub.Int64() == method.Stub.Int64() {
 		n.handlers[method.Stub] = handler
@@ -486,7 +487,7 @@ func (n *node) routes() []Route {
 		if subroutes != nil && len(pattern) > 2 {
 			pattern = pattern[:len(pattern)-2]
 		}
-		hs = make(map[string]http.Handler, 0)
+		hs = make(map[string]http.Handler)
 		if handlers[method.Any] != nil {
 			hs["*"] = handlers[method.Any]
 		}
@@ -511,11 +512,10 @@ func (n *node) routes() []Route {
 func (n *node) walkRoutes(pattern string, nd *node, fn walkFn) (ret bool) {
 	var nds nodes
 	var nn *node
-
-	pattern = nd.pattern
+	var pat = nd.pattern
 
 	// Visit the leaf values if any
-	if (nd.handlers != nil || nd.subroutes != nil) && fn(pattern, nd.handlers, nd.subroutes) {
+	if (nd.handlers != nil || nd.subroutes != nil) && fn(pat, nd.handlers, nd.subroutes) {
 		ret = true
 		return
 	}
@@ -523,7 +523,7 @@ func (n *node) walkRoutes(pattern string, nd *node, fn walkFn) (ret bool) {
 	// Recurse on the children
 	for _, nds = range nd.children {
 		for _, nn = range nds {
-			if n.walkRoutes(pattern, nn, fn) {
+			if n.walkRoutes(pat, nn, fn) {
 				ret = true
 				return
 			}

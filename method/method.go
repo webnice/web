@@ -1,7 +1,11 @@
 package method
 
-import "strings"
-import "fmt"
+//import "gopkg.in/webnice/debug.v1"
+//import "gopkg.in/webnice/log.v2"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	// Get HTTP Method "GET"
@@ -67,7 +71,6 @@ func Parse(mtd string) (ret Method, err error) {
 	var ok bool
 	if ret, ok = methodMap[strings.ToUpper(mtd)]; !ok {
 		err = fmt.Errorf("Unknown request method %s", mtd)
-		return
 	}
 	return
 }

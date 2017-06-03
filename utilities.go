@@ -12,33 +12,40 @@ import (
 // Наполнение конфигурации значениями по умолчанию
 // Проверка значений
 func defaultConfiguration(conf *Configuration) {
+	const (
+		_Tcp        = `tcp`
+		_Tcp4       = `tcp4`
+		_Tcp6       = `tcp6`
+		_Unix       = `unix`
+		_UnixPacket = `unixpacket`
+	)
 	if conf.Port == 0 {
 		conf.Port = 80
 	}
 	// Check mode
 	switch strings.ToLower(conf.Mode) {
-	case "tcp", "tcp4", "tcp6", "unix", "unixpacket":
+	case _Tcp, _Tcp4, _Tcp6, _Unix, _UnixPacket:
 		conf.Mode = strings.ToLower(conf.Mode)
 	case "socket":
-		conf.Mode = strings.ToLower("unix")
+		conf.Mode = _Unix
 	default:
-		conf.Mode = "tcp"
+		conf.Mode = _Tcp
 	}
-	if conf.Mode == "unix" && conf.Socket == "" || conf.Mode == "unixpacket" && conf.Socket == "" {
-		conf.Mode = "tcp"
+	if conf.Mode == _Unix && conf.Socket == "" || conf.Mode == _UnixPacket && conf.Socket == "" {
+		conf.Mode = _Tcp
 	}
 	// Check MaxHeaderBytes
 	if conf.MaxHeaderBytes == 0 {
 		conf.MaxHeaderBytes = http.DefaultMaxHeaderBytes
 	}
 	// unix socket modes
-	if conf.Mode == "unix" || conf.Mode == "unixpacket" {
+	if conf.Mode == _Unix || conf.Mode == _UnixPacket {
 		conf.HostPort = fmt.Sprintf("%s:%s", conf.Mode, conf.Socket)
 	} else {
 		conf.HostPort = fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	}
 	// Public address
-	if conf.Address == "" && conf.Mode == "tcp" {
+	if conf.Address == "" && conf.Mode == _Tcp {
 		if conf.Port == 80 {
 			conf.Address = fmt.Sprintf("%s", conf.Host)
 		} else {

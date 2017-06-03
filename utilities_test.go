@@ -94,23 +94,23 @@ func TestParseAddress(t *testing.T) {
 	}
 
 	conf, err = parseAddress(":https")
-	if conf.Port != 443 {
-		t.Errorf("Error parseAddress(): Port is '%d' expected '443'", conf.Port)
+	if conf.Port != 443 || err != nil {
+		t.Errorf("Error parseAddress(): Port is '%d' expected '443', error is '%v'", conf.Port, err)
 	}
 	conf, err = parseAddress(":http")
-	if conf.Port != 80 {
-		t.Errorf("Error parseAddress(): Port is '%d' expected '80'", conf.Port)
+	if conf.Port != 80 || err != nil {
+		t.Errorf("Error parseAddress(): Port is '%d' expected '80', error is '%v'", conf.Port, err)
 	}
 	conf, err = parseAddress("abcd:9080")
-	if conf.Port != 9080 {
-		t.Errorf("Error parseAddress(): Port is '%d' expected '9080'", conf.Port)
+	if conf.Port != 9080 || err != nil {
+		t.Errorf("Error parseAddress(): Port is '%d' expected '9080', error is '%v'", conf.Port, err)
 	}
 	if conf.Host != "abcd" {
 		t.Errorf("Error parseAddress(): Host is '%s' expected 'abcd'", conf.Host)
 	}
 
 	// Check error
-	conf, err = parseAddress("abcd:abcd")
+	_, err = parseAddress("abcd:abcd")
 	if err == nil {
 		t.Errorf("Error parseAddress()")
 	}

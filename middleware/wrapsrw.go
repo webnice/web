@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// NewWrapsResponseWriter Create new object and return interface
 func NewWrapsResponseWriter(wr http.ResponseWriter, protoMajor int) wrapsrw.WrapsResponseWriter {
 	return wrapsrw.New(wr, protoMajor)
 }

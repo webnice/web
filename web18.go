@@ -18,9 +18,9 @@ func (wsv *web) Stop() {
 		} else {
 			ctx = context.Background()
 		}
-		wsv.server.Shutdown(ctx)
+		_ = wsv.server.Shutdown(ctx)
 	} else if wsv.listener != nil {
-		wsv.listener.Close()
+		_ = wsv.listener.Close()
 	}
 }
 

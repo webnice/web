@@ -5,12 +5,12 @@ package web
 import "fmt"
 
 var (
-	_ErrAlreadyRunning  = fmt.Errorf("Web server already running")
-	_ErrNoConfiguration = fmt.Errorf("Web server configuration is missing or nil")
+	errAlreadyRunning  = fmt.Errorf("Web server already running")
+	errNoConfiguration = fmt.Errorf("Web server configuration is missing or nil")
 )
 
 // ErrAlreadyRunning Error: Web server already running
-func ErrAlreadyRunning() error { return _ErrAlreadyRunning }
+func ErrAlreadyRunning() error { return errAlreadyRunning }
 
 // ErrNoConfiguration Error: Web server configuration is missing or nil
-func ErrNoConfiguration() error { return _ErrNoConfiguration }
+func ErrNoConfiguration() error { return errNoConfiguration }

@@ -14,9 +14,9 @@ func (hndl *impl) defaultInternalServerError(wr http.ResponseWriter, rq *http.Re
 	var err error
 	wr.Header().Set(header.ContentType, mime.TextPlainCharsetUTF8)
 	wr.WriteHeader(status.InternalServerError)
-	wr.Write(status.Bytes(status.InternalServerError))
+	_, _ = wr.Write(status.Bytes(status.InternalServerError))
 	if err = hndl.errors.InternalServerError(nil); err != nil {
-		wr.Write([]byte("\n"))
-		wr.Write([]byte(err.Error()))
+		_, _ = wr.Write([]byte("\n"))
+		_, _ = wr.Write([]byte(err.Error()))
 	}
 }

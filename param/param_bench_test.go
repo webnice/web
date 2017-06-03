@@ -10,10 +10,9 @@ const VAL = "bar"
 var res interface{}
 
 func BenchmarkGet(b *testing.B) {
-	var prm Interface
 	var str string
+	var prm = New()
 
-	prm = New()
 	prm.Set(KEY, VAL)
 	for n := 0; n < b.N; n++ {
 		if x := prm.Get(KEY); x != "" {
@@ -24,19 +23,17 @@ func BenchmarkGet(b *testing.B) {
 }
 
 func BenchmarkSet(b *testing.B) {
-	var prm Interface
+	var prm = New()
 
-	prm = New()
 	for n := 0; n < b.N; n++ {
 		prm.Set(KEY, VAL)
 	}
 }
 
 func BenchmarkHas(b *testing.B) {
-	var prm Interface
 	var has bool
+	var prm = New()
 
-	prm = New()
 	for n := 0; n < b.N; n++ {
 		res = prm.Has(KEY)
 	}
@@ -44,9 +41,8 @@ func BenchmarkHas(b *testing.B) {
 }
 
 func BenchmarkDel(b *testing.B) {
-	var prm Interface
+	var prm = New()
 
-	prm = New()
 	prm.Set(KEY, VAL)
 	for n := 0; n < b.N; n++ {
 		prm.Del(KEY)

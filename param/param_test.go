@@ -12,9 +12,8 @@ var (
 )
 
 func TestSet(t *testing.T) {
-	var prm Interface
+	var prm = New()
 
-	prm = New()
 	if prm.Has(k) {
 		t.Errorf("key %s exist", k)
 	}
@@ -28,9 +27,8 @@ func TestSet(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	var prm Interface
+	var prm = New()
 
-	prm = New()
 	if prm.Get(k) != "" {
 		t.Errorf("Get return incorrect value")
 	}
@@ -100,9 +98,8 @@ func TestKeys(t *testing.T) {
 }
 
 func TestDel(t *testing.T) {
-	var prm Interface
+	var prm = New()
 
-	prm = New()
 	if prm.Del(k) != "" {
 		t.Errorf("Error in Del")
 	}

@@ -26,8 +26,9 @@ lint:
 	gometalinter \
 	--vendor \
 	--deadline=15m \
-	--cyclo-over=15 \
+	--cyclo-over=20 \
 	--disable=aligncheck \
+	--disable=gotype \
 	--skip=src/vendor \
 	--linter="vet:go tool vet -printf {path}/*.go:PATH:LINE:MESSAGE" \
 	./...

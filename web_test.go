@@ -18,7 +18,7 @@ func TestNew(t *testing.T) {
 	if wsv.inCloseUp == nil {
 		t.Errorf("Error New(), inCloseUp is nil")
 	}
-	if wsv.isRun.Load().(bool) != false {
+	if wsv.isRun.Load().(bool) {
 		t.Errorf("Error New(), isRun is %v", wsv.isRun.Load().(bool))
 	}
 }

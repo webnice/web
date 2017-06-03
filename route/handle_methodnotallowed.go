@@ -36,5 +36,5 @@ func (rou *impl) MethodNotAllowed(handlerFn http.HandlerFunc) {
 // is a helper function to respond with a 405, method not allowed
 func methodNotAllowedHandler(wr http.ResponseWriter, rq *http.Request) {
 	wr.WriteHeader(status.MethodNotAllowed)
-	wr.Write(status.Bytes(status.MethodNotAllowed))
+	_, _ = wr.Write(status.Bytes(status.MethodNotAllowed))
 }

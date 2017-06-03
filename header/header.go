@@ -153,8 +153,8 @@ const (
 	// DeliveredTo Delivered-To header
 	DeliveredTo = `Delivered-To`
 
-	// MessageId Message-Id header
-	MessageId = `Message-Id`
+	// MessageID Message-Id header
+	MessageID = `Message-Id`
 
 	// Received header
 	Received = `Received`

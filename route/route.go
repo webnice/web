@@ -16,9 +16,7 @@ func New() Interface {
 	var rou = &impl{tree: &node{}}
 	rou.context = context.New()
 	rou.pool.New = func() interface{} {
-		var ctx context.Interface
-		ctx = context.New(rou.context)
-		return ctx
+		return context.New(rou.context)
 	}
 	return rou
 }
@@ -51,7 +49,7 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	// Ensure the route has some routes defined on the route
 	if rou.handler == nil {
 		ctx = context.New(rq)
-		ctx.Errors().InternalServerError(fmt.Errorf("Attempting to route with no handlers"))
+		_ = ctx.Errors().InternalServerError(fmt.Errorf("Attempting to route with no handlers"))
 		ctx.Handlers().InternalServerError(nil)(wr, rq)
 		rou.pool.Put(ctx)
 		return
@@ -69,7 +67,7 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 func (rou *impl) Use(middlewares ...func(http.Handler) http.Handler) {
 	const errorMiddlewares = "all middlewares must be defined before use"
 	if rou.handler != nil {
-		rou.context.Errors().InternalServerError(fmt.Errorf(errorMiddlewares))
+		_ = rou.context.Errors().InternalServerError(fmt.Errorf(errorMiddlewares))
 		panic(errorMiddlewares)
 	}
 	rou.middlewares = append(rou.middlewares, middlewares...)
@@ -210,8 +208,7 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 
 	// Wrap the sub-router in a handlerFunc to scope the request path for routing.
 	subHandler = http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {
-		var ctx context.Interface
-		ctx = context.New(rq)
+		var ctx = context.New(rq)
 		ctx.Route().Path("/" + ctx.Route().UrnParams().Del("*"))
 		handler.ServeHTTP(wr, rq)
 	})

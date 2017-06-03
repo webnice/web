@@ -17,6 +17,7 @@ var (
 	_ http.Flusher       = &http2FancyWriter{}
 )
 
+// WrapsResponseWriter Wrapper response writer interface
 type WrapsResponseWriter interface {
 	http.ResponseWriter
 

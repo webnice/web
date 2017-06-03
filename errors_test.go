@@ -5,13 +5,13 @@ import (
 )
 
 func TestErrAlreadyRunning(t *testing.T) {
-	if ErrAlreadyRunning() != _ErrAlreadyRunning {
+	if ErrAlreadyRunning() != errAlreadyRunning {
 		t.Errorf("Error func ErrAlreadyRunning()")
 	}
 }
 
 func TestErrNoConfiguration(t *testing.T) {
-	if ErrNoConfiguration() != _ErrNoConfiguration {
+	if ErrNoConfiguration() != errNoConfiguration {
 		t.Errorf("Error func ErrNoConfiguration()")
 	}
 }

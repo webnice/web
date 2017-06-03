@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	emptyParams = map[string]string{}
+//emptyParams = map[string]string{}
 )
 
 //func TestTree(t *testing.T) {
