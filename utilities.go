@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"strings"
-	"time"
 )
 
 // Наполнение конфигурации значениями по умолчанию
@@ -48,7 +47,7 @@ func defaultConfiguration(conf *Configuration) {
 	}
 	// ShutdownTimeout
 	if conf.ShutdownTimeout == 0 {
-		conf.ShutdownTimeout = time.Minute / 2
+		conf.ShutdownTimeout = _ShutdownTimeout
 	}
 }
 
@@ -58,21 +57,15 @@ func parseAddress(addr string) (ret *Configuration, err error) {
 	ret = new(Configuration)
 	defer defaultConfiguration(ret)
 	sp = strings.Split(addr, ":")
-	if len(sp) == 0 {
-		return
-	}
-	if len(sp) == 1 {
+	if len(sp) <= 1 {
 		ret.Host = sp[0]
 		return
 	}
-	if len(sp) >= 2 {
-		var n, e = net.LookupPort("tcp", strings.Join(sp[1:], ":"))
-		if err = e; err != nil {
-			return
-		}
-		ret.Host = sp[0]
-		ret.Port = uint32(n)
+	var n, e = net.LookupPort("tcp", strings.Join(sp[1:], ":"))
+	if err = e; err != nil {
 		return
 	}
+	ret.Host = sp[0]
+	ret.Port = uint32(n)
 	return
 }
