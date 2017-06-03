@@ -68,6 +68,9 @@ const (
 	// ImageSVG MIME type
 	ImageSVG = `image/svg+xml`
 
+	// AutoReplied auto-replied header of RFC3464
+	AutoReplied = `auto-replied`
+
 	// MessageDeliveryStatus MIME type of RFC3464
 	MessageDeliveryStatus = `message/delivery-status`
 

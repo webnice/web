@@ -143,4 +143,25 @@ const (
 
 	// XRedefinitionDeny X-Redefinition-Deny header. Запрет переопределения значений маркеров, значения: ["all", "query", "path", "entrypoint"]
 	XRedefinitionDeny = `X-Redefinition-Deny`
+
+	// AutoSubmitted Auto-Submitted header
+	AutoSubmitted = `Auto-Submitted`
+
+	// Date header
+	Date = `Date`
+
+	// DeliveredTo Delivered-To header
+	DeliveredTo = `Delivered-To`
+
+	// MessageId Message-Id header
+	MessageId = `Message-Id`
+
+	// Received header
+	Received = `Received`
+
+	// ReturnPath Return-Path header
+	ReturnPath = `Return-Path`
+
+	// XFailedRecipients X-Failed-Recipients header
+	XFailedRecipients = `X-Failed-Recipients`
 )
