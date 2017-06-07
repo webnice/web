@@ -2,6 +2,7 @@ package context
 
 import (
 	stdContext "context"
+	"fmt"
 	"net/http"
 	"testing"
 )
@@ -90,6 +91,7 @@ func TestNewFromStdContext(t *testing.T) {
 
 func TestNewFromInterface(t *testing.T) {
 	var ctx, ctxOrig Interface
+	var addrErrors, addrHandlers, addrRoute string
 
 	ctxOrig = New()
 	ctxOrig.(*impl).errors = nil
@@ -99,8 +101,8 @@ func TestNewFromInterface(t *testing.T) {
 	if ctx == nil {
 		t.Errorf("Error func New(Interface), returns nil")
 	}
-	if ctx == ctxOrig {
-		t.Errorf("Error func New(Interface), returns same object")
+	if ctx != ctxOrig {
+		t.Errorf("Error func New(Interface), returns different object")
 	}
 	if ctx.Errors() == nil {
 		t.Errorf("Error func New(Interface), returns object not contains Errors() interface")
@@ -113,14 +115,18 @@ func TestNewFromInterface(t *testing.T) {
 	}
 
 	ctxOrig = New()
+	addrErrors = fmt.Sprintf("%p", ctxOrig.Errors())
+	addrHandlers = fmt.Sprintf("%p", ctxOrig.Handlers())
+	addrRoute = fmt.Sprintf("%p", ctxOrig.Route())
+
 	ctx = New(ctxOrig)
-	if ctx.Errors() != ctxOrig.Errors() {
+	if addrErrors != fmt.Sprintf("%p", ctx.Errors()) {
 		t.Errorf("Error func New(Interface), returns different Errors() interface")
 	}
-	if ctx.Handlers() != ctxOrig.Handlers() {
+	if addrHandlers != fmt.Sprintf("%p", ctx.Handlers()) {
 		t.Errorf("Error func New(Interface), returns different Handlers() interface")
 	}
-	if ctx.Route() == ctxOrig.Route() {
+	if addrRoute == fmt.Sprintf("%p", ctx.Route()) {
 		t.Errorf("Error func New(Interface), returns same Route() interface, expected new Route()")
 	}
 }

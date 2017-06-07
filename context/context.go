@@ -27,17 +27,14 @@ func New(obj ...interface{}) Interface {
 		case stdContext.Context:
 			ctx = context(val)
 		case Interface, *impl:
-			ctx = new(impl)
-			if val.(*impl).errors != nil {
-				ctx.errors = val.(*impl).errors
-			} else {
+			ctx = val.(*impl)
+			if ctx.errors == nil {
 				ctx.errors = errors.New()
 			}
-			if val.(*impl).handlers != nil {
-				ctx.handlers = val.(*impl).handlers
-			} else {
+			if ctx.handlers == nil {
 				ctx.handlers = handlers.New(ctx.errors)
 			}
+			// Allways new route object
 			ctx.route = route.New()
 		default:
 			// invalid argument type is passed
