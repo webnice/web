@@ -26,7 +26,7 @@ func New(obj ...interface{}) Interface {
 			ctx = request(val)
 		case stdContext.Context:
 			ctx = context(val)
-		case Interface:
+		case Interface, *impl:
 			ctx = new(impl)
 			if val.(*impl).errors != nil {
 				ctx.errors = val.(*impl).errors
@@ -59,8 +59,8 @@ func New(obj ...interface{}) Interface {
 // Get the routing Context object from a http context
 func context(cx stdContext.Context) (ret *impl) {
 	var ok bool
-	if ret, ok = cx.Value(_ContextKey).(*impl); ok {
-		return
+	if ret, ok = cx.Value(constContextKey).(*impl); !ok {
+		return nil
 	}
 	return
 }
@@ -82,5 +82,5 @@ func (ctx *impl) Handlers() handlers.Interface { return ctx.handlers }
 
 // NewRequest Creates new http request and copy context from parent request to new request
 func (ctx *impl) NewRequest(rq *http.Request) *http.Request {
-	return rq.WithContext(stdContext.WithValue(rq.Context(), _ContextKey, ctx))
+	return rq.WithContext(stdContext.WithValue(rq.Context(), constContextKey, ctx))
 }

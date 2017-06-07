@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	_ContextKey = &key{`2EA70633-A7DF-44AD-9DE4-C7593085B685`}
+	constContextKey = &key{`2EA70633-A7DF-44AD-9DE4-C7593085B685`}
 )
 
 // This is the default routing context implementation
