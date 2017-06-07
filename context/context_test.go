@@ -149,9 +149,8 @@ func TestNewRequest(t *testing.T) {
 	)
 	var ctx Interface
 	var rq *http.Request
-	var c stdContext.Context
+	var c = stdContext.WithValue(stdContext.Background(), testKey, testValue)
 
-	c = stdContext.WithValue(stdContext.Background(), testKey, testValue)
 	rq, _ = http.NewRequest("", `http://www.google.com/search?q=foo&q=bar`, nil)
 	rq = rq.WithContext(c)
 	ctx = New()
