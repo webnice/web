@@ -25,6 +25,9 @@ func TestNew(t *testing.T) {
 	if ctx = New(""); ctx != nil {
 		t.Errorf("Error New(), incorrect response")
 	}
+	if constContextKey.String() == "" {
+		t.Errorf("Error key, string is empty")
+	}
 }
 
 func TestContext(t *testing.T) {
