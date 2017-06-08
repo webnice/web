@@ -10,48 +10,57 @@ import (
 // New returns a new routing context object
 func New() Interface {
 	var rt = new(impl)
-	rt.Params = param.New()
+	rt.params = param.New()
 	return rt
 }
 
 // Reset a routing context to its initial state
 func (rt *impl) Reset() {
-	rt.Params = param.New()
+	rt.params = param.New()
 	rt.path = ""
 	rt.pattern = ""
-	rt.patterns = rt.patterns[:0]
+	rt.patterns = make([]string, 0)
 }
 
-// UrnParams Return routing URN parameters key and values
-func (rt *impl) UrnParams() param.Interface { return rt.Params }
+// Params Return routing URN parameters key and values
+func (rt *impl) Params() param.Interface { return rt.params }
 
 // Path Routing path override used by subrouters
 func (rt *impl) Path(str ...string) string {
-	// if str > 0 do not override!
-	if len(str) > 0 {
-		rt.path = strings.Join(str, ``)
+	// if len(str) == 0 do not override!
+	if len(str) == 0 {
+		return rt.path
 	}
+	rt.path = strings.Join(str, ``)
 	return rt.path
 }
 
 // Pattern Routing pattern matching the path
 func (rt *impl) Pattern(str ...string) string {
-	// if str > 0 do not override!
-	if len(str) > 0 {
-		rt.pattern = strings.Join(str, ``)
+	// if len(str) == 0 do not override!
+	if len(str) == 0 {
+		return rt.pattern
 	}
+	rt.pattern = strings.Join(str, ``)
 	return rt.pattern
 }
 
 // Patterns Routing patterns throughout the lifecycle of the request, across all connected routers
 func (rt *impl) Patterns(items ...[]string) []string {
-	var i int
+	var i, j int
+
+	// if len(items) == 0 do not override!
+	if len(items) == 0 {
+		return rt.patterns
+	}
+
 	for i = range items {
-		if i == 0 {
-			rt.patterns = items[i]
-			continue
-		}
-		rt.patterns = append(rt.patterns, items[i]...)
+		j += len(items[i])
+	}
+	rt.patterns, j = make([]string, j), 0
+	for i = range items {
+		copy(rt.patterns[j:j+len(items[i])], items[i])
+		j += len(items[i])
 	}
 	return rt.patterns
 }

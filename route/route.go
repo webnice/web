@@ -209,7 +209,7 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 	// Wrap the sub-router in a handlerFunc to scope the request path for routing.
 	subHandler = http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {
 		var ctx = context.New(rq)
-		ctx.Route().Path("/" + ctx.Route().UrnParams().Del("*"))
+		ctx.Route().Path("/" + ctx.Route().Params().Del("*"))
 		handler.ServeHTTP(wr, rq)
 	})
 

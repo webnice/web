@@ -6,7 +6,7 @@ import "gopkg.in/webnice/web.v1/param"
 
 // This is the default routing context set on the root node of a request context to track URL parameters and an optional routing path
 type impl struct {
-	Params   param.Interface
+	params   param.Interface
 	path     string
 	pattern  string
 	patterns []string
@@ -17,8 +17,8 @@ type Interface interface {
 	// Reset a routing context to its initial state
 	Reset()
 
-	// UrnParams Return routing URN parameters key and values
-	UrnParams() param.Interface
+	// Params Return routing URN parameters key and values
+	Params() param.Interface
 
 	// Path Routing path override used by subrouters
 	Path(...string) string

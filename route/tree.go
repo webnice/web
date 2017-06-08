@@ -386,9 +386,9 @@ func (n *node) findRoute(ctx context.Interface, path string) *node {
 			}
 
 			if xn.typ == ntCatchAll {
-				ctx.Route().UrnParams().Add("*", xsearch)
+				ctx.Route().Params().Add("*", xsearch)
 			} else {
-				ctx.Route().UrnParams().Add(xn.prefix[1:], xsearch[:p])
+				ctx.Route().Params().Add(xn.prefix[1:], xsearch[:p])
 			}
 
 			xsearch = xsearch[p:]
@@ -415,9 +415,9 @@ func (n *node) findRoute(ctx context.Interface, path string) *node {
 		// Did not found final handler, let's remove the param here if it was set
 		if xn.typ > ntStatic {
 			if xn.typ == ntCatchAll {
-				ctx.Route().UrnParams().Del("*")
+				ctx.Route().Params().Del("*")
 			} else {
-				ctx.Route().UrnParams().Del(xn.prefix[1:])
+				ctx.Route().Params().Del(xn.prefix[1:])
 			}
 		}
 	}
