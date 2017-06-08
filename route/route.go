@@ -135,6 +135,7 @@ func (rou *impl) Chain(middlewares ...func(http.Handler) http.Handler) Middlewar
 
 // With adds inline middlewares for an endpoint handler
 func (rou *impl) With(middlewares ...func(http.Handler) http.Handler) Interface {
+	var mws Middlewares
 	var im *impl
 
 	// Similarly as in handle(), we must build the route handler once further
@@ -144,7 +145,6 @@ func (rou *impl) With(middlewares ...func(http.Handler) http.Handler) Interface 
 	}
 
 	// Copy middlewares from parent inline route
-	var mws Middlewares
 	if rou.inline {
 		mws = make(Middlewares, len(rou.middlewares))
 		copy(mws, rou.middlewares)
