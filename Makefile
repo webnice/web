@@ -20,7 +20,12 @@ test:
 
 cover: test
 	GOPATH=${GOPATH} go tool cover -html=coverage.log
-.PHONY: test
+.PHONY: cover
+
+bench:
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1; true
+	GOPATH=${GOPATH} go test -race -bench=. ./...
+.PHONY: bench
 
 lint:
 	gometalinter \
