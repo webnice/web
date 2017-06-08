@@ -61,14 +61,6 @@ type Interface interface {
 
 	// Handlers interface
 	Handlers() handlers.Interface
-
-	// Set custom handler's
-
-	// NotFound defines a handler to respond whenever a route could not be found
-	NotFound(http.HandlerFunc)
-
-	// MethodNotAllowed defines a handler to respond whenever a method is not allowed
-	MethodNotAllowed(http.HandlerFunc)
 }
 
 // Routes interface adds two methods for router traversal
@@ -106,7 +98,4 @@ type impl struct {
 
 	// Custom route not found handler
 	notFoundHandler http.HandlerFunc
-
-	// Custom method not allowed handler
-	methodNotAllowedHandler http.HandlerFunc
 }

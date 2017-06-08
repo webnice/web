@@ -69,11 +69,35 @@ func (hndl *impl) Reset() { hndl.handlers = new(handlers) }
 // Set and get InternalServerError handler function
 func (hndl *impl) InternalServerError(fn http.HandlerFunc) (ret http.HandlerFunc) {
 	if fn != nil {
-		hndl.handlers.Set(_InternalServerError, fn)
+		hndl.handlers.Set(keyInternalServerError, fn)
 	}
-	if ret = hndl.handlers.Get(_InternalServerError); ret != nil {
+	if ret = hndl.handlers.Get(keyInternalServerError); ret != nil {
 		return
 	}
 	ret = hndl.defaultInternalServerError
+	return
+}
+
+// MethodNotAllowed	Set and get MethodNotAllowed handler function
+func (hndl *impl) MethodNotAllowed(fn http.HandlerFunc) (ret http.HandlerFunc) {
+	if fn != nil {
+		hndl.handlers.Set(keyMethodNotAllowed, fn)
+	}
+	if ret = hndl.handlers.Get(keyMethodNotAllowed); ret != nil {
+		return
+	}
+	ret = hndl.defaultMethodNotAllowed
+	return
+}
+
+// NotFound	Set and get MethodNotFound handler function
+func (hndl *impl) NotFound(fn http.HandlerFunc) (ret http.HandlerFunc) {
+	if fn != nil {
+		hndl.handlers.Set(keyNotFound, fn)
+	}
+	if ret = hndl.handlers.Get(keyNotFound); ret != nil {
+		return
+	}
+	ret = hndl.defaultNotFound
 	return
 }

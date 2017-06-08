@@ -4,7 +4,9 @@ package errors
 //import "gopkg.in/webnice/log.v2"
 
 const (
-	_InternalServerError uint32 = iota
+	keyInternalServerError uint32 = iota
+	keyMethodNotAllowed
+	keyNotFound
 )
 
 type item struct {
@@ -26,4 +28,10 @@ type Interface interface {
 
 	// InternalServerError Set description about internal server error
 	InternalServerError(err error) error
+
+	// MethodNotAllowed Set description about method not allowed error
+	MethodNotAllowed(err error) error
+
+	// NotFound Set description about not found error
+	NotFound(err error) error
 }

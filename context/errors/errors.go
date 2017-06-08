@@ -65,8 +65,26 @@ func (ce *impl) Reset() { ce.errors = new(errors) }
 // InternalServerError Set description about internal server error
 func (ce *impl) InternalServerError(value error) (ret error) {
 	if value != nil {
-		ce.errors.Set(_InternalServerError, value)
+		ce.errors.Set(keyInternalServerError, value)
 	}
-	ret = ce.errors.Get(_InternalServerError)
+	ret = ce.errors.Get(keyInternalServerError)
+	return
+}
+
+// MethodNotAllowed Set description about method not allowed error
+func (ce *impl) MethodNotAllowed(value error) (ret error) {
+	if value != nil {
+		ce.errors.Set(keyMethodNotAllowed, value)
+	}
+	ret = ce.errors.Get(keyMethodNotAllowed)
+	return
+}
+
+// NotFound Set description about not allowed error
+func (ce *impl) NotFound(value error) (ret error) {
+	if value != nil {
+		ce.errors.Set(keyNotFound, value)
+	}
+	ret = ce.errors.Get(keyNotFound)
 	return
 }

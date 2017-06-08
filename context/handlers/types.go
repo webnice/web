@@ -8,7 +8,9 @@ import (
 )
 
 const (
-	_InternalServerError uint32 = iota
+	keyInternalServerError uint32 = iota
+	keyMethodNotAllowed
+	keyNotFound
 )
 
 // internal storage structure
@@ -30,6 +32,12 @@ type Interface interface {
 	// Reset all stored handlers
 	Reset()
 
-	// Set and get InternalServerError handler function
+	// InternalServerError Set and get InternalServerError handler function
 	InternalServerError(fn http.HandlerFunc) http.HandlerFunc
+
+	// MethodNotAllowed	Set and get MethodNotAllowed handler function
+	MethodNotAllowed(fn http.HandlerFunc) http.HandlerFunc
+
+	// NotFound	Set and get NotFound handler function
+	NotFound(fn http.HandlerFunc) http.HandlerFunc
 }

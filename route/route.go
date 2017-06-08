@@ -197,13 +197,10 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 		panic(mountError)
 	}
 
-	// Assign sub-Router's with the parent not found & method not allowed handler if not specified.
-	subr, ok = handler.(*impl)
-	if ok && subr.notFoundHandler == nil && rou.notFoundHandler != nil {
-		subr.NotFound(rou.notFoundHandler)
-	}
-	if ok && subr.methodNotAllowedHandler == nil && rou.methodNotAllowedHandler != nil {
-		subr.MethodNotAllowed(rou.methodNotAllowedHandler)
+	// Assign sub-Router's with the parent not found & method not allowed handler if not specified
+	if subr, ok = handler.(*impl); ok && subr.Handlers() != rou.Handlers() {
+		subr.Handlers().NotFound(rou.Handlers().NotFound(nil))
+		subr.Handlers().MethodNotAllowed(rou.Handlers().MethodNotAllowed(nil))
 	}
 
 	// Wrap the sub-router in a handlerFunc to scope the request path for routing.
@@ -215,7 +212,7 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 
 	if pattern == "" || pattern[len(pattern)-1] != '/' {
 		rou.handle(method.Any|method.Stub, pattern, subHandler)
-		rou.handle(method.Any|method.Stub, pattern+"/", rou.NotFoundHandler())
+		rou.handle(method.Any|method.Stub, pattern+"/", rou.Handlers().NotFound(nil))
 		pattern += "/"
 	}
 
@@ -291,17 +288,17 @@ func (rou *impl) routeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	}
 	// Check if method is supported
 	if mtd, err = method.Parse(rq.Method); err != nil {
-		rou.MethodNotAllowedHandler().ServeHTTP(wr, rq)
+		rou.Handlers().MethodNotAllowed(nil).ServeHTTP(wr, rq)
 		return
 	}
 	// Find the route
 	hs = rou.tree.FindRoute(ctx, routePath)
 	if hs == nil {
-		rou.NotFoundHandler().ServeHTTP(wr, rq)
+		rou.Handlers().NotFound(nil).ServeHTTP(wr, rq)
 		return
 	}
 	if h, ok = hs[mtd]; !ok {
-		rou.MethodNotAllowedHandler().ServeHTTP(wr, rq)
+		rou.Handlers().MethodNotAllowed(nil).ServeHTTP(wr, rq)
 		return
 	}
 	// Serve it up
