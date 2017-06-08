@@ -2,6 +2,7 @@ package handlers
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
+import "gopkg.in/webnice/web.v1/ambry"
 import "gopkg.in/webnice/web.v1/context/errors"
 import (
 	"net/http"
@@ -10,94 +11,39 @@ import (
 // New returns new context object
 func New(errors errors.Interface) Interface {
 	var hndl = new(impl)
-	hndl.handlers = new(handlers)
+	hndl.handlers = ambry.New()
 	hndl.errors = errors
 	return hndl
 }
 
-// Add key value param to heap
-func (itm *handlers) Add(key uint32, value http.HandlerFunc) {
-	*itm = append(*itm, item{key, value})
-}
+func (hndl *impl) do(key uint32, fn http.HandlerFunc, defaultFn http.HandlerFunc) (ret http.HandlerFunc) {
+	var tmp interface{}
 
-// Get value by key from heap
-func (itm handlers) Get(key uint32) (ret http.HandlerFunc) {
-	var p item
-	for _, p = range itm {
-		if p.Key == key {
-			ret = p.Value
-			break
-		}
+	if fn != nil {
+		hndl.handlers.Set(key, fn)
 	}
-	return
-}
-
-// Set value by key to heap
-func (itm *handlers) Set(key uint32, value http.HandlerFunc) {
-	var p item
-	var i, idx int
-	idx = -1
-	for i, p = range *itm {
-		if p.Key == key {
-			idx = i
-			break
-		}
+	if tmp = hndl.handlers.Get(key); tmp != nil {
+		ret = tmp.(http.HandlerFunc)
+		return
 	}
-	if idx < 0 {
-		(*itm).Add(key, value)
-	} else {
-		(*itm)[idx] = item{key, value}
-	}
-}
-
-// Del Delete value by key from heap
-func (itm *handlers) Del(key uint32) (ret http.HandlerFunc) {
-	var p item
-	var i int
-	for i, p = range *itm {
-		if p.Key == key {
-			*itm = append((*itm)[:i], (*itm)[i+1:]...)
-			ret = p.Value
-		}
-	}
+	ret = defaultFn
 	return
 }
 
 // Reset all stored handlers
-func (hndl *impl) Reset() { hndl.handlers = new(handlers) }
+func (hndl *impl) Reset() { hndl.handlers = ambry.New() }
 
 // Set and get InternalServerError handler function
 func (hndl *impl) InternalServerError(fn http.HandlerFunc) (ret http.HandlerFunc) {
-	if fn != nil {
-		hndl.handlers.Set(keyInternalServerError, fn)
-	}
-	if ret = hndl.handlers.Get(keyInternalServerError); ret != nil {
-		return
-	}
-	ret = hndl.defaultInternalServerError
-	return
+	return hndl.do(keyInternalServerError, fn, hndl.defaultInternalServerError)
 }
 
 // MethodNotAllowed	Set and get MethodNotAllowed handler function
 func (hndl *impl) MethodNotAllowed(fn http.HandlerFunc) (ret http.HandlerFunc) {
-	if fn != nil {
-		hndl.handlers.Set(keyMethodNotAllowed, fn)
-	}
-	if ret = hndl.handlers.Get(keyMethodNotAllowed); ret != nil {
-		return
-	}
-	ret = hndl.defaultMethodNotAllowed
-	return
+	return hndl.do(keyMethodNotAllowed, fn, hndl.defaultMethodNotAllowed)
 }
 
 // NotFound	Set and get MethodNotFound handler function
 func (hndl *impl) NotFound(fn http.HandlerFunc) (ret http.HandlerFunc) {
-	if fn != nil {
-		hndl.handlers.Set(keyNotFound, fn)
-	}
-	if ret = hndl.handlers.Get(keyNotFound); ret != nil {
-		return
-	}
-	ret = hndl.defaultNotFound
-	return
+	return hndl.do(keyNotFound, fn, hndl.defaultNotFound)
 }
