@@ -31,7 +31,7 @@ func TestDo(t *testing.T) {
 	}
 
 	obj.Reset()
-	if obj.do(testKey, nil) == nil {
+	if obj.do(testKey, nil) != nil {
 		t.Errorf("Error do(), return object is incorrect")
 	}
 }
@@ -52,7 +52,11 @@ func testFn(t *testing.T, fn func(error) error, funcName string) {
 
 func TestAll(t *testing.T) {
 	var obj = New()
+
+	obj.Reset()
 	testFn(t, obj.InternalServerError, "InternalServerError()")
+	obj.Reset()
 	testFn(t, obj.MethodNotAllowed, "MethodNotAllowed()")
+	obj.Reset()
 	testFn(t, obj.NotFound, "NotFound()")
 }
