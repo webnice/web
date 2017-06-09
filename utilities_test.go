@@ -26,8 +26,8 @@ func TestDefaultConfiguration(t *testing.T) {
 	if conf.MaxHeaderBytes != http.DefaultMaxHeaderBytes {
 		t.Errorf("Error configuration defaults: MaxHeaderBytes is '%d' expected '%d'", conf.MaxHeaderBytes, http.DefaultMaxHeaderBytes)
 	}
-	if conf.ShutdownTimeout != _ShutdownTimeout {
-		t.Errorf("Error configuration defaults: ShutdownTimeout is '%s' expected '%s'", conf.ShutdownTimeout.String(), _ShutdownTimeout.String())
+	if conf.ShutdownTimeout != shutdownTimeout {
+		t.Errorf("Error configuration defaults: ShutdownTimeout is '%s' expected '%s'", conf.ShutdownTimeout.String(), shutdownTimeout.String())
 	}
 
 	conf.Host = _TestHost

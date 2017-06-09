@@ -7,5 +7,5 @@ import (
 )
 
 const (
-	_ShutdownTimeout time.Duration = time.Minute / 2
+	shutdownTimeout time.Duration = time.Minute / 2
 )

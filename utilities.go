@@ -54,8 +54,8 @@ func defaultConfiguration(conf *Configuration) {
 		}
 	}
 	// ShutdownTimeout
-	if conf.ShutdownTimeout == 0 {
-		conf.ShutdownTimeout = _ShutdownTimeout
+	if conf.ShutdownTimeout <= 0 {
+		conf.ShutdownTimeout = shutdownTimeout
 	}
 }
 
