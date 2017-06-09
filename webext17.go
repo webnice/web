@@ -10,7 +10,7 @@ import (
 
 // Stop web server
 func (wsv *web) Stop() {
-	wsv.listener.Close()
+	wsv.err = wsv.listener.Close()
 }
 
 func (wsv *web) loadConfiguration() *http.Server {

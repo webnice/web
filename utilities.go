@@ -19,6 +19,7 @@ func defaultConfiguration(conf *Configuration) {
 		_Unix       = `unix`
 		_UnixPacket = `unixpacket`
 	)
+
 	if conf.Port == 0 {
 		conf.Port = 80
 	}
@@ -61,6 +62,7 @@ func defaultConfiguration(conf *Configuration) {
 // Разбор адреса, определение порта через net.LookupPort, в том числе портов заданных как ":http"
 func parseAddress(addr string) (ret *Configuration, err error) {
 	var sp []string
+
 	ret = new(Configuration)
 	defer defaultConfiguration(ret)
 	sp = strings.Split(addr, ":")
@@ -74,5 +76,6 @@ func parseAddress(addr string) (ret *Configuration, err error) {
 	}
 	ret.Host = sp[0]
 	ret.Port = uint32(n)
+
 	return
 }

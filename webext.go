@@ -13,14 +13,13 @@ import (
 func (wsv *web) Stop() {
 	var ctx context.Context
 	if wsv.server != nil {
+		ctx = context.Background()
 		if wsv.conf.ShutdownTimeout > 0 {
-			ctx, _ = context.WithTimeout(context.Background(), wsv.conf.ShutdownTimeout)
-		} else {
-			ctx = context.Background()
+			ctx, _ = context.WithTimeout(ctx, wsv.conf.ShutdownTimeout)
 		}
-		_ = wsv.server.Shutdown(ctx)
+		wsv.err = wsv.server.Shutdown(ctx)
 	} else if wsv.listener != nil {
-		_ = wsv.listener.Close()
+		wsv.err = wsv.listener.Close()
 	}
 }
 
