@@ -22,7 +22,7 @@ func testDefaults(t *testing.T, handler http.HandlerFunc, hfName string, respons
 	if err != nil {
 		t.Errorf("Error response HandlerFunc: %s", err.Error())
 	}
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 
 	if buf, err = ioutil.ReadAll(rsp.Body); err != nil {
 		t.Errorf("Error read response: %s", err.Error())
@@ -47,14 +47,14 @@ func TestDefaultsAll(t *testing.T) {
 	obj = New(err).(*impl)
 
 	testDefaults(t, obj.defaultInternalServerError, "defaultInternalServerError()", "")
-	obj.errors.InternalServerError(fmt.Errorf("%s", testError))
+	_ = obj.errors.InternalServerError(fmt.Errorf("%s", testError))
 	testDefaults(t, obj.defaultInternalServerError, "defaultInternalServerError()", testError)
 
 	testDefaults(t, obj.defaultMethodNotAllowed, "defaultMethodNotAllowed()", "")
-	obj.errors.MethodNotAllowed(fmt.Errorf("%s", testError))
+	_ = obj.errors.MethodNotAllowed(fmt.Errorf("%s", testError))
 	testDefaults(t, obj.defaultMethodNotAllowed, "defaultMethodNotAllowed()", testError)
 
 	testDefaults(t, obj.defaultNotFound, "defaultNotFound()", "")
-	obj.errors.NotFound(fmt.Errorf("%s", testError))
+	_ = obj.errors.NotFound(fmt.Errorf("%s", testError))
 	testDefaults(t, obj.defaultNotFound, "defaultNotFound()", testError)
 }

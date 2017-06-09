@@ -1,3 +1,5 @@
+// +build !race
+
 package web
 
 //import "gopkg.in/webnice/debug.v1"
@@ -11,9 +13,7 @@ import (
 
 func TestInvalidPort(t *testing.T) {
 	const invalidAddress = `:170000`
-	var wsv Interface
-
-	wsv = New()
+	var wsv = New()
 	wsv.ListenAndServe(invalidAddress)
 	if wsv.Error() == nil {
 		t.Errorf("Error ListenAndServe(), don't cheack listen address")
@@ -25,9 +25,7 @@ func TestAlreadyRunningError(t *testing.T) {
 		testAddress1 = `localhost:18080`
 		testAddress2 = `localhost:18081`
 	)
-	var wsv Interface
-
-	wsv = New()
+	var wsv = New()
 	wsv.ListenAndServe(testAddress1)
 	defer wsv.Stop()
 	if wsv.Error() != nil {
@@ -100,7 +98,7 @@ func TestUnixSocket(t *testing.T) {
 	}
 
 	w1.Stop()
-	if fi, err = os.Stat(testAddress1); os.IsExist(err) == true {
+	if _, err = os.Stat(testAddress1); os.IsExist(err) {
 		t.Errorf("Error delete unix socket after server stop")
 	}
 }
@@ -111,14 +109,13 @@ func TestServe(t *testing.T) {
 		testAddress2 = `127.0.0.1:18080`
 	)
 	var err error
-	var w1 Interface
 	var ltn net.Listener
+	var w1 = New()
 
-	w1 = New()
 	if ltn, err = net.Listen("tcp", testAddress1); err != nil {
 		t.Errorf("Testing error, failed to open port '%s': %s", testAddress1, err.Error())
 	}
-	defer ltn.Close()
+	defer func() { _ = ltn.Close() }()
 
 	w1.Serve(ltn)
 	if w1.(*web).conf == nil {
@@ -134,11 +131,10 @@ func TestServe(t *testing.T) {
 
 func TestWait(t *testing.T) {
 	const testAddress1 = `localhost:18080`
-	var w1 Interface
 	var tic *time.Ticker
 	var cou uint32
+	var w1 = New()
 
-	w1 = New()
 	w1.ListenAndServe(testAddress1)
 	if w1.Error() != nil {
 		t.Errorf("Error starting web server: %s", w1.Error().Error())

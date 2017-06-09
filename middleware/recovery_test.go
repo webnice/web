@@ -40,7 +40,7 @@ func testRecover(t *testing.T, rou route.Interface) (err error) {
 		err = fmt.Errorf("Error response HandlerFunc: %s", err.Error())
 		return
 	}
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 
 	if buf, err = ioutil.ReadAll(rsp.Body); err != nil {
 		err = fmt.Errorf("Error read response: %s", err.Error())

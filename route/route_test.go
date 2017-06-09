@@ -24,9 +24,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestErrorsHandlers(t *testing.T) {
-	var r Interface
-
-	r = New()
+	var r = New()
 	if r.Errors() == nil {
 		t.Errorf("Errors() returns nil")
 	}

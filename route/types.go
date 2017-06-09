@@ -95,7 +95,4 @@ type impl struct {
 
 	// Routing context pool
 	pool sync.Pool
-
-	// Custom route not found handler
-	notFoundHandler http.HandlerFunc
 }
