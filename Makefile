@@ -18,7 +18,7 @@ dep:
 	GOPATH=${GOPATH} glide install
 .PHONY: dep
 
-test: dep
+test:
 	clear
 	echo "mode: set" > coverage.log
 	for PACKET in $(PACKETS); do \
@@ -34,7 +34,7 @@ cover: test
 	GOPATH=${GOPATH} go tool cover -html=coverage.log
 .PHONY: cover
 
-bench: dep
+bench:
 	GOPATH=${GOPATH} go test -race -bench=. -benchmem ./...
 .PHONY: bench
 
@@ -52,7 +52,6 @@ lint:
 
 clean:
 	rm -rf ${DIR}/src; true
-	rm -rf ${DIR}/vendor; true
 	rm -rf ${DIR}/bin/*; true
 	rm -rf ${DIR}/pkg/*; true
 	rm -rf ${DIR}/*.log; true
