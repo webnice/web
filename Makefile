@@ -19,7 +19,7 @@ dep:
 .PHONY: dep
 
 test:
-	clear
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
 	echo "mode: set" > coverage.log
 	for PACKET in $(PACKETS); do \
 		touch coverage-tmp.log; \
@@ -35,6 +35,7 @@ cover: test
 .PHONY: cover
 
 bench:
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
 	GOPATH=${GOPATH} go test -race -bench=. -benchmem ./...
 .PHONY: bench
 
