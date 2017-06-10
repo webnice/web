@@ -75,7 +75,7 @@ type Routes interface {
 // Middlewares type is a slice of standard middleware handlers with methods to compose middleware chains and http.Handler's
 type Middlewares []func(http.Handler) http.Handler
 
-// Is an private implementation
+// Is an private route implementation
 type impl struct {
 	// Context interface
 	context context.Interface
