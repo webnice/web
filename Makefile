@@ -24,7 +24,7 @@ test:
 	for PACKET in $(PACKETS); do \
 		touch coverage-tmp.log; \
 		GOPATH=${GOPATH} go test -v -covermode=count -coverprofile=coverage-tmp.log $$PACKET; \
-		if [ ! $$? == 0 ]; then exit $$?; fi; \
+		if [ ! "$$?" == "0" ]; then exit $$?; fi; \
 		tail -n +2 coverage-tmp.log | sort -r | awk '{if($$1 != last) {print $$0;last=$$1}}' >> coverage.log; \
 		rm -f coverage-tmp.log; true; \
 	done
