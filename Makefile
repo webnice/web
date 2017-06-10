@@ -6,14 +6,20 @@ PACKETS=$(shell cat .testpackages)
 
 default: lint test
 
+## Generate code by go generate or other utilities
 generate:
 	#GOPATH=${GOPATH} go generate
 	#GOPATH=${GOPATH} easyjson -output_filename configuration.go src/gopkg.in/webnice/web.v1/types.go
 .PHONY: generate
 
-test:
+## Dependence managers
+dep:
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
+	GOPATH=${GOPATH} glide install
+.PHONY: dep
+
+test: dep
 	clear
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1; true
 	echo "mode: set" > coverage.log
 	for PACKET in $(PACKETS); do \
 		touch coverage-tmp.log; \
@@ -28,9 +34,8 @@ cover: test
 	GOPATH=${GOPATH} go tool cover -html=coverage.log
 .PHONY: cover
 
-bench:
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1; true
-	GOPATH=${GOPATH} go test -race -bench=. ./...
+bench: dep
+	GOPATH=${GOPATH} go test -race -bench=. -benchmem ./...
 .PHONY: bench
 
 lint:
@@ -47,7 +52,9 @@ lint:
 
 clean:
 	rm -rf ${DIR}/src; true
+	rm -rf ${DIR}/vendor; true
 	rm -rf ${DIR}/bin/*; true
 	rm -rf ${DIR}/pkg/*; true
 	rm -rf ${DIR}/*.log; true
+	rm -rf ${DIR}/*.lock; true
 .PHONY: clean
