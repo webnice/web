@@ -1,3 +1,8 @@
+dependencies:
+  override:
+    - mkdir -p src/gopkg.in/webnice
+    - cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null
+
 test:
   override:
     - make test
