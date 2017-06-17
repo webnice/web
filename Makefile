@@ -15,7 +15,10 @@ generate:
 ## Dependence managers
 dep:
 	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
-	GOPATH=${GOPATH} glide install
+	if command -v "gvt"; then GOPATH="$(DIR)" gvt update -all; fi
+	rm -rf vendor/golang.org/x/text/cmd 2>/dev/null; true
+	rm -rf vendor/golang.org/x/text/collate/tools 2>/dev/null; true
+	rm -rf vendor/golang.org/x/net/http2/h2i 2>/dev/null; true
 .PHONY: dep
 
 test:
