@@ -16,22 +16,22 @@ import (
 // Interface is an interface
 type Interface interface {
 	// ListenAndServe listens on the TCP network address addr and then calls Serve on incoming connections
-	ListenAndServe(string)
+	ListenAndServe(string) Interface
 
 	// ListenAndServeWithConfig Fully configurable web server listens and then calls Serve on incoming connections
-	ListenAndServeWithConfig(*Configuration)
+	ListenAndServeWithConfig(*Configuration) Interface
 
 	// Serve accepts incoming connections on the Listener, creating a new service goroutine for each
-	Serve(net.Listener)
+	Serve(net.Listener) Interface
 
 	// Error Return last error of web server
 	Error() error
 
 	// Wait while web server is running
-	Wait()
+	Wait() Interface
 
 	// Stop web server
-	Stop()
+	Stop() Interface
 
 	// Route interface
 	Route() route.Interface

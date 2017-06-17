@@ -8,36 +8,36 @@ import (
 )
 
 // Wait while web server is running
-func (wsv *web) Wait() { wsv.doCloseDone.Wait() }
+func (wsv *web) Wait() Interface { wsv.doCloseDone.Wait(); return wsv }
 
 // ListenAndServe listens on the TCP network address addr and then calls Serve with handler to handle requests on incoming connections
-func (wsv *web) ListenAndServe(addr string) {
+func (wsv *web) ListenAndServe(addr string) Interface {
 	var conf *Configuration
 
 	if conf, wsv.err = parseAddress(addr); wsv.err != nil {
-		return
+		return wsv
 	}
-	wsv.ListenAndServeWithConfig(conf)
+	return wsv.ListenAndServeWithConfig(conf)
 }
 
 // ListenAndServeWithConfig Fully configurable web server listens and then calls Serve on incoming connections
-func (wsv *web) ListenAndServeWithConfig(conf *Configuration) {
+func (wsv *web) ListenAndServeWithConfig(conf *Configuration) Interface {
 	if conf == nil {
 		wsv.err = ErrNoConfiguration()
-		return
+		return wsv
 	}
 	defaultConfiguration(conf)
 	wsv.conf = conf
-	wsv.Listen()
+	return wsv.Listen()
 }
 
 // Listen Begin listen port and web server serve
-func (wsv *web) Listen() {
+func (wsv *web) Listen() Interface {
 	var ltn net.Listener
 
 	if wsv.isRun.Load().(bool) {
 		wsv.err = ErrAlreadyRunning()
-		return
+		return wsv
 	}
 	if wsv.conf.Mode == "unix" || wsv.conf.Mode == "unixpacket" {
 		_ = os.Remove(wsv.conf.Socket)
@@ -47,13 +47,13 @@ func (wsv *web) Listen() {
 		ltn, wsv.err = net.Listen(wsv.conf.Mode, wsv.conf.HostPort)
 	}
 	if wsv.err != nil {
-		return
+		return wsv
 	}
-	wsv.Serve(ltn)
+	return wsv.Serve(ltn)
 }
 
 // Serve accepts incoming connections on the listener, creating a new web server goroutine
-func (wsv *web) Serve(ltn net.Listener) {
+func (wsv *web) Serve(ltn net.Listener) Interface {
 	var conf *Configuration
 
 	if wsv.conf == nil {
@@ -65,6 +65,7 @@ func (wsv *web) Serve(ltn net.Listener) {
 	wsv.isRun.Store(true)
 	wsv.doCloseDone.Add(1)
 	go wsv.run()
+	return wsv
 }
 
 // Goroutine of the web server
@@ -82,6 +83,9 @@ func (wsv *web) run() {
 
 	// Configure net/http web server
 	wsv.server = wsv.loadConfiguration()
+	if wsv.err != nil {
+		return
+	}
 
 	// Configure keep alives of web server
 	if wsv.conf.KeepAliveDisable {

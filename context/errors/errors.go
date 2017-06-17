@@ -27,6 +27,11 @@ func (ce *impl) do(key uint32, value error) (ret error) {
 // Reset all stored errors
 func (ce *impl) Reset() { ce.errors = ambry.New() }
 
+// RouteConfigurationError Set description about roting configuration error
+func (ce *impl) RouteConfigurationError(value error) (ret error) {
+	return ce.do(keyRouteConfigurationError, value)
+}
+
 // InternalServerError Set description about internal server error
 func (ce *impl) InternalServerError(value error) (ret error) {
 	return ce.do(keyInternalServerError, value)

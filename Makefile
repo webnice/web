@@ -43,6 +43,7 @@ bench:
 .PHONY: bench
 
 lint:
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
 	gometalinter \
 	--vendor \
 	--deadline=15m \

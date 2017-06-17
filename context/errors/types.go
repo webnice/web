@@ -5,13 +5,17 @@ package errors
 import "gopkg.in/webnice/web.v1/ambry"
 
 const (
-	keyInternalServerError uint32 = iota
+	keyRouteConfigurationError uint32 = iota
+	keyInternalServerError
 	keyMethodNotAllowed
 	keyNotFound
 )
 
 // Interface is an interface of package
 type Interface interface {
+	// RouteConfigurationError Set description about roting configuration error
+	RouteConfigurationError(err error) error
+
 	// InternalServerError Set description about internal server error
 	InternalServerError(err error) error
 

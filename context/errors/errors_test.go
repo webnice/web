@@ -54,6 +54,8 @@ func TestAll(t *testing.T) {
 	var obj = New()
 
 	obj.Reset()
+	testFn(t, obj.RouteConfigurationError, "RouteConfigurationError()")
+	obj.Reset()
 	testFn(t, obj.InternalServerError, "InternalServerError()")
 	obj.Reset()
 	testFn(t, obj.MethodNotAllowed, "MethodNotAllowed()")

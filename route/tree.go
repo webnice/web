@@ -9,6 +9,7 @@ package route
 import "gopkg.in/webnice/web.v1/context"
 import "gopkg.in/webnice/web.v1/method"
 import (
+	"fmt"
 	"net/http"
 	"sort"
 	"strings"
@@ -89,8 +90,8 @@ func (n *node) FindRoute(ctx context.Interface, path string) methodHandlers {
 }
 
 // InsertRoute Добавление роутинга и обработчика
-func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handler) *node {
-	var cn, parent, child, subchild *node
+func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handler) (nde *node, err error) {
+	var parent, child *node
 	var search = pattern
 	var p, commonPrefix int
 
@@ -100,7 +101,8 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 			// Insert or update the node's leaf handler
 			n.setHandler(mtd, handler)
 			n.pattern = pattern
-			return n
+			nde = n
+			return
 		}
 
 		// Look for the edge
@@ -109,10 +111,10 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 
 		// No edge, create one
 		if n == nil {
-			cn = &node{label: search[0], prefix: search, pattern: pattern}
-			cn.setHandler(mtd, handler)
-			parent.addChild(pattern, cn)
-			return cn
+			nde = &node{label: search[0], prefix: search, pattern: pattern}
+			nde.setHandler(mtd, handler)
+			parent.addChild(pattern, nde)
+			return
 		}
 
 		if n.typ > ntStatic {
@@ -141,7 +143,10 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 			typ:    ntStatic,
 			prefix: search[:commonPrefix],
 		}
-		parent.replaceChild(search[0], child)
+		if err = parent.replaceChild(search[0], child); err != nil {
+			nde = nil
+			return
+		}
 
 		// Restore the existing node
 		n.label = n.prefix[commonPrefix]
@@ -153,19 +158,20 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 		if len(search) == 0 {
 			child.setHandler(mtd, handler)
 			child.pattern = pattern
-			return child
+			nde = child
+			return
 		}
 
 		// Create a new edge for the node
-		subchild = &node{
+		nde = &node{
 			typ:     ntStatic,
 			label:   search[0],
 			prefix:  search,
 			pattern: pattern,
 		}
-		subchild.setHandler(mtd, handler)
-		child.addChild(pattern, subchild)
-		return subchild
+		nde.setHandler(mtd, handler)
+		child.addChild(pattern, nde)
+		return
 	}
 }
 
@@ -285,8 +291,8 @@ func (n *node) addChild(pattern string, child *node) {
 	n.children[child.typ].Sort()
 }
 
-func (n *node) replaceChild(label byte, child *node) {
-	const missingChild = `replacing missing child`
+func (n *node) replaceChild(label byte, child *node) (err error) {
+	const missingChild = `Replacing missing child`
 	var i int
 	for i = 0; i < len(n.children[child.typ]); i++ {
 		if n.children[child.typ][i].label == label {
@@ -295,7 +301,8 @@ func (n *node) replaceChild(label byte, child *node) {
 			return
 		}
 	}
-	panic(missingChild)
+	err = fmt.Errorf(missingChild)
+	return
 }
 
 func (n *node) getEdge(label byte) (ret *node) {

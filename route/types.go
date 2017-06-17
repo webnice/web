@@ -77,6 +77,9 @@ type Middlewares []func(http.Handler) http.Handler
 
 // Is an private route implementation
 type impl struct {
+	// Accumulation of errors when configuring the router
+	errors []error
+
 	// Context interface
 	context context.Interface
 

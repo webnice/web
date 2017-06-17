@@ -5,6 +5,7 @@ package web
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 import (
+	"fmt"
 	"net"
 	"os"
 	"testing"
@@ -130,11 +131,16 @@ func TestServe(t *testing.T) {
 }
 
 func TestWait(t *testing.T) {
-	const testAddress1 = `localhost:18080`
+	const (
+		testAddress1 = `localhost:18080`
+		testAddress2 = `.test.socket`
+	)
 	var tic *time.Ticker
 	var cou uint32
-	var w1 = New()
+	var w1 Interface
+	var conf *Configuration
 
+	w1 = New()
 	w1.ListenAndServe(testAddress1)
 	if w1.Error() != nil {
 		t.Errorf("Error starting web server: %s", w1.Error().Error())
@@ -154,4 +160,52 @@ func TestWait(t *testing.T) {
 	if cou <= 4 {
 		t.Errorf("Error Wait()")
 	}
+
+	w1 = New()
+	conf, _ = parseAddress("")
+	conf.Mode = "socket"
+	conf.Socket = testAddress2
+	conf.KeepAliveDisable = true
+	w1.ListenAndServeWithConfig(conf)
+	if w1.Error() != nil {
+		t.Errorf("Error starting web server: %s", w1.Error().Error())
+	}
+	go func() {
+		tic = time.NewTicker(time.Second / 2)
+		defer tic.Stop()
+		for {
+			<-tic.C
+			if cou++; cou > 4 {
+				w1.Stop()
+				break
+			}
+		}
+	}()
+	w1.Wait()
+	if cou <= 4 {
+		t.Errorf("Error Wait()")
+	}
+}
+
+func TestRunRouteConfigurationError(t *testing.T) {
+	const (
+		testAddress1    = `localhost:18080`
+		testErrorString = `SvDJFQxV4Bscfn2tdP9bCr7CGnK7dYPJWrc6w5MJ`
+	)
+	var tic *time.Ticker
+	var w1 = New()
+
+	_ = w1.Errors().RouteConfigurationError(fmt.Errorf(testErrorString))
+	w1.ListenAndServe(testAddress1)
+	go func() {
+		tic = time.NewTicker(time.Second)
+		defer tic.Stop()
+		<-tic.C
+		w1.Stop()
+	}()
+	w1.Wait()
+	if w1.Error() == nil || w1.Error().Error() != testErrorString {
+		t.Errorf("Error starting web server with routing configuration error")
+	}
+	w1.Stop()
 }
