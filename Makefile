@@ -49,6 +49,7 @@ lint:
 	--cyclo-over=20 \
 	--disable=aligncheck \
 	--disable=gotype \
+	--skip=vendor \
 	--skip=src/vendor \
 	--linter="vet:go tool vet -printf {path}/*.go:PATH:LINE:MESSAGE" \
 	./...
