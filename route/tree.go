@@ -502,8 +502,7 @@ func (n *node) routes() []Route {
 			if h == nil {
 				continue
 			}
-			m = mt.String()
-			if m == "" {
+			if m = mt.String(); m == "" {
 				continue
 			}
 			hs[m] = h

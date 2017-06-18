@@ -96,7 +96,7 @@ func TestServeHTTP(t *testing.T) {
 	// Add incorrect handler
 	w1 = New()
 	w1.Get("/", testServeHTTP)
-	w1.Post("", testServeHTTP)
+	w1.Post("", testServeHTTP) // Error URI (path must begin with '/')
 	srv = httptest.NewServer(w1)
 	if rsp, err = http.Get(srv.URL); err != nil {
 		t.Errorf("Error httptest get %s: %s", srv.URL, err.Error())
