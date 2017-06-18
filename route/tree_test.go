@@ -59,6 +59,18 @@ func TestTree(t *testing.T) {
 	//
 
 	tr = &node{}
+	_, _ = tr.InsertRoute(method.Get, "/aaa/*", hIndex)
+	_, _ = tr.InsertRoute(method.Get, "/eee/zzz", hIndex)
+	_, _ = tr.InsertRoute(method.Get, "/eee/ccc", hIndex)
+	_, _ = tr.InsertRoute(method.Get, "/zzz/*", hIndex)
+	_, _ = tr.InsertRoute(method.Get, "/aaa", hIndex)
+	_, _ = tr.InsertRoute(method.Get, "/aaa/aaa", hIndex)
+	_, _ = tr.InsertRoute(method.Any, "", hIndex)
+	//
+
+	//
+
+	tr = &node{}
 	if !tr.isEmpty() {
 		t.Errorf("Error function isEmpty()")
 	}

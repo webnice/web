@@ -143,6 +143,7 @@ func (n *node) InsertRoute(mtd method.Method, pattern string, handler http.Handl
 			typ:    ntStatic,
 			prefix: search[:commonPrefix],
 		}
+
 		if err = parent.replaceChild(search[0], child); err != nil {
 			nde = nil
 			return
@@ -294,14 +295,17 @@ func (n *node) addChild(pattern string, child *node) {
 func (n *node) replaceChild(label byte, child *node) (err error) {
 	const missingChild = `Replacing missing child`
 	var i int
+
+	err = fmt.Errorf(missingChild)
 	for i = 0; i < len(n.children[child.typ]); i++ {
 		if n.children[child.typ][i].label == label {
 			n.children[child.typ][i] = child
 			n.children[child.typ][i].label = label
-			return
+			err = nil
+			break
 		}
 	}
-	err = fmt.Errorf(missingChild)
+
 	return
 }
 
