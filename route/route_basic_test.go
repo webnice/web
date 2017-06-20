@@ -5,6 +5,7 @@ package route
 import "gopkg.in/webnice/web.v1/context"
 import "gopkg.in/webnice/web.v1/status"
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"net/http"
@@ -12,6 +13,44 @@ import (
 	"strings"
 	"testing"
 )
+
+func testRequest(t *testing.T, method string, path string, body *bytes.Buffer) (rsp *http.Response, ret *bytes.Buffer, err error) {
+	var req *http.Request
+	var buf *bytes.Buffer
+	var tmp [][]byte
+
+	ret = &bytes.Buffer{}
+	if req, err = http.NewRequest(method, path, body); err != nil {
+		return
+	}
+	if rsp, err = http.DefaultClient.Do(req); err != nil {
+		return
+	}
+	defer rsp.Body.Close()
+
+	buf = &bytes.Buffer{}
+	if err = rsp.Write(buf); err != nil {
+		return
+	}
+	if rsp, err = http.ReadResponse(bufio.NewReader(buf), req); err != nil {
+		return
+	}
+
+	buf.Reset()
+	if err = rsp.Write(buf); err != nil {
+		return
+	}
+
+	if tmp = bytes.SplitN(buf.Bytes(), []byte{'\r', '\n', '\r', '\n'}, 2); len(tmp) > 1 {
+		ret = bytes.NewBuffer(tmp[1])
+	} else if tmp = bytes.SplitN(buf.Bytes(), []byte{'\n', '\n'}, 2); len(tmp) > 1 {
+		ret = bytes.NewBuffer(tmp[1])
+	} else {
+		ret = bytes.NewBuffer(tmp[0])
+	}
+
+	return
+}
 
 func TestNew(t *testing.T) {
 	var ok bool
@@ -77,53 +116,48 @@ func TestServeHTTP(t *testing.T) {
 	var rsp *http.Response
 	var buf *bytes.Buffer
 
+	// Empty handler
 	w1 = New()
 	srv = httptest.NewServer(w1)
-	if rsp, err = http.Get(srv.URL); err != nil {
-		t.Errorf("Error httptest get %s: %s", srv.URL, err.Error())
+	rsp, buf, err = testRequest(t, "GET", srv.URL, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("Error httptest get %s: %s", srv.URL, err.Error())
 	}
-	buf = bytes.NewBufferString(``)
-	_ = rsp.Write(buf)
 	if rsp.StatusCode != status.InternalServerError {
 		t.Errorf("Error ServeHTTP(), running server without handlers, request must returned internal server error")
 	}
 	if !strings.Contains(buf.String(), "route with no handlers") {
 		t.Errorf("Error ServeHTTP(), returns incorrect error description: %q", buf.String())
 	}
-	_ = rsp.Body.Close()
 	srv.Close()
 
-	// Add incorrect handler
+	// Incorrect routing
 	w1 = New()
 	w1.Get("/", testServeHTTP)
 	w1.Post("", testServeHTTP) // Error URI (path must begin with '/')
 	srv = httptest.NewServer(w1)
-	if rsp, err = http.Get(srv.URL); err != nil {
-		t.Errorf("Error httptest get %s: %s", srv.URL, err.Error())
+	rsp, buf, err = testRequest(t, "GET", srv.URL, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("Error httptest get %s: %s", srv.URL, err.Error())
 	}
-	buf = bytes.NewBufferString(``)
-	_ = rsp.Write(buf)
 	if rsp.StatusCode != status.InternalServerError {
 		t.Errorf("Error ServeHTTP(), running server without handlers, request must returned internal server error")
 	}
 	if !strings.Contains(buf.String(), "must begin with '/'") {
 		t.Errorf("Error ServeHTTP(), returns incorrect error description: %q", buf.String())
 	}
-	_ = rsp.Body.Close()
 	srv.Close()
 
-	// Add handler
+	// Correct handler
 	w1 = New()
 	w1.Get("/", testServeHTTP)
 	srv = httptest.NewServer(w1)
-	if rsp, err = http.Get(srv.URL); err != nil {
-		t.Errorf("Error httptest get %s: %s", srv.URL, err.Error())
+	rsp, buf, err = testRequest(t, "GET", srv.URL, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("Error httptest get %s: %s", srv.URL, err.Error())
 	}
-	buf = bytes.NewBufferString(``)
-	_ = rsp.Write(buf)
 	if rsp.StatusCode != status.NoContent {
 		t.Errorf("Error test ServeHTTP(), returns %d expected %d", rsp.StatusCode, status.NoContent)
 	}
-	_ = rsp.Body.Close()
 	srv.Close()
 }

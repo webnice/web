@@ -87,7 +87,7 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 // change the course of the request execution, or set request-scoped values for
 // the next http.Handler
 func (rou *impl) Use(middlewares ...func(http.Handler) http.Handler) {
-	const errorMiddlewares = "all middlewares must be defined before use"
+	const errorMiddlewares = "All middlewares must be defined before use"
 	if rou.handler != nil {
 		rou.errors = append(rou.errors, rou.context.Errors().InternalServerError(fmt.Errorf(errorMiddlewares)))
 		return

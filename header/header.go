@@ -120,6 +120,9 @@ const (
 	// XDayOfWeek X-Day-Of-Week header. День недели, значения: [0,1,2,3,4,5,6] 0=пнд, -1=не известен
 	XDayOfWeek = `X-Day-Of-Week`
 
+	// XGeoContinent X-Geo-Continent header. Географический континент
+	XGeoContinent = `X-Geo-Continent`
+
 	// XGeoRegion X-Geo-Region header. Географический регион
 	XGeoRegion = `X-Geo-Region`
 
