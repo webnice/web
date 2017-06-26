@@ -28,6 +28,18 @@ const (
 	// IfModifiedSince header
 	IfModifiedSince = `If-Modified-Since`
 
+	// IfMatch If-Match header
+	IfMatch = `If-Match`
+
+	// IfNoneMatch If-None-Match header
+	IfNoneMatch = `If-None-Match`
+
+	// IfRange If-Range header
+	IfRange = `If-Range`
+
+	// IfUnmodifiedSince If-Unmodified-Since header
+	IfUnmodifiedSince = `If-Unmodified-Since`
+
 	// LastModified header
 	LastModified = `Last-Modified`
 
@@ -99,6 +111,9 @@ const (
 
 	// Expires header
 	Expires = `Expires`
+
+	// ETag header
+	ETag = `ETag`
 
 	// Кастомные заголовки
 
