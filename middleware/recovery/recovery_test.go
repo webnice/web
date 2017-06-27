@@ -1,4 +1,4 @@
-package middleware
+package recovery
 
 import "gopkg.in/webnice/web.v1/route"
 import (

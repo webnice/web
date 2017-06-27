@@ -1,9 +1,10 @@
-package middleware
+package pprof
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 import "gopkg.in/webnice/web.v1/status"
 import "gopkg.in/webnice/web.v1/route"
+import "gopkg.in/webnice/web.v1/middleware/nocache"
 import (
 	"expvar"
 	"fmt"
@@ -14,7 +15,7 @@ import (
 func Pprof() http.Handler {
 	var rou = route.New()
 
-	rou.Use(NoCache)
+	rou.Use(nocache.NoCache)
 	rou.Get("/", func(wr http.ResponseWriter, rq *http.Request) {
 		http.Redirect(wr, rq, rq.RequestURI+"/pprof/", status.MovedPermanently)
 	})
