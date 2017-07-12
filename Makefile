@@ -6,23 +6,25 @@ PACKETS=$(shell cat .testpackages)
 
 default: lint test
 
+link:
+	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
+.PHONY: link
+
 ## Generate code by go generate or other utilities
-generate:
+generate: link
 	#GOPATH=${GOPATH} go generate
 	#GOPATH=${GOPATH} easyjson -output_filename configuration.go src/gopkg.in/webnice/web.v1/types.go
 .PHONY: generate
 
 ## Dependence managers
-dep:
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
+dep: link
 	if command -v "gvt"; then GOPATH="$(DIR)" gvt update -all; fi
 	rm -rf vendor/golang.org/x/text/cmd 2>/dev/null; true
 	rm -rf vendor/golang.org/x/text/collate/tools 2>/dev/null; true
 	rm -rf vendor/golang.org/x/net/http2/h2i 2>/dev/null; true
 .PHONY: dep
 
-test:
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
+test: link
 	echo "mode: set" > coverage.log
 	for PACKET in $(PACKETS); do \
 		touch coverage-tmp.log; \
@@ -37,13 +39,11 @@ cover: test
 	GOPATH=${GOPATH} go tool cover -html=coverage.log
 .PHONY: cover
 
-bench:
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
+bench: link
 	GOPATH=${GOPATH} go test -race -bench=. -benchmem ./...
 .PHONY: bench
 
-lint:
-	mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
+lint: link
 	gometalinter \
 	--vendor \
 	--deadline=15m \
