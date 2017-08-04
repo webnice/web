@@ -51,10 +51,7 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	// Once the request is finished, reset the routing context and put it back
 	// into the pool for reuse from another request
 	if !context.IsContext(rq) {
-		ctx = rou.pool.Get().(context.Interface)
-		ctx.Route().Reset()
-		ctx.Errors().Reset()
-		ctx.Handlers().InternalServerError(rou.context.Handlers().InternalServerError(nil))
+		ctx = context.New(rou.pool.Get().(context.Interface))
 		rq = ctx.NewRequest(rq)
 		defer rou.pool.Put(ctx)
 	}
@@ -327,12 +324,7 @@ func (rou *impl) routeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	var ok bool
 
 	// Grab the route context object
-	if context.IsContext(rq) {
-		ctx = context.New(rq)
-	} else {
-		ctx = context.New()
-		rq = ctx.NewRequest(rq)
-	}
+	ctx = context.New(rq)
 	// The request routing path
 	routePath = ctx.Route().Path()
 	if routePath == "" {
