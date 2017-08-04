@@ -40,7 +40,7 @@ func TestContext(t *testing.T) {
 	if ctx = context(c); ctx != nil {
 		t.Errorf("Error func context(), returns not nil")
 	}
-	c = stdContext.WithValue(stdContext.Background(), constContextKey, ctxOrig)
+	c = stdContext.WithValue(stdContext.Background(), constContextKey.String(), ctxOrig)
 	if ctx = context(c); ctx == nil {
 		t.Errorf("Error func context(), returns nil")
 	}
@@ -55,7 +55,7 @@ func TestNewFromRequest(t *testing.T) {
 	var c stdContext.Context
 
 	ctxOrig = New()
-	c = stdContext.WithValue(stdContext.Background(), constContextKey, ctxOrig)
+	c = stdContext.WithValue(stdContext.Background(), constContextKey.String(), ctxOrig)
 	rq, _ = http.NewRequest("", `http://www.google.com/search?q=foo&q=bar`, nil)
 	rq = rq.WithContext(c)
 
@@ -83,7 +83,7 @@ func TestNewFromStdContext(t *testing.T) {
 	}
 
 	// Standard context with context object
-	c = stdContext.WithValue(stdContext.Background(), constContextKey, ctxOrig)
+	c = stdContext.WithValue(stdContext.Background(), constContextKey.String(), ctxOrig)
 	if ctx = New(c); c == nil {
 		t.Errorf("Error func New(stdContext), returns nil")
 	}
@@ -145,7 +145,7 @@ func TestIsContext(t *testing.T) {
 		t.Errorf("Error IsContext(*http.Request), returns true, expected false")
 	}
 
-	rq = rq.WithContext(stdContext.WithValue(stdContext.Background(), constContextKey, ctx))
+	rq = rq.WithContext(stdContext.WithValue(stdContext.Background(), constContextKey.String(), ctx))
 	if !IsContext(rq) {
 		t.Errorf("Error IsContext(*http.Request), returns false, expected true")
 	}
