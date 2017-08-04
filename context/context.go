@@ -56,7 +56,7 @@ func New(obj ...interface{}) Interface {
 // Get the routing Context object from a http context
 func context(cx stdContext.Context) (ret *impl) {
 	var ok bool
-	if ret, ok = cx.Value(constContextKey).(*impl); !ok {
+	if ret, ok = cx.Value(constContextKey.String()).(*impl); !ok {
 		return nil
 	}
 	return
@@ -79,5 +79,5 @@ func (ctx *impl) Handlers() handlers.Interface { return ctx.handlers }
 
 // NewRequest Creates new http request and copy context from parent request to new request
 func (ctx *impl) NewRequest(rq *http.Request) *http.Request {
-	return rq.WithContext(stdContext.WithValue(rq.Context(), constContextKey, ctx))
+	return rq.WithContext(stdContext.WithValue(rq.Context(), constContextKey.String(), ctx))
 }
