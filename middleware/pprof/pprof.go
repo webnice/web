@@ -12,6 +12,7 @@ import (
 	"net/http/pprof"
 )
 
+// Pprof Middleware to profiling
 func Pprof() http.Handler {
 	var rou = route.New()
 

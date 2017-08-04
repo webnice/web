@@ -31,7 +31,7 @@ func TestUse(t *testing.T) {
 	var r = New()
 	var hf = func(wr http.ResponseWriter, rq *http.Request) {
 		wr.WriteHeader(status.Ok)
-		wr.Write(status.Bytes(status.Ok))
+		_, _ = wr.Write(status.Bytes(status.Ok))
 	}
 
 	// Correct middlewares

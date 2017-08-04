@@ -26,7 +26,7 @@ func testRequest(t *testing.T, method string, path string, body *bytes.Buffer) (
 	if rsp, err = http.DefaultClient.Do(req); err != nil {
 		return
 	}
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 
 	buf = &bytes.Buffer{}
 	if err = rsp.Write(buf); err != nil {
@@ -152,7 +152,7 @@ func TestServeHTTP(t *testing.T) {
 	w1 = New()
 	w1.Get("/", testServeHTTP)
 	srv = httptest.NewServer(w1)
-	rsp, buf, err = testRequest(t, "GET", srv.URL, &bytes.Buffer{})
+	rsp, _, err = testRequest(t, "GET", srv.URL, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("Error httptest get %s: %s", srv.URL, err.Error())
 	}

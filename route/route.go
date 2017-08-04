@@ -327,7 +327,12 @@ func (rou *impl) routeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	var ok bool
 
 	// Grab the route context object
-	ctx = context.New(rq)
+	if context.IsContext(rq) {
+		ctx = context.New(rq)
+	} else {
+		ctx = context.New()
+		rq = ctx.NewRequest(rq)
+	}
 	// The request routing path
 	routePath = ctx.Route().Path()
 	if routePath == "" {
@@ -357,15 +362,15 @@ func (rou *impl) routeHTTP(wr http.ResponseWriter, rq *http.Request) {
 }
 
 // Recursively update data on child routers
-func (rou *impl) updateSubRoutes(fn func(subMux *impl)) {
-	var r Route
-	var ok bool
-	var subMux *impl
-	for _, r = range rou.tree.routes() {
-		subMux, ok = r.SubRoutes.(*impl)
-		if !ok {
-			continue
-		}
-		fn(subMux)
-	}
-}
+//func (rou *impl) updateSubRoutes(fn func(subMux *impl)) {
+//	var r Route
+//	var ok bool
+//	var subMux *impl
+//	for _, r = range rou.tree.routes() {
+//		subMux, ok = r.SubRoutes.(*impl)
+//		if !ok {
+//			continue
+//		}
+//		fn(subMux)
+//	}
+//}

@@ -48,7 +48,7 @@ func defaultConfiguration(conf *Configuration) {
 	// Public address
 	if conf.Address == "" && conf.Mode == _Tcp {
 		if conf.Port == 80 {
-			conf.Address = fmt.Sprintf("%s", conf.Host)
+			conf.Address = conf.Host
 		} else {
 			conf.Address = fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 		}

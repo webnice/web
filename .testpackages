@@ -6,9 +6,11 @@ gopkg.in/webnice/web.v1/context/handlers
 gopkg.in/webnice/web.v1/context/route
 gopkg.in/webnice/web.v1/header
 gopkg.in/webnice/web.v1/method
-gopkg.in/webnice/web.v1/middleware
-gopkg.in/webnice/web.v1/middleware/wrapsrw
 gopkg.in/webnice/web.v1/mime
 gopkg.in/webnice/web.v1/param
 gopkg.in/webnice/web.v1/route
 gopkg.in/webnice/web.v1/status
+gopkg.in/webnice/web.v1/middleware/wrapsrw
+gopkg.in/webnice/web.v1/middleware/recovery
+gopkg.in/webnice/web.v1/middleware/pprof
+gopkg.in/webnice/web.v1/middleware/nocache

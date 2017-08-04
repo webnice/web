@@ -42,7 +42,6 @@ func TestAlreadyRunningError(t *testing.T) {
 }
 
 func TestNoConfigurationError(t *testing.T) {
-	const testAddress1 = `localhost:18080`
 	var wsv = New()
 
 	wsv.ListenAndServeWithConfig(nil)
