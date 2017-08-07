@@ -1,7 +1,7 @@
 package route
 
 //import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
+import "gopkg.in/webnice/log.v2"
 import "gopkg.in/webnice/web.v1/context"
 import "gopkg.in/webnice/web.v1/context/handlers"
 import "gopkg.in/webnice/web.v1/context/errors"
@@ -337,6 +337,7 @@ func (rou *impl) routeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	}
 	// Check if method is supported
 	if mtd, err = method.Parse(rq.Method); err != nil {
+		log.Warningf("Method: %q, %q", mtd.String(), rq.Method)
 		rou.Handlers().MethodNotAllowed(nil).ServeHTTP(wr, rq)
 		return
 	}
@@ -347,6 +348,7 @@ func (rou *impl) routeHTTP(wr http.ResponseWriter, rq *http.Request) {
 		return
 	}
 	if h, ok = hs[mtd]; !ok {
+		log.Warningf("Method: %q, %q", mtd.String(), rq.Method)
 		rou.Handlers().MethodNotAllowed(nil).ServeHTTP(wr, rq)
 		return
 	}
