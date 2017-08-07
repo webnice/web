@@ -75,8 +75,7 @@ func (n *node) FindRoute(ctx context.Interface, path string) methodHandlers {
 	ctx.Route().Pattern("")
 
 	// Find the routing handlers for the path
-	rn = n.findRoute(ctx, path)
-	if rn == nil {
+	if rn = n.findRoute(ctx, path); rn == nil {
 		return nil
 	}
 
