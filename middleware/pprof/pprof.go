@@ -27,9 +27,11 @@ func Pprof() http.Handler {
 	rou.HandleFunc("/pprof/cmdline", pprof.Cmdline)
 	rou.HandleFunc("/pprof/profile", pprof.Profile)
 	rou.HandleFunc("/pprof/symbol", pprof.Symbol)
+	rou.HandleFunc("/pprof/trace", pprof.Trace)
 	rou.Handle("/pprof/block", pprof.Handler("block"))
 	rou.Handle("/pprof/heap", pprof.Handler("heap"))
 	rou.Handle("/pprof/goroutine", pprof.Handler("goroutine"))
+	rou.Handle("/pprof/mutex", pprof.Handler("mutex"))
 	rou.Handle("/pprof/threadcreate", pprof.Handler("threadcreate"))
 	rou.HandleFunc("/vars", func(wr http.ResponseWriter, rq *http.Request) {
 		var first = true
