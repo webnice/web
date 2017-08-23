@@ -15,7 +15,7 @@ func New() Interface {
 // values associated with key
 func (itm *impl) Set(k interface{}, v interface{}) {
 	itm.Lock()
-	itm.items[key(k)] = []*item{&item{Value: v}}
+	itm.items[key(k)] = []*item{{Value: v}}
 	itm.Unlock()
 }
 

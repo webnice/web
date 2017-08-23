@@ -12,15 +12,19 @@ import (
 // Stop web server
 func (wsv *web) Stop() Interface {
 	var ctx context.Context
+	var cfn context.CancelFunc
+
 	if wsv.server != nil {
 		ctx = context.Background()
 		if wsv.conf.ShutdownTimeout > 0 {
-			ctx, _ = context.WithTimeout(ctx, wsv.conf.ShutdownTimeout)
+			ctx, cfn = context.WithTimeout(ctx, wsv.conf.ShutdownTimeout)
+			defer cfn()
 		}
 		wsv.err = wsv.server.Shutdown(ctx)
 	} else if wsv.listener != nil {
 		wsv.err = wsv.listener.Close()
 	}
+
 	return wsv
 }
 

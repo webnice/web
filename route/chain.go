@@ -11,7 +11,7 @@ type ChainHandler struct {
 	chain       http.Handler
 }
 
-// ServeHTTP Inplementation of http.Handler interface
+// ServeHTTP http.Handler interface
 func (c *ChainHandler) ServeHTTP(wr http.ResponseWriter, rq *http.Request) { c.chain.ServeHTTP(wr, rq) }
 
 // Handler builds and returns a http.Handler from the chain of middlewares,

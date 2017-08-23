@@ -29,7 +29,6 @@ type Interface interface {
 	Reset()
 }
 
-// This is an inplementation
 type impl struct {
 	handlers ambry.Interface
 	errors   errors.Interface
