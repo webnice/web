@@ -87,7 +87,7 @@ type Configuration struct {
 	// Default value: "" - unix socket is off
 	Socket string `yaml:"Socket" json:"socket"`
 
-	// Mode Режим работы, tcp, tcp4, tcp6, unix, unixpacket
+	// Mode Режим работы, tcp, tcp4, tcp6, unix, unixpacket, socket
 	// Default value: "tcp"
 	Mode string `yaml:"Mode" json:"mode"`
 
