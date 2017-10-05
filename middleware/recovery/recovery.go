@@ -15,7 +15,13 @@ func Recover(next http.Handler) http.Handler {
 		defer func() {
 			if e := recover(); e != nil {
 				var ctx = context.New(rq)
-				_ = ctx.Errors().InternalServerError(fmt.Errorf("Catch panic: %v\nGoroutine stack is:\n%s", e, string(runtimeDebug.Stack())))
+				_ = ctx.Errors().InternalServerError(
+					fmt.Errorf(
+						"Catch panic: %v\nGoroutine stack is:\n%s",
+						e,
+						string(runtimeDebug.Stack()),
+					),
+				)
 				ctx.Handlers().InternalServerError(nil).ServeHTTP(wr, rq)
 			}
 		}()

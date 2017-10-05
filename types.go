@@ -74,7 +74,7 @@ type Configuration struct {
 	//TODO
 	//Domains []string `yaml:"Domains" json:"domains"`
 
-	// Host IP адрес или имя хоста на котором запускается web serverр,
+	// Host IP адрес или имя хоста на котором запускается web сервер,
 	// можно указывать 0.0.0.0 для всех ip адресов
 	// Default value: ""
 	Host string `yaml:"Host" json:"host"`

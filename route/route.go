@@ -224,6 +224,7 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 	if subr, ok = handler.(*impl); ok && subr.Handlers() != rou.Handlers() {
 		subr.Handlers().NotFound(rou.Handlers().NotFound(nil))
 		subr.Handlers().MethodNotAllowed(rou.Handlers().MethodNotAllowed(nil))
+		subr.Handlers().InternalServerError(rou.Handlers().InternalServerError(nil))
 	}
 
 	// Wrap the sub-router in a handlerFunc to scope the request path for routing.
