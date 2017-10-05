@@ -72,10 +72,28 @@ func IsContext(rq *http.Request) bool { return request(rq) != nil }
 func (ctx *impl) Route() route.Interface { return ctx.route }
 
 // Error interface
-func (ctx *impl) Errors() errors.Interface { return ctx.errors }
+func (ctx *impl) Errors(is ...errors.Interface) (ret errors.Interface) {
+	ret = ctx.errors
+	for i := range is {
+		if is[i] != nil {
+			ctx.errors = is[i]
+			break
+		}
+	}
+	return
+}
 
 // Handlers interface
-func (ctx *impl) Handlers() handlers.Interface { return ctx.handlers }
+func (ctx *impl) Handlers(is ...handlers.Interface) (ret handlers.Interface) {
+	ret = ctx.handlers
+	for i := range is {
+		if is[i] != nil {
+			ctx.handlers = is[i]
+			break
+		}
+	}
+	return
+}
 
 // NewRequest Creates new http request and copy context from parent request to new request
 func (ctx *impl) NewRequest(rq *http.Request) *http.Request {

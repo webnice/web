@@ -26,10 +26,10 @@ type Interface interface {
 	Route() route.Interface
 
 	// Errors interface
-	Errors() errors.Interface
+	Errors(is ...errors.Interface) errors.Interface
 
 	// Handlers interface
-	Handlers() handlers.Interface
+	Handlers(is ...handlers.Interface) handlers.Interface
 
 	// NewRequest Create new http.Request and copy context from parent request to new request
 	NewRequest(*http.Request) *http.Request

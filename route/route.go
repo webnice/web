@@ -17,7 +17,10 @@ func New() Interface {
 	var rou = &impl{tree: &node{}}
 	rou.context = context.New()
 	rou.pool.New = func() interface{} {
-		return context.New()
+		rp := context.New()
+		rp.Handlers(rou.context.Handlers())
+		rp.Errors(rou.context.Errors())
+		return rp
 	}
 	return rou
 }
@@ -68,7 +71,9 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	if len(rou.errors) > 0 {
 		rou.setErrors()
 		ctx = context.New(rq)
-		_ = ctx.Errors().InternalServerError(rou.context.Errors().RouteConfigurationError(nil))
+		_ = ctx.Errors().InternalServerError(
+			rou.context.Errors().RouteConfigurationError(nil),
+		)
 		ctx.Handlers().InternalServerError(nil)(wr, rq)
 		rou.pool.Put(ctx)
 		return
@@ -188,6 +193,8 @@ func (rou *impl) Group(fn func(r Interface)) Interface {
 // along the `pattern` as a subrouter. Effectively, this is a short-hand call to Mount
 func (rou *impl) Subroute(pattern string, fn func(r Interface)) Interface {
 	var subRouter = New()
+	subRouter.(*impl).context.Handlers(rou.context.Handlers())
+	subRouter.(*impl).context.Errors(rou.context.Errors())
 	if fn != nil {
 		fn(subRouter)
 	}
@@ -221,10 +228,10 @@ func (rou *impl) Mount(pattern string, handler http.Handler) {
 	}
 
 	// Assign sub-Router's with the parent not found & method not allowed handler if not specified
-	if subr, ok = handler.(*impl); ok && subr.Handlers() != rou.Handlers() {
-		subr.Handlers().NotFound(rou.Handlers().NotFound(nil))
-		subr.Handlers().MethodNotAllowed(rou.Handlers().MethodNotAllowed(nil))
-		subr.Handlers().InternalServerError(rou.Handlers().InternalServerError(nil))
+	if subr, ok = handler.(*impl); ok && subr.context.Handlers() != rou.context.Handlers() {
+		subr.context.Handlers().NotFound(rou.context.Handlers().NotFound(nil))
+		subr.context.Handlers().MethodNotAllowed(rou.context.Handlers().MethodNotAllowed(nil))
+		subr.context.Handlers().InternalServerError(rou.context.Handlers().InternalServerError(nil))
 	}
 
 	// Wrap the sub-router in a handlerFunc to scope the request path for routing.

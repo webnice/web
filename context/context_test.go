@@ -19,9 +19,11 @@ func TestNew(t *testing.T) {
 	if ctx.Errors() == nil {
 		t.Errorf("Error New(), Errors() is nil")
 	}
+	ctx.Errors(ctx.Errors())
 	if ctx.Handlers() == nil {
 		t.Errorf("Error New(), Handlers() is nil")
 	}
+	ctx.Handlers(ctx.Handlers())
 	if ctx = New(""); ctx != nil {
 		t.Errorf("Error New(), incorrect response")
 	}
