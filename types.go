@@ -113,7 +113,7 @@ type Configuration struct {
 
 	// ShutdownTimeout is the maximum amount of time to wait for the server graceful shutdown
 	// Если не указано или рано 0 - таймаута нет
-	// Default value: 30s - One minute
+	// Default value: 30s
 	ShutdownTimeout time.Duration `yaml:"ShutdownTimeout" json:"shutdownTimeout"`
 
 	// MaxHeaderBytes controls the maximum number of bytes the server will read parsing the request header's keys and values, including the request line
@@ -121,7 +121,7 @@ type Configuration struct {
 	MaxHeaderBytes int `yaml:"MaxHeaderBytes" json:"maxHeaderBytes"`
 
 	// MaxBodyBytes controls the maximum number of bytes the server will read request body
-	// Default value: 0 - no limit
+	// Default value: 0 - unlimited
 	//TODO
 	//MaxBodyBytes int64 `yaml:"MaxBodyBytes" json:"maxBodyBytes"`
 
