@@ -2,25 +2,49 @@
 	"version": 0,
 	"dependencies": [
 		{
+			"importpath": "github.com/go-playground/locales",
+			"repository": "https://github.com/go-playground/locales",
+			"vcs": "git",
+			"revision": "e4cbcb5d0652150d40ad0646651076b6bd2be4f6",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/go-playground/universal-translator",
+			"repository": "https://github.com/go-playground/universal-translator",
+			"vcs": "git",
+			"revision": "71201497bace774495daed26a3874fd339e0b538",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "golang.org/x/crypto",
 			"repository": "https://go.googlesource.com/crypto",
 			"vcs": "git",
-			"revision": "850760c427c516be930bc91280636328f1a62286",
+			"revision": "541b9d50ad47e36efd8fb423e938e59ff1691f68",
 			"branch": "master"
 		},
 		{
 			"importpath": "golang.org/x/net",
 			"repository": "https://go.googlesource.com/net",
 			"vcs": "git",
-			"revision": "973f3f3bbd50e92b13faa6c53ec16f49b45e851c",
+			"revision": "aabf50738bcdd9b207582cbe796b59ed65d56680",
 			"branch": "master"
 		},
 		{
 			"importpath": "golang.org/x/text",
 			"repository": "https://go.googlesource.com/text",
 			"vcs": "git",
-			"revision": "9e2f80a6ba7ed4ba13e0cd4b1f094bf916875735",
+			"revision": "c01e4764d870b77f8abe5096ee19ad20d80e8075",
 			"branch": "master"
+		},
+		{
+			"importpath": "gopkg.in/go-playground/validator.v9",
+			"repository": "https://gopkg.in/go-playground/validator.v9",
+			"vcs": "git",
+			"revision": "a021b2ec9a8a8bb970f3f15bc42617cb520e8a64",
+			"branch": "master",
+			"notests": true
 		}
 	]
 }
