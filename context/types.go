@@ -5,6 +5,7 @@ package context
 import "gopkg.in/webnice/web.v1/context/route"
 import "gopkg.in/webnice/web.v1/context/errors"
 import "gopkg.in/webnice/web.v1/context/handlers"
+import "gopkg.in/webnice/web.v1/context/verify"
 import (
 	"net/http"
 )
@@ -18,6 +19,7 @@ type impl struct {
 	route    route.Interface    // Routing interface
 	errors   errors.Interface   // Errors interface
 	handlers handlers.Interface // Handlers interface
+	Request  *http.Request      // net/http request
 }
 
 // Interface is an interface of package
@@ -33,6 +35,9 @@ type Interface interface {
 
 	// NewRequest Create new http.Request and copy context from parent request to new request
 	NewRequest(*http.Request) *http.Request
+
+	// Data Extracting from a request and decoding data to structure of obj
+	Data(obj interface{}) (verify.Interface, error)
 }
 
 // key is a value for use with context.WithValue

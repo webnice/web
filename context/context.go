@@ -24,6 +24,7 @@ func New(obj ...interface{}) Interface {
 		switch val := obj[i].(type) {
 		case *http.Request:
 			ctx = request(val)
+			ctx.Request = val
 		case stdContext.Context:
 			ctx = context(val)
 		case Interface, *impl:

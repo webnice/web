@@ -4,6 +4,7 @@ gopkg.in/webnice/web.v1/context
 gopkg.in/webnice/web.v1/context/errors
 gopkg.in/webnice/web.v1/context/handlers
 gopkg.in/webnice/web.v1/context/route
+gopkg.in/webnice/web.v1/context/verify
 gopkg.in/webnice/web.v1/header
 gopkg.in/webnice/web.v1/method
 gopkg.in/webnice/web.v1/mime
