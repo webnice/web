@@ -18,6 +18,7 @@ But at the same time framework adds to your application a full-functions routing
 	golang.org/x/net
 	golang.org/x/text
 	golang.org/x/crypto
+	gopkg.in/go-playground/validator.v9
 
 All dependencies in the vendor folder saved. This lib do not require install dependencies.
 
