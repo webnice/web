@@ -53,7 +53,7 @@ func (ctx *impl) Data(obj interface{}) (vfi verify.Interface, err error) {
 		return
 	}
 	// Верификация полученных данных
-	if vfi, err = verify.Verify(req); err != nil {
+	if vfi, err = verify.Verify(obj); err != nil {
 		err = fmt.Errorf("Verification data error: %s", err.Error())
 		return
 	}
