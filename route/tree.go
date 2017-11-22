@@ -19,7 +19,7 @@ const (
 	ntStatic   nodeTyp = iota // /string
 	ntParam                   // /:variable
 	ntCatchAll                // /api/v1.0/*
-	//ntRegexp                  // /:id([0-9]+) or #id^[0-9]+$
+	ntRegexp                  // /:id([0-9]+) or #id^[0-9]+$
 )
 
 type (
@@ -329,7 +329,7 @@ func (n *node) findEdge(ntyp nodeTyp, label byte) *node {
 	var i, j int
 
 	switch ntyp {
-	case ntStatic:
+	case ntStatic, ntParam, ntRegexp:
 		i, j = 0, num-1
 		for i <= j {
 			idx = i + (j-i)/2
@@ -338,7 +338,7 @@ func (n *node) findEdge(ntyp nodeTyp, label byte) *node {
 			} else if label < nds[idx].label {
 				j = idx - 1
 			} else {
-				i = num // breaks cond
+				i = num
 			}
 		}
 		if nds[idx].label != label {
@@ -347,10 +347,6 @@ func (n *node) findEdge(ntyp nodeTyp, label byte) *node {
 		return nds[idx]
 
 	default:
-		// TODO
-		// wild nodes
-		// right now we match them all, but regexp should
-		// run through regexp matcher
 		return nds[idx]
 	}
 }
