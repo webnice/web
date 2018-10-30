@@ -5,13 +5,13 @@ package context
 import "gopkg.in/webnice/web.v1/context/route"
 import "gopkg.in/webnice/web.v1/context/errors"
 import "gopkg.in/webnice/web.v1/context/handlers"
-import "gopkg.in/webnice/web.v1/context/verify"
 import (
 	"net/http"
 )
 
 var (
-	constContextKey = &key{`2EA70633-A7DF-44AD-9DE4-C7593085B685`}
+	constContextKey    = &key{`2EA70633-A7DF-44AD-9DE4-C7593085B685`}
+	globalVerifyPlugin VerifyPlugin // Registered interface of data verification external library
 )
 
 // This is the default routing context implementation
@@ -37,14 +37,14 @@ type Interface interface {
 	NewRequest(*http.Request) *http.Request
 
 	// Data Extracting from a request and decoding data to structure of obj
-	Data(obj interface{}) (verify.Interface, error)
+	Data(obj interface{}) ([]byte, error)
 }
 
-// key is a value for use with context.WithValue
-// It's used as a pointer so it fits in an interface{} without allocation
-type key struct {
-	Name string
-}
+// VerifyPlugin External data verification library interface
+type VerifyPlugin interface {
+	// Verify Check data function
+	Verify(data interface{}) ([]byte, error)
 
-// String convert type to string
-func (k *key) String() string { return k.Name }
+	// Error400 Create response data for HTTP error 400 in the library format
+	Error400(err error) []byte
+}

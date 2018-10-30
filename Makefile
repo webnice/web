@@ -2,6 +2,7 @@ DIR=$(strip $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST)))))
 
 GOPATH := $(DIR):$(GOPATH)
 DATE=$(shell date -u +%Y%m%d.%H%M%S.%Z)
+GOGENERATE=$(shell if [ -f .gogenerate ]; then cat .gogenerate; fi)
 PACKETS=$(shell cat .testpackages)
 
 default: lint test
@@ -12,8 +13,7 @@ link:
 
 ## Generate code by go generate or other utilities
 generate: link
-	#GOPATH=${GOPATH} go generate
-	#GOPATH=${GOPATH} easyjson -output_filename configuration.go src/gopkg.in/webnice/web.v1/types.go
+	for PKGNAME in $(GOGENERATE); do GOPATH="$(DIR)" go generate $${PKGNAME}; done
 .PHONY: generate
 
 ## Dependence managers

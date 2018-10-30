@@ -10,6 +10,12 @@ const (
 	// AcceptLanguage Accept-Language header
 	AcceptLanguage = `Accept-Language`
 
+	// AcceptCharset Accept-Charset header
+	AcceptCharset = `Accept-Charset`
+
+	// Allow request methods
+	Allow = `Allow`
+
 	// Authorization header
 	Authorization = `Authorization`
 
@@ -182,4 +188,7 @@ const (
 
 	// XFailedRecipients X-Failed-Recipients header
 	XFailedRecipients = `X-Failed-Recipients`
+
+	// XRequestedWith X-Requested-With header
+	XRequestedWith = `X-Requested-With`
 )

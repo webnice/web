@@ -19,7 +19,7 @@ const (
 	ntStatic   nodeTyp = iota // /string
 	ntParam                   // /:variable
 	ntCatchAll                // /api/v1.0/*
-	ntRegexp                  // /:id([0-9]+) or #id^[0-9]+$
+	//ntRegexp                  // /:id([0-9]+) or #id^[0-9]+$
 )
 
 type (
@@ -329,7 +329,8 @@ func (n *node) findEdge(ntyp nodeTyp, label byte) *node {
 	var i, j int
 
 	switch ntyp {
-	case ntStatic, ntParam, ntRegexp:
+	//case ntParam, ntRegexp:
+	case ntStatic:
 		i, j = 0, num-1
 		for i <= j {
 			idx = i + (j-i)/2
@@ -530,7 +531,6 @@ func (n *node) walkRoutes(pattern string, nd *node, fn walkFn) (ret bool) {
 		for _, nn = range nds {
 			if n.walkRoutes(pat, nn, fn) {
 				ret = true
-				return
 			}
 		}
 	}

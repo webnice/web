@@ -2,13 +2,22 @@ package nocache
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/header"
 import (
+	"io"
 	"net/http"
 	"time"
+
+	"gopkg.in/webnice/web.v1/header"
+	"gopkg.in/webnice/web.v1/status"
 )
 
-func cleanHeaders(rq *http.Request) {
+type impl struct {
+	http.ResponseWriter
+	isHeaderWritten bool
+	Writer          io.Writer
+}
+
+func cleanHeaders(wr http.ResponseWriter) {
 	var key string
 	var headers = []string{
 		header.ETag,
@@ -19,8 +28,8 @@ func cleanHeaders(rq *http.Request) {
 		header.IfUnmodifiedSince,
 	}
 	for _, key = range headers {
-		if rq.Header.Get(key) != "" {
-			rq.Header.Del(key)
+		if wr.Header().Get(key) != "" {
+			wr.Header().Del(key)
 		}
 	}
 }
@@ -41,9 +50,30 @@ func setHeaders(wr http.ResponseWriter) {
 // NoCache Middleware set headers to disable cache
 func NoCache(hndl http.Handler) http.Handler {
 	var fn = func(wr http.ResponseWriter, rq *http.Request) {
-		cleanHeaders(rq)
+		var nch = &impl{
+			ResponseWriter: wr,
+			Writer:         wr, // by default
+		}
 		setHeaders(wr)
-		hndl.ServeHTTP(wr, rq)
+		hndl.ServeHTTP(nch, rq)
 	}
 	return http.HandlerFunc(fn)
+}
+
+// WriteHeader Write header code
+func (nch *impl) WriteHeader(code int) {
+	if nch.isHeaderWritten {
+		return
+	}
+	cleanHeaders(nch.ResponseWriter)
+	nch.isHeaderWritten = true
+}
+
+// Write Implementation of an interface io.Writer
+func (nch *impl) Write(p []byte) (n int, err error) {
+	if !nch.isHeaderWritten {
+		nch.WriteHeader(status.Ok)
+	}
+	n, err = nch.Writer.Write(p)
+	return
 }

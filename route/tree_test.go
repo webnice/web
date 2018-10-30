@@ -52,7 +52,7 @@ func TestTree(t *testing.T) {
 	subroute := New()
 	subroute.Get("/users", hHubView3)
 	_, _ = tr.InsertRoute(method.Get, "///*", subroute)
-	if routes := tr.routes(); len(routes) > 1 {
+	if routes := tr.routes(); len(routes) != 2 || len(subroute.Routes()) > 1 {
 		t.Errorf("Error function routes()")
 	}
 

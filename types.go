@@ -57,7 +57,7 @@ type web struct {
 }
 
 // Configuration is a structure of web server configuration
-type Configuration struct {
+type Configuration struct { // nolint: maligned
 	// HostPort (readonly) Адрес составленный автоматически из Host:Port
 	// Значение создаётся автоматически при инициализации конфигурации
 	// Default value: ":http"

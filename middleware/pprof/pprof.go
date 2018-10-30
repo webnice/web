@@ -35,16 +35,17 @@ func Pprof() http.Handler {
 	rou.Handle("/pprof/threadcreate", pprof.Handler("threadcreate"))
 	rou.HandleFunc("/vars", func(wr http.ResponseWriter, rq *http.Request) {
 		var first = true
+
 		wr.Header().Set("Content-Type", "application/json; charset=utf-8")
-		fmt.Fprintf(wr, "{\n")
+		_, _ = fmt.Fprintf(wr, "{\n") // nolint: errcheck
 		expvar.Do(func(kv expvar.KeyValue) {
 			if !first {
-				fmt.Fprintf(wr, ",\n")
+				_, _ = fmt.Fprintf(wr, ",\n") // nolint: errcheck
 			}
 			first = false
-			fmt.Fprintf(wr, "%q: %s", kv.Key, kv.Value)
+			_, _ = fmt.Fprintf(wr, "%q: %s", kv.Key, kv.Value) // nolint: errcheck
 		})
-		fmt.Fprintf(wr, "\n}\n")
+		_, _ = fmt.Fprintf(wr, "\n}\n") // nolint: errcheck
 	})
 
 	return rou

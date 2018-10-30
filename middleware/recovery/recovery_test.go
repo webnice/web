@@ -1,6 +1,5 @@
 package recovery
 
-import "gopkg.in/webnice/web.v1/route"
 import (
 	"fmt"
 	"io/ioutil"
@@ -8,6 +7,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"gopkg.in/webnice/web.v1/route"
 )
 
 const (
@@ -37,13 +38,13 @@ func testRecover(t *testing.T, rou route.Interface) (err error) {
 
 	rsp, err = http.Get(srv.URL)
 	if err != nil {
-		err = fmt.Errorf("Error response HandlerFunc: %s", err.Error())
+		err = fmt.Errorf("Error response HandlerFunc: %s", err)
 		return
 	}
 	defer func() { _ = rsp.Body.Close() }()
 
 	if buf, err = ioutil.ReadAll(rsp.Body); err != nil {
-		err = fmt.Errorf("Error read response: %s", err.Error())
+		err = fmt.Errorf("Error read response: %s", err)
 		return
 	}
 	if rsp.StatusCode != 500 {
