@@ -68,6 +68,12 @@ const (
 	// ImageSVG MIME type
 	ImageSVG = `image/svg+xml`
 
+	// ImageICO Official registered MIME type of ico files
+	ImageICO = `image/vnd.microsoft.icon`
+
+	// ImageXICON MIME type of ico files, which is used by Microsoft by stupidity
+	ImageXICON = `image/x-icon`
+
 	// AutoReplied auto-replied header of RFC3464
 	AutoReplied = `auto-replied`
 
