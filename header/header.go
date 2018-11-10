@@ -67,6 +67,9 @@ const (
 	// XForwardedProto header
 	XForwardedProto = `X-Forwarded-Proto`
 
+	// XScheme header
+	XScheme = `X-Scheme`
+
 	// XRealIP header
 	XRealIP = `X-Real-IP`
 
