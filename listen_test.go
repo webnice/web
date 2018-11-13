@@ -36,7 +36,7 @@ func TestAlreadyRunningError(t *testing.T) {
 	if wsv.Error() == nil {
 		t.Errorf("Error ListenAndServe(), do not check already running")
 	}
-	if wsv.Error() != errAlreadyRunning {
+	if wsv.Error() != ErrAlreadyRunning() {
 		t.Errorf("Error ListenAndServe(), incorrect error")
 	}
 }
@@ -49,7 +49,7 @@ func TestNoConfigurationError(t *testing.T) {
 	if wsv.Error() == nil {
 		t.Errorf("Error ListenAndServe(), do not check configuration")
 	}
-	if wsv.Error() != errNoConfiguration {
+	if wsv.Error() != ErrNoConfiguration() {
 		t.Errorf("Error ListenAndServe(), incorrect error")
 	}
 }
