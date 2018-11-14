@@ -2,9 +2,9 @@ package web
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/context/errors"
-import "gopkg.in/webnice/web.v1/context/handlers"
 import (
+	"gopkg.in/webnice/web.v1/context/errors"
+	"gopkg.in/webnice/web.v1/context/handlers"
 	"gopkg.in/webnice/web.v1/route"
 )
 
