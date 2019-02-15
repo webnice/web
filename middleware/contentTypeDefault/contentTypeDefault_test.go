@@ -64,7 +64,7 @@ func TestDefaultContentType(t *testing.T) {
 
 	rou = route.New()
 	ctd = New(mime.TextRfc822Headers)
-	rou.Use(ctd.DefaultContentType)
+	rou.Use(ctd.Handler)
 	rou.Get("/", testContentTypeDefaultHandlerFunc1)
 	ctv, err = testContentTypeDefault(t, rou, testContentTypeDefaultHandlerFunc1)
 	if err != nil || ctv != mime.TextRfc822Headers {
@@ -73,7 +73,7 @@ func TestDefaultContentType(t *testing.T) {
 
 	rou = route.New()
 	ctd = New(mime.ApplicationMsgpack)
-	rou.Use(ctd.DefaultContentType)
+	rou.Use(ctd.Handler)
 	rou.Get("/", testContentTypeDefaultHandlerFunc1)
 	ctv, err = testContentTypeDefault(t, rou, testContentTypeDefaultHandlerFunc1)
 	if err != nil || ctv != mime.ApplicationMsgpack {
@@ -82,7 +82,7 @@ func TestDefaultContentType(t *testing.T) {
 
 	rou = route.New()
 	ctd = New(mime.ImageXICON)
-	rou.Use(ctd.DefaultContentType)
+	rou.Use(ctd.Handler)
 	rou.Get("/", testContentTypeDefaultHandlerFunc2)
 	ctv, err = testContentTypeDefault(t, rou, testContentTypeDefaultHandlerFunc2)
 	if err != nil || ctv != mime.ImageXICON {

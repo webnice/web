@@ -12,8 +12,8 @@ import (
 
 // Interface is an interface of package
 type Interface interface {
-	// DefaultContentType Middleware set default content-type header
-	DefaultContentType(hndl http.Handler) http.Handler
+	// Handler Middleware set default content-type header
+	Handler(hndl http.Handler) http.Handler
 }
 
 type impl struct {
@@ -36,8 +36,8 @@ func New(def string) Interface {
 	return dct
 }
 
-// DefaultContentType Middleware set default content-type header
-func (dct *impl) DefaultContentType(hndl http.Handler) http.Handler {
+// Handler Middleware set default content-type header
+func (dct *impl) Handler(hndl http.Handler) http.Handler {
 	var fn = func(wr http.ResponseWriter, rq *http.Request) {
 		var rwr = &rewr{
 			ResponseWriter: wr,
