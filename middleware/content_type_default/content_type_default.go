@@ -1,4 +1,4 @@
-package content_type_default
+package content_type_default // nolint: golint
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
@@ -27,6 +27,8 @@ type rewr struct {
 	Default         string
 }
 
+// New Create object of package and return interface
+// First argument is a default content-type
 func New(def string) Interface {
 	var dct = &impl{
 		Default: def,

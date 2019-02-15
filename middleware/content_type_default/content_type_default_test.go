@@ -1,4 +1,4 @@
-package content_type_default
+package content_type_default // nolint: golint
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
