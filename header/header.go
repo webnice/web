@@ -124,6 +124,15 @@ const (
 	// ETag header
 	ETag = `ETag`
 
+	// Range Range header
+	Range = `Range`
+
+	// AcceptRanges Accept-Ranges header
+	AcceptRanges = `Accept-Ranges`
+
+	// ContentRange Content-Range header
+	ContentRange = `Content-Range`
+
 	// Кастомные заголовки
 
 	// XUserAgent X-User-Agent header. Аналог User-Agent
