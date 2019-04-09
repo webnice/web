@@ -133,6 +133,9 @@ const (
 	// ContentRange Content-Range header
 	ContentRange = `Content-Range`
 
+	// Date header
+	Date = `Date`
+
 	// Кастомные заголовки
 
 	// XUserAgent X-User-Agent header. Аналог User-Agent
@@ -183,9 +186,6 @@ const (
 	// AutoSubmitted Auto-Submitted header
 	AutoSubmitted = `Auto-Submitted`
 
-	// Date header
-	Date = `Date`
-
 	// DeliveredTo Delivered-To header
 	DeliveredTo = `Delivered-To`
 
@@ -203,4 +203,10 @@ const (
 
 	// XRequestedWith X-Requested-With header
 	XRequestedWith = `X-Requested-With`
+
+	// XProjectID The X-Project-Id header
+	XProjectID = `X-Project-Id`
+
+	// XCoreSDToken The X-Coresd-Token header
+	XCoreSDToken = `X-Coresd-Token`
 )
