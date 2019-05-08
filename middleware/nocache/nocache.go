@@ -47,8 +47,8 @@ func setHeaders(wr http.ResponseWriter) {
 	}
 }
 
-// NoCache Middleware set headers to disable cache
-func NoCache(hndl http.Handler) http.Handler {
+// Handler Middleware set headers to disable cache
+func Handler(hndl http.Handler) http.Handler {
 	var fn = func(wr http.ResponseWriter, rq *http.Request) {
 		var nch = &impl{
 			ResponseWriter: wr,

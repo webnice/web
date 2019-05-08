@@ -20,7 +20,7 @@ func testPprofSubPath(path string, t *testing.T, rou route.Interface) (err error
 	var rsp *http.Response
 	var buf []byte
 
-	srv = httptest.NewServer(http.HandlerFunc(Pprof().ServeHTTP))
+	srv = httptest.NewServer(http.HandlerFunc(Handler().ServeHTTP))
 	if rou != nil {
 		srv.Config.Handler = rou
 	}
@@ -50,7 +50,7 @@ func testPprof(t *testing.T, rou route.Interface) (err error) {
 	var rsp *http.Response
 	var buf []byte
 
-	srv = httptest.NewServer(http.HandlerFunc(Pprof().ServeHTTP))
+	srv = httptest.NewServer(http.HandlerFunc(Handler().ServeHTTP))
 	if rou != nil {
 		srv.Config.Handler = rou
 	}
@@ -84,7 +84,7 @@ func TestPprof(t *testing.T) {
 	var err error
 
 	rou = route.New()
-	rou.Mount("/debug", Pprof())
+	rou.Mount("/debug", Handler())
 	if err = testPprof(t, rou); err != nil {
 		t.Errorf("Error pprof: %v", err)
 	}

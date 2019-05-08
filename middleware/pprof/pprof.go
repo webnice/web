@@ -12,11 +12,11 @@ import (
 	"net/http/pprof"
 )
 
-// Pprof Middleware to profiling
-func Pprof() http.Handler {
+// Handler Middleware to profiling
+func Handler() http.Handler {
 	var rou = route.New()
 
-	rou.Use(nocache.NoCache)
+	rou.Use(nocache.Handler)
 	rou.Get("/", func(wr http.ResponseWriter, rq *http.Request) {
 		http.Redirect(wr, rq, rq.RequestURI+"/pprof/", status.MovedPermanently)
 	})

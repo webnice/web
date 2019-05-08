@@ -86,7 +86,7 @@ func TestNoCache(t *testing.T) {
 	var err error
 
 	rou = route.New()
-	rou.Use(NoCache)
+	rou.Use(Handler)
 	rou.Get("/", testNoCacheHandlerFunc)
 	if err = testNoCache(t, rou); err != nil {
 		t.Errorf("Error nocache: %v", err)

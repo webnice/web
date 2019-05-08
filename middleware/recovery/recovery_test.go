@@ -64,7 +64,7 @@ func TestRecover(t *testing.T) {
 	var err error
 
 	rou = route.New()
-	rou.Use(Recover)
+	rou.Use(Handler)
 	rou.HandleFunc("/", testPanic)
 	if err = testRecover(t, rou); err != nil {
 		t.Errorf("Error Recover(): %v", err)

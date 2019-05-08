@@ -9,8 +9,8 @@ import (
 	runtimeDebug "runtime/debug"
 )
 
-// Recover is a middleware that recovers from panics
-func Recover(next http.Handler) http.Handler {
+// Handler is a middleware that recovers from panics
+func Handler(next http.Handler) http.Handler {
 	var fn = func(wr http.ResponseWriter, rq *http.Request) {
 		defer func() {
 			if e := recover(); e != nil {
@@ -27,5 +27,6 @@ func Recover(next http.Handler) http.Handler {
 		}()
 		next.ServeHTTP(wr, rq)
 	}
+
 	return http.HandlerFunc(fn)
 }
