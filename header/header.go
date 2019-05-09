@@ -209,4 +209,10 @@ const (
 
 	// XCoreSDToken The X-Coresd-Token header
 	XCoreSDToken = `X-Coresd-Token`
+
+	// XCaptchaType X-Captcha-Type header
+	XCaptchaType = `X-Captcha-Type`
+
+	// XRecaptchaSiteKey X-Recaptcha-Site-Key header
+	XRecaptchaSiteKey = `X-Recaptcha-Site-Key`
 )
