@@ -215,4 +215,7 @@ const (
 
 	// XRecaptchaSiteKey X-Recaptcha-Site-Key header
 	XRecaptchaSiteKey = `X-Recaptcha-Site-Key`
+
+	// XRegistrationInviteCode X-Registration-Invite-Code header
+	XRegistrationInviteCode = `X-Registration-Invite-Code`
 )
