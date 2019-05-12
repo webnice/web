@@ -198,10 +198,13 @@ const (
 	// ReturnPath Return-Path header
 	ReturnPath = `Return-Path`
 
-	// MailXPriority Header for mail messages: Priority
+	// MailPriority Header for mail messages: Priority
+	MailPriority = `Priority`
+
+	// MailXPriority Header for mail messages: X-Priority
 	MailXPriority = `X-Priority`
 
-	// MailMSMailPriority Header for mail messages: MSMail-Priority
+	// MailMSMailPriority Header for mail messages: X-MSMail-Priority
 	MailMSMailPriority = `X-MSMail-Priority`
 
 	// MailImportance Header for mail messages: Importance
