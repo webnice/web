@@ -10,6 +10,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"reflect"
+	stddebug "runtime/debug"
 	"strings"
 )
 
@@ -25,11 +27,60 @@ func (ctx *impl) DataError(format string, a ...interface{}) (rsp []byte, err err
 	return
 }
 
+func indirectValue(rv reflect.Value) reflect.Value {
+	for rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+	return rv
+}
+
+func indirectType(rt reflect.Type) reflect.Type {
+	for rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
+	}
+	return rt
+}
+
+// Verify Верификация данных с использованием внешней библиотеки
+func (ctx *impl) Verify(obj interface{}) (rsp []byte, err error) {
+	var (
+		rv   reflect.Value
+		rt   reflect.Type
+		item interface{}
+	)
+
+	if globalVerifyPlugin == nil {
+		return
+	}
+	// При вызове reflect возможна паника
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("panic recovery:\n%v\n%s", e.(error), string(stddebug.Stack()))
+		}
+	}()
+	switch rt = indirectType(reflect.TypeOf(obj)); rt.Kind() {
+	case reflect.Slice:
+		rv = indirectValue(reflect.ValueOf(obj))
+		for i := 0; i < rv.Len(); i++ {
+			item = rv.Index(i).Interface()
+			if rsp, err = globalVerifyPlugin.Verify(item); err != nil || len(rsp) > 0 {
+				return
+			}
+		}
+	default:
+		rsp, err = globalVerifyPlugin.Verify(obj)
+	}
+
+	return
+}
+
 // Data Extracting from a request and decoding data to structure of obj
 func (ctx *impl) Data(obj interface{}) (rsp []byte, err error) {
-	var req *bytes.Buffer
-	var written int64
-	var ct string
+	var (
+		req     *bytes.Buffer
+		written int64
+		ct      string
+	)
 
 	if ctx.Request == nil {
 		rsp, err = ctx.DataError("net/http is nil, can't retrieve data")
@@ -61,9 +112,7 @@ func (ctx *impl) Data(obj interface{}) (rsp []byte, err error) {
 		return
 	}
 	// Верификация данных с использованием внешней библиотеки
-	if globalVerifyPlugin != nil {
-		rsp, err = globalVerifyPlugin.Verify(obj)
-	}
+	rsp, err = ctx.Verify(obj)
 
 	return
 }
