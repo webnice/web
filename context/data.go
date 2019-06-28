@@ -90,10 +90,10 @@ func (ctx *impl) Data(obj interface{}) (rsp []byte, err error) {
 	// Получение запроса
 	defer func() { _ = ctx.Request.Body.Close() }()
 	if written, err = io.Copy(req, ctx.Request.Body); err != nil {
-		rsp, err = ctx.DataError("Error read request data: %s", err)
+		rsp, err = ctx.DataError("reading data of request error: %s", err)
 		return
 	} else if written < 2 {
-		rsp, err = ctx.DataError("Request data is empty")
+		rsp, err = ctx.DataError("request data is empty")
 		return
 	}
 	// Тип кодирования выбирается на основе Content-Type заголовка
@@ -104,15 +104,18 @@ func (ctx *impl) Data(obj interface{}) (rsp []byte, err error) {
 	case strings.Contains(ct, mime.TextXML), strings.Contains(ct, mime.ApplicationXML):
 		err = xml.NewDecoder(req).Decode(obj)
 	default:
-		err = fmt.Errorf("Unknown content type: %q", ct)
+		err = fmt.Errorf("unknown content type: %q", ct)
 		return
 	}
 	if err != nil {
-		rsp, err = ctx.DataError("Decoding data error: %s", err)
+		rsp, err = ctx.DataError("decoding data error: %s", err)
 		return
 	}
 	// Верификация данных с использованием внешней библиотеки
-	rsp, err = ctx.Verify(obj)
+	if rsp, err = ctx.Verify(obj); err != nil {
+		rsp, err = ctx.DataError("verification of data error: %s", err)
+		return
+	}
 
 	return
 }
