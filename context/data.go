@@ -55,7 +55,7 @@ func (ctx *impl) Verify(obj interface{}) (rsp []byte, err error) {
 	// При вызове reflect возможна паника
 	defer func() {
 		if e := recover(); e != nil {
-			err = fmt.Errorf("panic recovery:\n%v\n%s", e.(error), string(stddebug.Stack()))
+			err = fmt.Errorf("panic recovery:\n%v\n%s", e, string(stddebug.Stack()))
 		}
 	}()
 	switch rt = indirectType(reflect.TypeOf(obj)); rt.Kind() {
