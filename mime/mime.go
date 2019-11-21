@@ -53,6 +53,9 @@ const (
 	// TextXMLCharsetUTF8 MIME type
 	TextXMLCharsetUTF8 = TextXML + `; ` + charsetUTF8
 
+	// TextJavascript MIME type
+	TextJavascript = `text/javascript`
+
 	// MultipartForm MIME type
 	MultipartForm = `multipart/form-data`
 
