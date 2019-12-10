@@ -12,41 +12,34 @@ import (
 // Наполнение конфигурации значениями по умолчанию
 // Проверка значений
 func defaultConfiguration(conf *Configuration) {
-	const (
-		_Tcp        = `tcp`
-		_Tcp4       = `tcp4`
-		_Tcp6       = `tcp6`
-		_Unix       = `unix`
-		_UnixPacket = `unixpacket`
-	)
-
 	if conf.Port == 0 {
 		conf.Port = 80
 	}
 	// Check mode
 	switch strings.ToLower(conf.Mode) {
-	case _Tcp, _Tcp4, _Tcp6, _Unix, _UnixPacket:
+	case netTcp, netTcp4, netTcp6, netUnix, netUnixPacket:
 		conf.Mode = strings.ToLower(conf.Mode)
-	case "socket":
-		conf.Mode = _Unix
+	case netSocket:
+		conf.Mode = netUnix
 	default:
-		conf.Mode = _Tcp
+		conf.Mode = netTcp
 	}
-	if conf.Mode == _Unix && conf.Socket == "" || conf.Mode == _UnixPacket && conf.Socket == "" {
-		conf.Mode = _Tcp
+	if conf.Mode == netUnix && conf.Socket == "" || conf.Mode == netUnixPacket && conf.Socket == "" {
+		conf.Mode = netTcp
 	}
 	// Check MaxHeaderBytes
 	if conf.MaxHeaderBytes == 0 {
 		conf.MaxHeaderBytes = http.DefaultMaxHeaderBytes
 	}
 	// unix socket modes
-	if conf.Mode == _Unix || conf.Mode == _UnixPacket {
+	switch conf.Mode {
+	case netUnix, netUnixPacket:
 		conf.HostPort = fmt.Sprintf("%s:%s", conf.Mode, conf.Socket)
-	} else {
+	default:
 		conf.HostPort = fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	}
 	// Public address
-	if conf.Address == "" && conf.Mode == _Tcp {
+	if conf.Address == "" && conf.Mode == netTcp {
 		if conf.Port == 80 {
 			conf.Address = conf.Host
 		} else {
@@ -61,21 +54,25 @@ func defaultConfiguration(conf *Configuration) {
 
 // Разбор адреса, определение порта через net.LookupPort, в том числе портов заданных как ":http"
 func parseAddress(addr string) (ret *Configuration, err error) {
-	var sp []string
+	const addrSep = ":"
+	var (
+		sp []string
+		n  int
+		e  error
+	)
 
 	ret = new(Configuration)
 	defer defaultConfiguration(ret)
-	sp = strings.Split(addr, ":")
+	sp = strings.Split(addr, addrSep)
 	if len(sp) <= 1 {
 		ret.Host = sp[0]
 		return
 	}
-	var n, e = net.LookupPort("tcp", strings.Join(sp[1:], ":"))
+	n, e = net.LookupPort(netTcp, strings.Join(sp[1:], addrSep))
 	if err = e; err != nil {
 		return
 	}
-	ret.Host = sp[0]
-	ret.Port = uint32(n)
+	ret.Host, ret.Port = sp[0], uint32(n)
 
 	return
 }

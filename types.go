@@ -14,6 +14,15 @@ import (
 	"gopkg.in/webnice/web.v1/route"
 )
 
+const (
+	netTcp        = `tcp`
+	netTcp4       = `tcp4`
+	netTcp6       = `tcp6`
+	netUnix       = `unix`
+	netUnixPacket = `unixpacket`
+	netSocket     = `socket`
+)
+
 // Interface is an interface
 type Interface interface {
 	// ListenAndServe listens on the TCP network address addr and then calls Serve on incoming connections
@@ -21,6 +30,9 @@ type Interface interface {
 
 	// ListenAndServeWithConfig Fully configurable web server listens and then calls Serve on incoming connections
 	ListenAndServeWithConfig(*Configuration) Interface
+
+	// NewListener Make new listener from web server configuration
+	NewListener(conf *Configuration) (ret net.Listener, err error)
 
 	// Serve accepts incoming connections on the Listener, creating a new service goroutine for each
 	Serve(net.Listener) Interface
@@ -46,15 +58,14 @@ type Interface interface {
 
 // Is an private implementation of web server
 type web struct {
-	isRun       atomic.Value   // The indicator of web server goroutine. =true-goroutine is started, =false-goroutine is stopped
-	inCloseUp   chan bool      // The indicator of web server state, true in channel means we're in shutdown goroutine and web server
-	doCloseDone sync.WaitGroup // Wait while goroutine stopped
-
-	conf     *Configuration  // The web server configuration
-	listener net.Listener    // The web server listener
-	server   *http.Server    // The net/http web server object
-	route    route.Interface // Routing settings interface
-	err      error           // The last of error
+	isRun       atomic.Value    // The indicator of web server goroutine. =true-goroutine is started, =false-goroutine is stopped
+	inCloseUp   chan bool       // The indicator of web server state, true in channel means we're in shutdown goroutine and web server
+	doCloseDone sync.WaitGroup  // Wait while goroutine stopped
+	conf        *Configuration  // The web server configuration
+	listener    net.Listener    // The web server listener
+	server      *http.Server    // The net/http web server object
+	route       route.Interface // Routing settings interface
+	err         error           // The last of error
 }
 
 // Configuration is a structure of web server configuration

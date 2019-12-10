@@ -17,6 +17,7 @@ func (wsv *web) ListenAndServe(addr string) Interface {
 	if conf, wsv.err = parseAddress(addr); wsv.err != nil {
 		return wsv
 	}
+
 	return wsv.ListenAndServeWithConfig(conf)
 }
 
@@ -26,9 +27,24 @@ func (wsv *web) ListenAndServeWithConfig(conf *Configuration) Interface {
 		wsv.err = ErrNoConfiguration()
 		return wsv
 	}
-	defaultConfiguration(conf)
 	wsv.conf = conf
+
 	return wsv.Listen()
+}
+
+// NewListener Make new listener from web server configuration
+func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
+	defaultConfiguration(conf)
+	switch conf.Mode {
+	case netUnix, netUnixPacket:
+		_ = os.Remove(conf.Socket)
+		ret, err = net.Listen(conf.Mode, conf.Socket)
+		_ = os.Chmod(conf.Socket, os.FileMode(0666))
+	default:
+		ret, err = net.Listen(conf.Mode, conf.HostPort)
+	}
+
+	return
 }
 
 // Listen Begin listen port and web server serve
@@ -39,16 +55,10 @@ func (wsv *web) Listen() Interface {
 		wsv.err = ErrAlreadyRunning()
 		return wsv
 	}
-	if wsv.conf.Mode == "unix" || wsv.conf.Mode == "unixpacket" {
-		_ = os.Remove(wsv.conf.Socket)
-		ltn, wsv.err = net.Listen(wsv.conf.Mode, wsv.conf.Socket)
-		_ = os.Chmod(wsv.conf.Socket, os.FileMode(0666))
-	} else {
-		ltn, wsv.err = net.Listen(wsv.conf.Mode, wsv.conf.HostPort)
-	}
-	if wsv.err != nil {
+	if ltn, wsv.err = wsv.NewListener(wsv.conf); wsv.err != nil {
 		return wsv
 	}
+
 	return wsv.Serve(ltn)
 }
 
@@ -65,6 +75,7 @@ func (wsv *web) Serve(ltn net.Listener) Interface {
 	wsv.isRun.Store(true)
 	wsv.doCloseDone.Add(1)
 	go wsv.run()
+
 	return wsv
 }
 
@@ -76,7 +87,7 @@ func (wsv *web) run() {
 		if wsv.conf.Socket == "" {
 			return
 		}
-		if wsv.conf.Mode == "unix" || wsv.conf.Mode == "unixpacket" {
+		if wsv.conf.Mode == netUnix || wsv.conf.Mode == netUnixPacket {
 			_ = os.Remove(wsv.conf.Socket)
 		}
 	}()
