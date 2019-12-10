@@ -11,8 +11,10 @@ import (
 
 // Stop web server
 func (wsv *web) Stop() Interface {
-	var ctx context.Context
-	var cfn context.CancelFunc
+	var (
+		ctx context.Context
+		cfn context.CancelFunc
+	)
 
 	if wsv.server != nil {
 		ctx = context.Background()
