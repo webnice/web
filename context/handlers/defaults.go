@@ -2,11 +2,12 @@ package handlers
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/status"
-import "gopkg.in/webnice/web.v1/mime"
-import "gopkg.in/webnice/web.v1/header"
 import (
 	"net/http"
+
+	"gopkg.in/webnice/web.v1/header"
+	"gopkg.in/webnice/web.v1/mime"
+	"gopkg.in/webnice/web.v1/status"
 )
 
 // Default handler for internal server errors

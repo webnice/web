@@ -1,11 +1,12 @@
 package handlers
 
-// import "gopkg.in/webnice/debug.v1"
-// import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/ambry"
-import "gopkg.in/webnice/web.v1/context/errors"
+//import "gopkg.in/webnice/debug.v1"
+//import "gopkg.in/webnice/log.v2"
 import (
 	"net/http"
+
+	"gopkg.in/webnice/web.v1/ambry"
+	"gopkg.in/webnice/web.v1/context/errors"
 )
 
 const (

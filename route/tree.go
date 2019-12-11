@@ -6,13 +6,14 @@ package route
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/context"
-import "gopkg.in/webnice/web.v1/method"
 import (
 	"fmt"
 	"net/http"
 	"sort"
 	"strings"
+
+	"gopkg.in/webnice/web.v1/context"
+	"gopkg.in/webnice/web.v1/method"
 )
 
 const (

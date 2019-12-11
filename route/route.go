@@ -2,14 +2,15 @@ package route
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/context"
-import "gopkg.in/webnice/web.v1/context/handlers"
-import "gopkg.in/webnice/web.v1/context/errors"
-import "gopkg.in/webnice/web.v1/method"
 import (
 	"fmt"
 	"net/http"
 	"runtime"
+
+	"gopkg.in/webnice/web.v1/context"
+	"gopkg.in/webnice/web.v1/context/errors"
+	"gopkg.in/webnice/web.v1/context/handlers"
+	"gopkg.in/webnice/web.v1/method"
 )
 
 // New returns a newly initialized router object that implements the Router interface

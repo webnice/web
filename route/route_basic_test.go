@@ -2,8 +2,6 @@ package route
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/context"
-import "gopkg.in/webnice/web.v1/status"
 import (
 	"bufio"
 	"bytes"
@@ -12,6 +10,9 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"gopkg.in/webnice/web.v1/context"
+	"gopkg.in/webnice/web.v1/status"
 )
 
 func testRequest(t *testing.T, method string, path string, body *bytes.Buffer) (rsp *http.Response, ret *bytes.Buffer, err error) {

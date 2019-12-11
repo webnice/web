@@ -2,8 +2,6 @@ package context
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/header"
-import "gopkg.in/webnice/web.v1/mime"
 import (
 	"bytes"
 	"encoding/json"
@@ -11,8 +9,11 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	stddebug "runtime/debug"
+	runtimeDebug "runtime/debug"
 	"strings"
+
+	"gopkg.in/webnice/web.v1/header"
+	"gopkg.in/webnice/web.v1/mime"
 )
 
 // RegisterGlobalVerifyPlugin Register global external library of data verification
@@ -55,7 +56,7 @@ func (ctx *impl) Verify(obj interface{}) (rsp []byte, err error) {
 	// При вызове reflect возможна паника
 	defer func() {
 		if e := recover(); e != nil {
-			err = fmt.Errorf("panic recovery:\n%v\n%s", e, string(stddebug.Stack()))
+			err = fmt.Errorf("panic recovery:\n%v\n%s", e, string(runtimeDebug.Stack()))
 		}
 	}()
 	switch rt = indirectType(reflect.TypeOf(obj)); rt.Kind() {

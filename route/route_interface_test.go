@@ -2,14 +2,14 @@ package route
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-//import "gopkg.in/webnice/web.v1/context"
-import "gopkg.in/webnice/web.v1/status"
 import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"gopkg.in/webnice/web.v1/status"
 )
 
 var (

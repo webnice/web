@@ -1,12 +1,15 @@
 package handlers
 
-import "gopkg.in/webnice/web.v1/context/errors"
+//import "gopkg.in/webnice/debug.v1"
+//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"gopkg.in/webnice/web.v1/context/errors"
 )
 
 func testDefaults(t *testing.T, handler http.HandlerFunc, hfName string, response string) {

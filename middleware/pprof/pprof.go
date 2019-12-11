@@ -2,14 +2,15 @@ package pprof
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/status"
-import "gopkg.in/webnice/web.v1/route"
-import "gopkg.in/webnice/web.v1/middleware/nocache"
 import (
 	"expvar"
 	"fmt"
 	"net/http"
 	"net/http/pprof"
+
+	"gopkg.in/webnice/web.v1/middleware/nocache"
+	"gopkg.in/webnice/web.v1/route"
+	"gopkg.in/webnice/web.v1/status"
 )
 
 // Handler Middleware to profiling

@@ -1,10 +1,13 @@
 package handlers
 
-import "gopkg.in/webnice/web.v1/context/errors"
+//import "gopkg.in/webnice/debug.v1"
+//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"net/http"
 	"testing"
+
+	"gopkg.in/webnice/web.v1/context/errors"
 )
 
 type testHandler struct {

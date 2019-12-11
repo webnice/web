@@ -2,14 +2,15 @@ package route
 
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/context"
-import "gopkg.in/webnice/web.v1/status"
-import "gopkg.in/webnice/web.v1/method"
 import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"gopkg.in/webnice/web.v1/context"
+	"gopkg.in/webnice/web.v1/method"
+	"gopkg.in/webnice/web.v1/status"
 )
 
 var countTestSubroute int64
