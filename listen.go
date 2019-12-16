@@ -66,6 +66,8 @@ func (wsv *web) Listen() Interface {
 func (wsv *web) Serve(ltn net.Listener) Interface {
 	var conf *Configuration
 
+	// TODO: Реализовать поддержку PROXY Protocol через "gopkg.in/webnice/web.v1/proxyp", conf.ProxyProtocol
+
 	if wsv.conf == nil {
 		conf, _ = parseAddress(ltn.Addr().String())
 		defaultConfiguration(conf)

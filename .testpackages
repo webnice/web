@@ -10,6 +10,8 @@ gopkg.in/webnice/web.v1/mime
 gopkg.in/webnice/web.v1/param
 gopkg.in/webnice/web.v1/route
 gopkg.in/webnice/web.v1/status
+gopkg.in/webnice/web.v1/proxyp
+gopkg.in/webnice/web.v1/proxyp/tlvparse
 gopkg.in/webnice/web.v1/middleware/recovery
 gopkg.in/webnice/web.v1/middleware/pprof
 gopkg.in/webnice/web.v1/middleware/nocache

@@ -18,15 +18,18 @@ type impl struct {
 }
 
 func cleanHeaders(wr http.ResponseWriter) {
-	var key string
-	var headers = []string{
-		header.ETag,
-		header.IfModifiedSince,
-		header.IfMatch,
-		header.IfNoneMatch,
-		header.IfRange,
-		header.IfUnmodifiedSince,
-	}
+	var (
+		key     string
+		headers = []string{
+			header.ETag,
+			header.IfModifiedSince,
+			header.IfMatch,
+			header.IfNoneMatch,
+			header.IfRange,
+			header.IfUnmodifiedSince,
+		}
+	)
+
 	for _, key = range headers {
 		if wr.Header().Get(key) != "" {
 			wr.Header().Del(key)
@@ -35,13 +38,16 @@ func cleanHeaders(wr http.ResponseWriter) {
 }
 
 func setHeaders(wr http.ResponseWriter) {
-	var key, value string
-	var headers = map[string]string{
-		"Expires":         time.Unix(0, 0).Format(time.RFC1123),
-		"Cache-Control":   "no-cache, private, max-age=0",
-		"Pragma":          "no-cache",
-		"X-Accel-Expires": "0",
-	}
+	var (
+		key, value string
+		headers    = map[string]string{
+			header.Expires:      time.Unix(0, 0).Format(time.RFC1123),
+			header.CacheControl: "no-cache, private, max-age=0",
+			header.Pragma:       "no-cache",
+			"X-Accel-Expires":   "0",
+		}
+	)
+
 	for key, value = range headers {
 		wr.Header().Set(key, value)
 	}

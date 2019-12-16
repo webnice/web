@@ -26,9 +26,11 @@ func testContentTypeDefaultHandlerFunc2(wr http.ResponseWriter, rq *http.Request
 }
 
 func testContentTypeDefault(t *testing.T, rou route.Interface, hf http.HandlerFunc) (contentType string, err error) {
-	var srv *httptest.Server
-	var rsp *http.Response
-	var buf []byte
+	var (
+		srv *httptest.Server
+		rsp *http.Response
+		buf []byte
+	)
 
 	srv = httptest.NewServer(hf)
 	if rou != nil {
@@ -57,10 +59,12 @@ func testContentTypeDefault(t *testing.T, rou route.Interface, hf http.HandlerFu
 }
 
 func TestDefaultContentType(t *testing.T) {
-	var rou route.Interface
-	var err error
-	var ctd Interface
-	var ctv string
+	var (
+		rou route.Interface
+		err error
+		ctd Interface
+		ctv string
+	)
 
 	rou = route.New()
 	ctd = New(mime.TextRfc822Headers)

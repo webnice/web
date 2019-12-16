@@ -28,9 +28,11 @@ func testNoCacheHandlerFunc(wr http.ResponseWriter, rq *http.Request) {
 }
 
 func testNoCache(t *testing.T, rou route.Interface) (err error) {
-	var srv *httptest.Server
-	var rsp *http.Response
-	var buf []byte
+	var (
+		srv *httptest.Server
+		rsp *http.Response
+		buf []byte
+	)
 
 	srv = httptest.NewServer(http.HandlerFunc(testNoCacheHandlerFunc))
 	if rou != nil {
@@ -82,8 +84,10 @@ func testNoCache(t *testing.T, rou route.Interface) (err error) {
 }
 
 func TestNoCache(t *testing.T) {
-	var rou route.Interface
-	var err error
+	var (
+		rou route.Interface
+		err error
+	)
 
 	rou = route.New()
 	rou.Use(Handler)

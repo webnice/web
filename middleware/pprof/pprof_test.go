@@ -16,9 +16,11 @@ import (
 const testTitleString = `<title>/debug/pprof/</title>`
 
 func testPprofSubPath(path string, t *testing.T, rou route.Interface) (err error) {
-	var srv *httptest.Server
-	var rsp *http.Response
-	var buf []byte
+	var (
+		srv *httptest.Server
+		rsp *http.Response
+		buf []byte
+	)
 
 	srv = httptest.NewServer(http.HandlerFunc(Handler().ServeHTTP))
 	if rou != nil {
@@ -46,9 +48,11 @@ func testPprofSubPath(path string, t *testing.T, rou route.Interface) (err error
 }
 
 func testPprof(t *testing.T, rou route.Interface) (err error) {
-	var srv *httptest.Server
-	var rsp *http.Response
-	var buf []byte
+	var (
+		srv *httptest.Server
+		rsp *http.Response
+		buf []byte
+	)
 
 	srv = httptest.NewServer(http.HandlerFunc(Handler().ServeHTTP))
 	if rou != nil {
@@ -80,8 +84,10 @@ func testPprof(t *testing.T, rou route.Interface) (err error) {
 }
 
 func TestPprof(t *testing.T) {
-	var rou route.Interface
-	var err error
+	var (
+		rou route.Interface
+		err error
+	)
 
 	rou = route.New()
 	rou.Mount("/debug", Handler())

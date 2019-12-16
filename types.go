@@ -106,38 +106,44 @@ type Configuration struct { // nolint: maligned
 	// ReadTimeout Время в наносекундах ожидания запроса включая ReadHeaderTimeout
 	// Если не указано или рано 0 - таймаута нет
 	// Default value: 0 - no timeout
-	ReadTimeout time.Duration `yaml:"ReadTimeout" json:"readTimeout"`
+	ReadTimeout time.Duration `yaml:"ReadTimeout" json:"read_timeout"`
 
 	// ReadHeaderTimeout Время в наносекундах ожидания заголовка запроса
 	// Если не указано или рано 0 - таймаута нет
 	// Default value: 0 - no timeout
-	ReadHeaderTimeout time.Duration `yaml:"ReadHeaderTimeout" json:"readHeaderTimeout"`
+	ReadHeaderTimeout time.Duration `yaml:"ReadHeaderTimeout" json:"read_header_timeout"`
 
 	// WriteTimeout Время в наносекундах ожидания выдачи ответа
 	// Если не указано или рано 0 - таймаута нет
 	// Default value: 0 - no timeout
-	WriteTimeout time.Duration `yaml:"WriteTimeout" json:"writeTimeout"`
+	WriteTimeout time.Duration `yaml:"WriteTimeout" json:"write_timeout"`
 
 	// IdleTimeout is the maximum amount of time to wait for the next request when keep-alives are enabled
 	// Если не указано или рано 0 - таймаута нет
 	// Default value: 0 - no timeout
-	IdleTimeout time.Duration `yaml:"IdleTimeout" json:"idleTimeout"`
+	IdleTimeout time.Duration `yaml:"IdleTimeout" json:"idle_timeout"`
 
 	// ShutdownTimeout is the maximum amount of time to wait for the server graceful shutdown
 	// Если не указано или рано 0 - таймаута нет
 	// Default value: 30s
-	ShutdownTimeout time.Duration `yaml:"ShutdownTimeout" json:"shutdownTimeout"`
+	ShutdownTimeout time.Duration `yaml:"ShutdownTimeout" json:"shutdown_timeout"`
 
 	// MaxHeaderBytes controls the maximum number of bytes the server will read parsing the request header's keys and values, including the request line
 	// Default value: 1 MB (from net/http/DefaultMaxHeaderBytes)
-	MaxHeaderBytes int `yaml:"MaxHeaderBytes" json:"maxHeaderBytes"`
+	MaxHeaderBytes int `yaml:"MaxHeaderBytes" json:"max_header_bytes"`
 
 	// MaxBodyBytes controls the maximum number of bytes the server will read request body
 	// Default value: 0 - unlimited
 	//TODO
-	//MaxBodyBytes int64 `yaml:"MaxBodyBytes" json:"maxBodyBytes"`
+	//MaxBodyBytes int64 `yaml:"MaxBodyBytes" json:"max_body_bytes"`
 
 	// KeepAliveDisable if is equal true, keep alive are disabled, if false - keep alive are enabled
 	// Default value: false - keep alive are enabled
-	KeepAliveDisable bool `yaml:"KeepAliveDisable" json:"keepAliveDisable"`
+	KeepAliveDisable bool `yaml:"KeepAliveDisable" json:"keep_alive_disable"`
+
+	// ProxyProtocol if is equal true, accepting the PROXY Protocol
+	// The PROXY protocol enables web server to receive client connection information passed through proxy servers and
+	// load balancers such as HAproxy and Amazon Elastic Load Balancer (ELB).
+	// With the PROXY protocol, web server can learn the originating IP address from HTTP, SSL, HTTP/2, SPDY, WebSocket, and TCP.
+	ProxyProtocol bool `yaml:"ProxyProtocol" json:"proxy_protocol"`
 }
