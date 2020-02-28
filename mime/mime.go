@@ -50,6 +50,12 @@ const (
 	// TextXML MIME type
 	TextXML = `text/xml`
 
+	// TextMarkdown MIME type
+	TextMarkdown = `text/markdown`
+
+	// TextMarkdownCharsetUTF8 MIME type
+	TextMarkdownCharsetUTF8 = TextMarkdown + `; ` + charsetUTF8
+
 	// TextXMLCharsetUTF8 MIME type
 	TextXMLCharsetUTF8 = TextXML + `; ` + charsetUTF8
 
