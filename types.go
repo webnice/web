@@ -80,10 +80,10 @@ type Configuration struct { // nolint: maligned
 	// Default value: "" - make automatically
 	Address string `yaml:"Address" json:"address"`
 
+	// TODO
 	// Domains Список всех доменов, на которые отвечает сервер
 	// Если не пусто, то для всех других доменов будет ответ "Requested host unavailable"
 	// Default value: [] - all domain
-	//TODO
 	//Domains []string `yaml:"Domains" json:"domains"`
 
 	// Host IP адрес или имя хоста на котором запускается web сервер,
@@ -93,7 +93,7 @@ type Configuration struct { // nolint: maligned
 
 	// Port tcp/ip порт занимаемый сервером
 	// Default value: 80
-	Port uint32 `yaml:"Port" json:"port"`
+	Port uint16 `yaml:"Port" json:"port"`
 
 	// Socket Unix socket на котором поднимается сервер, только для unix-like операционных систем Linux, Unix, Mac
 	// Default value: "" - unix socket is off
@@ -132,10 +132,10 @@ type Configuration struct { // nolint: maligned
 	// Default value: 1 MB (from net/http/DefaultMaxHeaderBytes)
 	MaxHeaderBytes int `yaml:"MaxHeaderBytes" json:"max_header_bytes"`
 
+	// TODO
 	// MaxBodyBytes controls the maximum number of bytes the server will read request body
 	// Default value: 0 - unlimited
-	//TODO
-	//MaxBodyBytes int64 `yaml:"MaxBodyBytes" json:"max_body_bytes"`
+	//MaxBodyBytes uint64 `yaml:"MaxBodyBytes" json:"max_body_bytes"`
 
 	// KeepAliveDisable if is equal true, keep alive are disabled, if false - keep alive are enabled
 	// Default value: false - keep alive are enabled

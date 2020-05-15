@@ -72,7 +72,7 @@ func parseAddress(addr string) (ret *Configuration, err error) {
 	if err = e; err != nil {
 		return
 	}
-	ret.Host, ret.Port = sp[0], uint32(n)
+	ret.Host, ret.Port = sp[0], uint16(n)
 
 	return
 }
