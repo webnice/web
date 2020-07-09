@@ -31,7 +31,7 @@ type Interface interface {
 
 	// ListenAndServeTLS listens on the TCP network address address with TLS and then calls Serve with handler
 	// to handle requests on incoming connections
-	ListenAndServeTLS(addr string, certFile string, keyFile string) Interface
+	ListenAndServeTLS(addr string, certFile string, keyFile string, tlsConfig *tls.Config) Interface
 
 	// ListenAndServeWithConfig Fully configurable web server listens and then calls Serve on incoming connections
 	ListenAndServeWithConfig(*Configuration) Interface
@@ -41,6 +41,9 @@ type Interface interface {
 
 	// NewListener Make new listener from web server configuration
 	NewListener(conf *Configuration) (ret net.Listener, err error)
+
+	// NewListenerTLS Make new listener with TLS from web server configuration
+	NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error)
 
 	// Serve accepts incoming connections on the Listener, creating a new service goroutine for each
 	Serve(net.Listener) Interface

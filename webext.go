@@ -49,16 +49,9 @@ func (wsv *web) loadConfiguration(tlsConfig *tls.Config) (srv *http.Server) {
 	}
 	// TLS конфигурация по умолчанию
 	if tlsConfig == nil {
-		tlsConfig = &tls.Config{
-			MinVersion:               tls.VersionTLS12,
-			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
-			PreferServerCipherSuites: true,
-			CipherSuites: []uint16{
-				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-				tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-			},
+		tlsConfig, wsv.err = wsv.tlsConfigDefault(wsv.conf.TLSPublicKeyPEM, wsv.conf.TLSPrivateKeyPEM)
+		if wsv.err != nil {
+			return
 		}
 	}
 	srv.TLSConfig, srv.TLSNextProto = tlsConfig, make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)

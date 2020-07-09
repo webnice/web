@@ -24,7 +24,7 @@ func (wsv *web) ListenAndServe(addr string) Interface {
 
 // ListenAndServeTLS listens on the TCP network address address with TLS and then calls Serve with handler
 // to handle requests on incoming connections
-func (wsv *web) ListenAndServeTLS(addr string, certFile string, keyFile string) Interface {
+func (wsv *web) ListenAndServeTLS(addr string, certFile string, keyFile string, tlsConfig *tls.Config) Interface {
 	var conf *Configuration
 
 	if conf, wsv.err = parseAddress(addr); wsv.err != nil {
@@ -32,7 +32,7 @@ func (wsv *web) ListenAndServeTLS(addr string, certFile string, keyFile string) 
 	}
 	conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM = certFile, keyFile
 
-	return wsv.ListenAndServeWithConfig(conf)
+	return wsv.ListenAndServeTLSWithConfig(conf, tlsConfig)
 }
 
 // ListenAndServeWithConfig Fully configurable web server listens and then calls Serve on incoming connections
@@ -53,6 +53,11 @@ func (wsv *web) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.
 		return wsv
 	}
 	wsv.conf = conf
+	if tlsConfig == nil {
+		if tlsConfig, wsv.err = wsv.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); wsv.err != nil {
+			return wsv
+		}
+	}
 
 	return wsv.Listen(tlsConfig)
 }
@@ -72,6 +77,44 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	return
 }
 
+// NewListenerTLS Make new listener with TLS from web server configuration
+func (wsv *web) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error) {
+	var l net.Listener
+
+	if l, err = wsv.NewListener(conf); err != nil {
+		return
+	}
+	if tlsConfig == nil {
+		if tlsConfig, err = wsv.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); err != nil {
+			return
+		}
+	}
+	ret = tls.NewListener(l, tlsConfig)
+
+	return
+}
+
+// Конфигурация TLS по умолчанию
+func (wsv *web) tlsConfigDefault(tlsPublicFile string, tlsPrivateFile string) (ret *tls.Config, err error) {
+	ret = &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		PreferServerCipherSuites: true,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+		},
+		Certificates: make([]tls.Certificate, 1),
+	}
+	if ret.Certificates[0], err = tls.LoadX509KeyPair(tlsPublicFile, tlsPrivateFile); err != nil {
+		return
+	}
+
+	return
+}
+
 // Listen Begin listen port and web server serve
 func (wsv *web) Listen(tlsConfig *tls.Config) Interface {
 	var ltn net.Listener
@@ -80,7 +123,13 @@ func (wsv *web) Listen(tlsConfig *tls.Config) Interface {
 		wsv.err = ErrAlreadyRunning()
 		return wsv
 	}
-	if ltn, wsv.err = wsv.NewListener(wsv.conf); wsv.err != nil {
+	switch tlsConfig == nil {
+	case true:
+		ltn, wsv.err = wsv.NewListener(wsv.conf)
+	case false:
+		ltn, wsv.err = wsv.NewListenerTLS(wsv.conf, tlsConfig)
+	}
+	if wsv.err != nil {
 		return wsv
 	}
 
