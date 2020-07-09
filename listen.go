@@ -3,6 +3,7 @@ package web
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 import (
+	"crypto/tls"
 	"net"
 	"os"
 )
@@ -21,6 +22,19 @@ func (wsv *web) ListenAndServe(addr string) Interface {
 	return wsv.ListenAndServeWithConfig(conf)
 }
 
+// ListenAndServeTLS listens on the TCP network address address with TLS and then calls Serve with handler
+// to handle requests on incoming connections
+func (wsv *web) ListenAndServeTLS(addr string, certFile string, keyFile string) Interface {
+	var conf *Configuration
+
+	if conf, wsv.err = parseAddress(addr); wsv.err != nil {
+		return wsv
+	}
+	conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM = certFile, keyFile
+
+	return wsv.ListenAndServeWithConfig(conf)
+}
+
 // ListenAndServeWithConfig Fully configurable web server listens and then calls Serve on incoming connections
 func (wsv *web) ListenAndServeWithConfig(conf *Configuration) Interface {
 	if conf == nil {
@@ -29,7 +43,18 @@ func (wsv *web) ListenAndServeWithConfig(conf *Configuration) Interface {
 	}
 	wsv.conf = conf
 
-	return wsv.Listen()
+	return wsv.Listen(nil)
+}
+
+// ListenAndServeTLSWithConfig Fully configurable web server listens and then calls Serve on incoming connections
+func (wsv *web) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.Config) Interface {
+	if conf == nil {
+		wsv.err = ErrNoConfiguration()
+		return wsv
+	}
+	wsv.conf = conf
+
+	return wsv.Listen(tlsConfig)
 }
 
 // NewListener Make new listener from web server configuration
@@ -48,7 +73,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 }
 
 // Listen Begin listen port and web server serve
-func (wsv *web) Listen() Interface {
+func (wsv *web) Listen(tlsConfig *tls.Config) Interface {
 	var ltn net.Listener
 
 	if wsv.isRun.Load().(bool) {
@@ -59,11 +84,14 @@ func (wsv *web) Listen() Interface {
 		return wsv
 	}
 
-	return wsv.Serve(ltn)
+	return wsv.ServeTLS(ltn, tlsConfig)
 }
 
 // Serve accepts incoming connections on the listener, creating a new web server goroutine
-func (wsv *web) Serve(ltn net.Listener) Interface {
+func (wsv *web) Serve(ltn net.Listener) Interface { return wsv.ServeTLS(ltn, nil) }
+
+// ServeTLS accepts incoming connections on the listener with TLS configuration, creating a new web server goroutine
+func (wsv *web) ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface {
 	var conf *Configuration
 
 	// TODO: Реализовать поддержку PROXY Protocol через "gopkg.in/webnice/web.v1/proxyp", conf.ProxyProtocol
@@ -76,13 +104,13 @@ func (wsv *web) Serve(ltn net.Listener) Interface {
 	wsv.listener = ltn
 	wsv.isRun.Store(true)
 	wsv.doCloseDone.Add(1)
-	go wsv.run()
+	go wsv.run(tlsConfig)
 
 	return wsv
 }
 
 // Goroutine of the web server
-func (wsv *web) run() {
+func (wsv *web) run(tlsConfig *tls.Config) {
 	defer wsv.doCloseDone.Done()
 	defer wsv.isRun.Store(false)
 	defer func() {
@@ -95,15 +123,17 @@ func (wsv *web) run() {
 	}()
 
 	// Configure net/http web server
-	wsv.server = wsv.loadConfiguration()
-	if wsv.err != nil {
+	if wsv.server = wsv.loadConfiguration(tlsConfig); wsv.err != nil {
 		return
 	}
-
-	// Configure keep alives of web server
+	// Configure keepalive of web server
 	if wsv.conf.KeepAliveDisable {
 		wsv.server.SetKeepAlivesEnabled(false)
 	}
 	// Begin serve
-	wsv.err = wsv.server.Serve(wsv.listener)
+	if wsv.conf.TLSPrivateKeyPEM == "" || wsv.conf.TLSPublicKeyPEM == "" {
+		wsv.err = wsv.server.Serve(wsv.listener)
+		return
+	}
+	wsv.err = wsv.server.ServeTLS(wsv.listener, wsv.conf.TLSPublicKeyPEM, wsv.conf.TLSPrivateKeyPEM)
 }

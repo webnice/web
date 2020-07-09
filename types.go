@@ -3,6 +3,7 @@ package web
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 import (
+	"crypto/tls"
 	"net"
 	"net/http"
 	"sync"
@@ -26,16 +27,26 @@ const (
 // Interface is an interface
 type Interface interface {
 	// ListenAndServe listens on the TCP network address addr and then calls Serve on incoming connections
-	ListenAndServe(string) Interface
+	ListenAndServe(addr string) Interface
+
+	// ListenAndServeTLS listens on the TCP network address address with TLS and then calls Serve with handler
+	// to handle requests on incoming connections
+	ListenAndServeTLS(addr string, certFile string, keyFile string) Interface
 
 	// ListenAndServeWithConfig Fully configurable web server listens and then calls Serve on incoming connections
 	ListenAndServeWithConfig(*Configuration) Interface
+
+	// ListenAndServeTLSWithConfig Fully configurable web server listens and then calls Serve on incoming connections
+	ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.Config) Interface
 
 	// NewListener Make new listener from web server configuration
 	NewListener(conf *Configuration) (ret net.Listener, err error)
 
 	// Serve accepts incoming connections on the Listener, creating a new service goroutine for each
 	Serve(net.Listener) Interface
+
+	// ServeTLS accepts incoming connections on the listener with TLS configuration, creating a new web server goroutine
+	ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface
 
 	// Error Return last error of web server
 	Error() error
@@ -80,11 +91,18 @@ type Configuration struct { // nolint: maligned
 	// Default value: "" - make automatically
 	Address string `yaml:"Address" json:"address"`
 
-	// TODO
+	// TODO Сделать ограничение по доменам
 	// Domains Список всех доменов, на которые отвечает сервер
 	// Если не пусто, то для всех других доменов будет ответ "Requested host unavailable"
 	// Default value: [] - all domain
 	//Domains []string `yaml:"Domains" json:"domains"`
+
+	// TLSPublicKeyPEM Путь и имя файла содержащего публичный ключ (сертификат) в PEM формате, включая CA сертификаты
+	// всех промежуточных центров сертификации, если ими подписан ключ
+	TLSPublicKeyPEM string `yaml:"TLSPublicKeyPEM" json:"tls_public_key_pem"`
+
+	// TLSPrivateKeyPEM Путь и имя файла содержащего приватный ключ в PEM формате
+	TLSPrivateKeyPEM string `yaml:"TLSPrivateKeyPEM" json:"tls_private_key_pem"`
 
 	// Host IP адрес или имя хоста на котором запускается web сервер,
 	// можно указывать 0.0.0.0 для всех ip адресов
@@ -132,7 +150,7 @@ type Configuration struct { // nolint: maligned
 	// Default value: 1 MB (from net/http/DefaultMaxHeaderBytes)
 	MaxHeaderBytes int `yaml:"MaxHeaderBytes" json:"max_header_bytes"`
 
-	// TODO
+	// TODO Сделать ограничение на максимальный размер тела запроса
 	// MaxBodyBytes controls the maximum number of bytes the server will read request body
 	// Default value: 0 - unlimited
 	//MaxBodyBytes uint64 `yaml:"MaxBodyBytes" json:"max_body_bytes"`

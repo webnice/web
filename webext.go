@@ -6,6 +6,7 @@ package web
 //import "gopkg.in/webnice/log.v2"
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 )
 
@@ -30,11 +31,11 @@ func (wsv *web) Stop() Interface {
 	return wsv
 }
 
-func (wsv *web) loadConfiguration() *http.Server {
+func (wsv *web) loadConfiguration(tlsConfig *tls.Config) (srv *http.Server) {
 	if wsv.route.Errors().RouteConfigurationError(nil) != nil {
 		wsv.err = wsv.route.Errors().RouteConfigurationError(nil)
 	}
-	return &http.Server{
+	srv = &http.Server{
 		Addr:              wsv.conf.HostPort,
 		IdleTimeout:       wsv.conf.IdleTimeout,
 		ReadHeaderTimeout: wsv.conf.ReadHeaderTimeout,
@@ -43,4 +44,24 @@ func (wsv *web) loadConfiguration() *http.Server {
 		MaxHeaderBytes:    wsv.conf.MaxHeaderBytes,
 		Handler:           wsv.route,
 	}
+	if wsv.conf.TLSPrivateKeyPEM == "" || wsv.conf.TLSPublicKeyPEM == "" {
+		return
+	}
+	// TLS конфигурация по умолчанию
+	if tlsConfig == nil {
+		tlsConfig = &tls.Config{
+			MinVersion:               tls.VersionTLS12,
+			CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+			PreferServerCipherSuites: true,
+			CipherSuites: []uint16{
+				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+				tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+				tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+			},
+		}
+	}
+	srv.TLSConfig, srv.TLSNextProto = tlsConfig, make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0)
+
+	return
 }
