@@ -11,22 +11,6 @@ import (
 	"syscall"
 )
 
-// ListenSystemdSocket Загрузка сокета открытого systemd
-func (wsv *web) ListenSystemdSocket() (ret net.Listener, err error) {
-	var listeners []net.Listener
-
-	if listeners, err = wsv.ListenersSystemdWithoutNames(); err != nil {
-		return
-	}
-	if len(listeners) != 1 {
-		err = ErrListenSystemdUnexpectedNumber()
-		return
-	}
-	ret = listeners[0]
-
-	return
-}
-
 // ListenLoadFilesFdWithNames Загрузка файловых дескрипторов на основе переменных окружения
 func (wsv *web) ListenLoadFilesFdWithNames(unsetEnvAll bool) (ret []*os.File, err error) {
 	const (
@@ -35,6 +19,8 @@ func (wsv *web) ListenLoadFilesFdWithNames(unsetEnvAll bool) (ret []*os.File, er
 		listenFds      = `LISTEN_FDS`
 		listenFdNames  = `LISTEN_FDNAMES`
 		listenFdPrefix = `LISTEN_FD_`
+		errPIDTpl      = `getting pid from environment %q, error: %s`
+		errFDSTpl      = `getting FD id from environment %q, error: %s`
 	)
 	var (
 		pID        int
@@ -50,19 +36,22 @@ func (wsv *web) ListenLoadFilesFdWithNames(unsetEnvAll bool) (ret []*os.File, er
 		defer func() { _ = os.Unsetenv(listenFdNames) }()
 	}
 	if pID, err = strconv.Atoi(os.Getenv(listenPID)); err != nil {
-		err = fmt.Errorf("get pid from environment %q error: %s", listenPID, err)
+		err = fmt.Errorf(errPIDTpl, listenPID, err)
 		return
 	}
 	if nFds, err = strconv.Atoi(os.Getenv(listenFds)); err != nil {
-		err = fmt.Errorf("get FDs from environment %q error: %s", listenFds, err)
+		err = fmt.Errorf(errFDSTpl, listenFds, err)
 		return
 	}
-	if pID != os.Getpid() || nFds == 0 {
+	if pID != os.Getpid() {
 		err = ErrListenSystemdPID()
 		return
 	}
-	names = strings.Split(os.Getenv(listenFdNames), ":")
-	ret = make([]*os.File, 0, nFds)
+	if nFds == 0 {
+		err = ErrListenSystemdFDS()
+		return
+	}
+	ret, names = make([]*os.File, 0, nFds), strings.Split(os.Getenv(listenFdNames), ":")
 	for fd = listenFdBegin; fd < listenFdBegin+nFds; fd++ {
 		syscall.CloseOnExec(fd)
 		name = listenFdPrefix + strconv.Itoa(fd)

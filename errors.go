@@ -8,6 +8,7 @@ const (
 	cAlreadyRunning                = `Web server already running`
 	cNoConfiguration               = `Web server configuration is missing or nil`
 	cListenSystemdPID              = `Environment variable LISTEN_PID is empty or contains an invalid value`
+	cListenSystemdFDS              = `Environment variable LISTEN_FDS is empty or contains an invalid value`
 	cListenSystemdUnexpectedNumber = `Unexpected number of socket activation fds`
 )
 
@@ -18,6 +19,7 @@ var (
 	errAlreadyRunning                = err(cAlreadyRunning)
 	errNoConfiguration               = err(cNoConfiguration)
 	errListenSystemdPID              = err(cListenSystemdPID)
+	errListenSystemdFDS              = err(cListenSystemdFDS)
 	errListenSystemdUnexpectedNumber = err(cListenSystemdUnexpectedNumber)
 )
 
@@ -43,6 +45,9 @@ func ErrNoConfiguration() error { return &errNoConfiguration }
 
 // ErrListenSystemdPID Error: Environment variable LISTEN_PID is empty or contains an invalid value
 func ErrListenSystemdPID() error { return &errListenSystemdPID }
+
+// ErrListenSystemdFDS Error: Environment variable LISTEN_FDS is empty or contains an invalid value
+func ErrListenSystemdFDS() error { return &errListenSystemdFDS }
 
 // ErrListenSystemdUnexpectedNumber Error: Unexpected number of socket activation fds
 func ErrListenSystemdUnexpectedNumber() error { return &errListenSystemdUnexpectedNumber }

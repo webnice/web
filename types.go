@@ -22,7 +22,7 @@ const (
 	netUnix       = `unix`
 	netUnixPacket = `unixpacket`
 	netSocket     = `socket`
-	netSystemd    = `systemd_socket`
+	netSystemd    = `systemd`
 )
 
 // Interface is an interface
@@ -121,7 +121,9 @@ type Configuration struct { // nolint: maligned
 	// Default value: "" - unix socket is off
 	Socket string `yaml:"Socket" json:"socket"`
 
-	// Mode Режим работы, tcp, tcp4, tcp6, unix, unixpacket, socket, systemd_socket
+	// Mode Режим работы, tcp, tcp4, tcp6, unix, unixpacket, socket, systemd
+	// systemd - systemd is configures to open the port or unix socket and passes over the file descriptor the port
+	// listener to the service. See systemd.socket(5) manual.
 	// Default value: "tcp"
 	Mode string `yaml:"Mode" json:"mode"`
 

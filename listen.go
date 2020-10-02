@@ -64,10 +64,19 @@ func (wsv *web) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.
 
 // NewListener Make new listener from web server configuration
 func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
+	var listeners []net.Listener
+
 	defaultConfiguration(conf)
 	switch conf.Mode {
 	case netSystemd:
-		ret, err = wsv.ListenSystemdSocket()
+		if listeners, err = wsv.ListenersSystemdWithoutNames(); err != nil {
+			return
+		}
+		if len(listeners) != 1 {
+			err = ErrListenSystemdUnexpectedNumber()
+			return
+		}
+		ret = listeners[0]
 	case netUnix, netUnixPacket:
 		_ = os.Remove(conf.Socket)
 		ret, err = net.Listen(conf.Mode, conf.Socket)
