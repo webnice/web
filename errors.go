@@ -5,18 +5,20 @@ package web
 
 // All errors are defined as constants
 const (
-	cAlreadyRunning  = `Web server already running`
-	cNoConfiguration = `Web server configuration is missing or nil`
-	cListenPID       = `Environment variable LISTEN_PID is empty or contains an invalid value`
+	cAlreadyRunning                = `Web server already running`
+	cNoConfiguration               = `Web server configuration is missing or nil`
+	cListenSystemdPID              = `Environment variable LISTEN_PID is empty or contains an invalid value`
+	cListenSystemdUnexpectedNumber = `Unexpected number of socket activation fds`
 )
 
 // Constants are specified in objects as a fixed address all the time the application is running
 // Error with error can be compared by a content, by a address, etc
 var (
-	errSingleton       = &Error{}
-	errAlreadyRunning  = err(cAlreadyRunning)
-	errNoConfiguration = err(cNoConfiguration)
-	errListenPID       = err(cListenPID)
+	errSingleton                     = &Error{}
+	errAlreadyRunning                = err(cAlreadyRunning)
+	errNoConfiguration               = err(cNoConfiguration)
+	errListenSystemdPID              = err(cListenSystemdPID)
+	errListenSystemdUnexpectedNumber = err(cListenSystemdUnexpectedNumber)
 )
 
 type (
@@ -39,5 +41,8 @@ func ErrAlreadyRunning() error { return &errAlreadyRunning }
 // ErrNoConfiguration Error: Web server configuration is missing or nil
 func ErrNoConfiguration() error { return &errNoConfiguration }
 
-// ErrListenPID Error: Environment variable LISTEN_PID is empty or contains an invalid value
-func ErrListenPID() error { return &errListenPID }
+// ErrListenSystemdPID Error: Environment variable LISTEN_PID is empty or contains an invalid value
+func ErrListenSystemdPID() error { return &errListenSystemdPID }
+
+// ErrListenSystemdUnexpectedNumber Error: Unexpected number of socket activation fds
+func ErrListenSystemdUnexpectedNumber() error { return &errListenSystemdUnexpectedNumber }
