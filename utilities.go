@@ -17,7 +17,7 @@ func defaultConfiguration(conf *Configuration) {
 	}
 	// Check mode
 	switch strings.ToLower(conf.Mode) {
-	case netTcp, netTcp4, netTcp6, netUnix, netUnixPacket:
+	case netTcp, netTcp4, netTcp6, netUnix, netUnixPacket, netSystemd:
 		conf.Mode = strings.ToLower(conf.Mode)
 	case netSocket:
 		conf.Mode = netUnix
@@ -35,6 +35,8 @@ func defaultConfiguration(conf *Configuration) {
 	switch conf.Mode {
 	case netUnix, netUnixPacket:
 		conf.HostPort = fmt.Sprintf("%s:%s", conf.Mode, conf.Socket)
+	case netSystemd:
+		conf.HostPort = conf.Mode
 	default:
 		conf.HostPort = fmt.Sprintf("%s:%d", conf.Host, conf.Port)
 	}
