@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"net"
 	"os"
+	"strconv"
 )
 
 // Wait while web server is running
@@ -64,8 +65,22 @@ func (wsv *web) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.
 
 // NewListener Make new listener from web server configuration
 func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
+	const (
+		envListenPID     = `LISTEN_PID`
+		systemdFilename  = `from systemd`
+		osKindNonBlockID = 3
+	)
+	var file *os.File
+
 	defaultConfiguration(conf)
 	switch conf.Mode {
+	case netSystemd:
+		if os.Getenv(envListenPID) != strconv.Itoa(os.Getpid()) {
+			err = ErrListenPID()
+			return
+		}
+		file = os.NewFile(osKindNonBlockID, systemdFilename)
+		ret, err = net.FileListener(file)
 	case netUnix, netUnixPacket:
 		_ = os.Remove(conf.Socket)
 		ret, err = net.Listen(conf.Mode, conf.Socket)
@@ -166,7 +181,10 @@ func (wsv *web) run(tlsConfig *tls.Config) {
 		if wsv.conf.Socket == "" {
 			return
 		}
-		if wsv.conf.Mode == netUnix || wsv.conf.Mode == netUnixPacket {
+		switch wsv.conf.Mode {
+		case netSystemd:
+			return
+		case netUnix, netUnixPacket:
 			_ = os.Remove(wsv.conf.Socket)
 		}
 	}()

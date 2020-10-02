@@ -7,6 +7,7 @@ package web
 const (
 	cAlreadyRunning  = `Web server already running`
 	cNoConfiguration = `Web server configuration is missing or nil`
+	cListenPID       = `Environment variable LISTEN_PID is empty or contains an invalid value`
 )
 
 // Constants are specified in objects as a fixed address all the time the application is running
@@ -15,6 +16,7 @@ var (
 	errSingleton       = &Error{}
 	errAlreadyRunning  = err(cAlreadyRunning)
 	errNoConfiguration = err(cNoConfiguration)
+	errListenPID       = err(cListenPID)
 )
 
 type (
@@ -36,3 +38,6 @@ func ErrAlreadyRunning() error { return &errAlreadyRunning }
 
 // ErrNoConfiguration Error: Web server configuration is missing or nil
 func ErrNoConfiguration() error { return &errNoConfiguration }
+
+// ErrListenPID Error: Environment variable LISTEN_PID is empty or contains an invalid value
+func ErrListenPID() error { return &errListenPID }
