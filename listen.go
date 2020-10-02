@@ -66,20 +66,22 @@ func (wsv *web) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.
 // NewListener Make new listener from web server configuration
 func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	const (
-		envListenPID     = `LISTEN_PID`
-		systemdFilename  = `from systemd`
-		osKindNonBlockID = 3
+		envListenPID    = `LISTEN_PID`
+		systemdFilename = `from systemd`
 	)
-	var file *os.File
+	var (
+		file *os.File
+		lpid int
+	)
 
 	defaultConfiguration(conf)
 	switch conf.Mode {
 	case netSystemd:
-		if os.Getenv(envListenPID) != strconv.Itoa(os.Getpid()) {
+		if lpid, err = strconv.Atoi(os.Getenv(envListenPID)); err != nil {
 			err = ErrListenPID()
 			return
 		}
-		file = os.NewFile(osKindNonBlockID, systemdFilename)
+		file = os.NewFile(uintptr(lpid), systemdFilename)
 		ret, err = net.FileListener(file)
 	case netUnix, netUnixPacket:
 		_ = os.Remove(conf.Socket)
