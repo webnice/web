@@ -40,6 +40,18 @@ type Interface interface {
 	// ListenAndServeTLSWithConfig Fully configurable web server listens and then calls Serve on incoming connections
 	ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.Config) Interface
 
+	// ListenersSystemdWithoutNames returns a net.Listener for each matching socket type passed to this process from systemd
+	ListenersSystemdWithoutNames() (ret []net.Listener, err error)
+
+	// ListenersSystemdWithNames maps a listener name to a set of net.Listener instances passed to this process from systemd
+	ListenersSystemdWithNames() (ret map[string][]net.Listener, err error)
+
+	// ListenersSystemdTLSWithoutNames returns a net.listener for each matching TCP socket type passed to this process from systemd
+	ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) (ret []net.Listener, err error)
+
+	// ListenersSystemdTLSWithNames maps a listener name to a net.Listener with the associated TLS configuration passed to this process from systemd
+	ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (ret map[string][]net.Listener, err error)
+
 	// NewListener Make new listener from web server configuration
 	NewListener(conf *Configuration) (ret net.Listener, err error)
 
