@@ -3,6 +3,7 @@ package web
 //import "gopkg.in/webnice/debug.v1"
 //import "gopkg.in/webnice/log.v2"
 import (
+	"fmt"
 	"net"
 	"os"
 	"strconv"
@@ -49,9 +50,11 @@ func (wsv *web) ListenLoadFilesFdWithNames(unsetEnvAll bool) (ret []*os.File, er
 		defer func() { _ = os.Unsetenv(listenFdNames) }()
 	}
 	if pID, err = strconv.Atoi(os.Getenv(listenPID)); err != nil {
+		err = fmt.Errorf("get pid from environment %q error: %s", listenPID, err)
 		return
 	}
 	if nFds, err = strconv.Atoi(os.Getenv(listenFds)); err != nil {
+		err = fmt.Errorf("get FDs from environment %q error: %s", listenFds, err)
 		return
 	}
 	if pID != os.Getpid() || nFds == 0 {
