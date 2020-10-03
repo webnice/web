@@ -108,17 +108,48 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 
 // NewListenerTLS Make new listener with TLS from web server configuration
 func (wsv *web) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error) {
-	var l net.Listener
+	var (
+		lstWithNames map[string][]net.Listener
+		listeners    []net.Listener
+		ok           bool
+		l            net.Listener
+	)
 
-	if l, err = wsv.NewListener(conf); err != nil {
-		return
-	}
 	if tlsConfig == nil {
 		if tlsConfig, err = wsv.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); err != nil {
 			return
 		}
 	}
-	ret = tls.NewListener(l, tlsConfig)
+	defaultConfiguration(conf)
+	switch conf.Mode {
+	case netSystemd:
+		if conf.Socket != "" {
+			// Имена сокетов указаны
+			if lstWithNames, err = wsv.ListenersSystemdTLSWithNames(false, tlsConfig); err != nil {
+				return
+			}
+			// Выбор сокета по имени
+			if listeners, ok = lstWithNames[path.Base(conf.Socket)]; !ok {
+				err = ErrListenSystemdNotFound()
+				return
+			}
+		} else {
+			// Имена сокетов не указаны
+			if listeners, err = wsv.ListenersSystemdTLSWithoutNames(false, tlsConfig); err != nil {
+				return
+			}
+		}
+		if len(listeners) == 0 {
+			err = ErrListenSystemdUnexpectedNumber()
+			return
+		}
+		ret = listeners[0]
+	default:
+		if l, err = wsv.NewListener(conf); err != nil {
+			return
+		}
+		ret = tls.NewListener(l, tlsConfig)
+	}
 
 	return
 }

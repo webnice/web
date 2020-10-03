@@ -113,7 +113,6 @@ func (wsv *web) ListenersSystemdWithNames(unsetEnvAll bool) (ret map[string][]ne
 
 // ListenersSystemdTLSWithoutNames returns a net.listener for each matching TCP socket type passed to this process
 func (wsv *web) ListenersSystemdTLSWithoutNames(unsetEnvAll bool, tlsConfig *tls.Config) (ret []net.Listener, err error) {
-	const tcp = `tcp`
 	var (
 		listeners []net.Listener
 		l         net.Listener
@@ -124,12 +123,11 @@ func (wsv *web) ListenersSystemdTLSWithoutNames(unsetEnvAll bool, tlsConfig *tls
 		return
 	}
 	if tlsConfig == nil {
+		err = ErrTLSIsNil()
 		return
 	}
 	for n, l = range listeners {
-		if l.Addr().Network() == tcp {
-			listeners[n] = tls.NewListener(l, tlsConfig)
-		}
+		listeners[n] = tls.NewListener(l, tlsConfig)
 	}
 
 	return
@@ -137,7 +135,6 @@ func (wsv *web) ListenersSystemdTLSWithoutNames(unsetEnvAll bool, tlsConfig *tls
 
 // ListenersSystemdTLSWithNames maps a listener name to a net.Listener with the associated TLS configuration
 func (wsv *web) ListenersSystemdTLSWithNames(unsetEnvAll bool, tlsConfig *tls.Config) (ret map[string][]net.Listener, err error) {
-	const tcp = `tcp`
 	var (
 		listeners map[string][]net.Listener
 		ll        []net.Listener
@@ -149,13 +146,12 @@ func (wsv *web) ListenersSystemdTLSWithNames(unsetEnvAll bool, tlsConfig *tls.Co
 		return
 	}
 	if tlsConfig == nil {
+		err = ErrTLSIsNil()
 		return
 	}
 	for _, ll = range listeners {
 		for n, l = range ll {
-			if l.Addr().Network() == tcp {
-				ll[n] = tls.NewListener(l, tlsConfig)
-			}
+			ll[n] = tls.NewListener(l, tlsConfig)
 		}
 	}
 

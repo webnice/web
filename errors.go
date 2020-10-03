@@ -11,6 +11,7 @@ const (
 	cListenSystemdFDS              = `Environment variable LISTEN_FDS is empty or contains an invalid value`
 	cListenSystemdUnexpectedNumber = `Unexpected number of socket activation fds`
 	cListenSystemdNotFound         = `Systemd socket with name not found`
+	cTLSIsNil                      = `TLS configuration is empty`
 )
 
 // Constants are specified in objects as a fixed address all the time the application is running
@@ -23,6 +24,7 @@ var (
 	errListenSystemdFDS              = err(cListenSystemdFDS)
 	errListenSystemdUnexpectedNumber = err(cListenSystemdUnexpectedNumber)
 	errListenSystemdNotFound         = err(cListenSystemdNotFound)
+	errTLSIsNil                      = err(cTLSIsNil)
 )
 
 type (
@@ -56,3 +58,6 @@ func ErrListenSystemdUnexpectedNumber() error { return &errListenSystemdUnexpect
 
 // ErrListenSystemdNotFound Error: Systemd socket with name not found
 func ErrListenSystemdNotFound() error { return &errListenSystemdNotFound }
+
+// ErrTLSIsNil Error: TLS configuration is empty
+func ErrTLSIsNil() error { return &errTLSIsNil }
