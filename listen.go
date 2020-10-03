@@ -1,11 +1,12 @@
 package web
 
-import "gopkg.in/webnice/debug.v1"
-import "gopkg.in/webnice/log.v2"
+//import "gopkg.in/webnice/debug.v1"
+//import "gopkg.in/webnice/log.v2"
 import (
 	"crypto/tls"
 	"net"
 	"os"
+	"path"
 )
 
 // Wait while web server is running
@@ -78,11 +79,8 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 			if lstWithNames, err = wsv.ListenersSystemdWithNames(false); err != nil {
 				return
 			}
-
-			log.Debug(debug.DumperString(lstWithNames, listeners, os.Environ(), conf.Socket, conf))
-
 			// Выбор сокета по имени
-			if listeners, ok = lstWithNames[conf.Socket]; !ok {
+			if listeners, ok = lstWithNames[path.Base(conf.Socket)]; !ok {
 				err = ErrListenSystemdNotFound()
 				return
 			}
