@@ -74,6 +74,10 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	switch conf.Mode {
 	case netSystemd:
 		if conf.Socket != "" {
+			// Имена сокетов указаны
+			if lstWithNames, err = wsv.ListenersSystemdWithNames(); err != nil {
+				return
+			}
 			// Выбор сокета по имени
 			if listeners, ok = lstWithNames[conf.Socket]; ok {
 				err = ErrListenSystemdNotFound()
@@ -85,7 +89,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 				return
 			}
 		}
-		if len(listeners) < 1 {
+		if len(listeners) == 0 {
 			err = ErrListenSystemdUnexpectedNumber()
 			return
 		}
