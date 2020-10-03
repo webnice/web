@@ -76,7 +76,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	case netSystemd:
 		if conf.Socket != "" {
 			// Имена сокетов указаны
-			if lstWithNames, err = wsv.ListenersSystemdWithNames(false); err != nil {
+			if lstWithNames, err = wsv.ListenersSystemdWithNames(); err != nil {
 				return
 			}
 			// Выбор сокета по имени
@@ -86,7 +86,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 			}
 		} else {
 			// Имена сокетов не указаны
-			if listeners, err = wsv.ListenersSystemdWithoutNames(false); err != nil {
+			if listeners, err = wsv.ListenersSystemdWithoutNames(); err != nil {
 				return
 			}
 		}
@@ -108,48 +108,21 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 
 // NewListenerTLS Make new listener with TLS from web server configuration
 func (wsv *web) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error) {
-	var (
-		lstWithNames map[string][]net.Listener
-		listeners    []net.Listener
-		ok           bool
-		l            net.Listener
-	)
+	var lst net.Listener
 
+	if lst, err = wsv.NewListener(conf); err != nil {
+		return
+	}
 	if tlsConfig == nil {
 		if tlsConfig, err = wsv.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); err != nil {
 			return
 		}
 	}
-	defaultConfiguration(conf)
-	switch conf.Mode {
-	case netSystemd:
-		if conf.Socket != "" {
-			// Имена сокетов указаны
-			if lstWithNames, err = wsv.ListenersSystemdTLSWithNames(false, tlsConfig); err != nil {
-				return
-			}
-			// Выбор сокета по имени
-			if listeners, ok = lstWithNames[path.Base(conf.Socket)]; !ok {
-				err = ErrListenSystemdNotFound()
-				return
-			}
-		} else {
-			// Имена сокетов не указаны
-			if listeners, err = wsv.ListenersSystemdTLSWithoutNames(false, tlsConfig); err != nil {
-				return
-			}
-		}
-		if len(listeners) == 0 {
-			err = ErrListenSystemdUnexpectedNumber()
-			return
-		}
-		ret = listeners[0]
-	default:
-		if l, err = wsv.NewListener(conf); err != nil {
-			return
-		}
-		ret = tls.NewListener(l, tlsConfig)
+	if tlsConfig == nil {
+		err = ErrTLSIsNil()
+		return
 	}
+	ret = tls.NewListener(lst, tlsConfig)
 
 	return
 }
