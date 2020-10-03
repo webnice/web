@@ -75,7 +75,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	case netSystemd:
 		if conf.Socket != "" {
 			// Имена сокетов указаны
-			if lstWithNames, err = wsv.ListenersSystemdWithNames(); err != nil {
+			if lstWithNames, err = wsv.ListenersSystemdWithNames(false); err != nil {
 				return
 			}
 			// Выбор сокета по имени
@@ -85,7 +85,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 			}
 		} else {
 			// Имена сокетов не указаны
-			if listeners, err = wsv.ListenersSystemdWithoutNames(); err != nil {
+			if listeners, err = wsv.ListenersSystemdWithoutNames(false); err != nil {
 				return
 			}
 		}

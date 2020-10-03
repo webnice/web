@@ -66,7 +66,7 @@ func (wsv *web) ListenLoadFilesFdWithNames(unsetEnvAll bool) (ret []*os.File, er
 }
 
 // ListenersSystemdWithoutNames returns a net.Listener for each matching socket type passed to this process
-func (wsv *web) ListenersSystemdWithoutNames() (ret []net.Listener, err error) {
+func (wsv *web) ListenersSystemdWithoutNames(unsetEnvAll bool) (ret []net.Listener, err error) {
 	var (
 		file  *os.File
 		files []*os.File
@@ -74,7 +74,7 @@ func (wsv *web) ListenersSystemdWithoutNames() (ret []net.Listener, err error) {
 		pc    net.Listener
 	)
 
-	files, err = wsv.ListenLoadFilesFdWithNames(true)
+	files, err = wsv.ListenLoadFilesFdWithNames(unsetEnvAll)
 	ret = make([]net.Listener, len(files))
 	for n, file = range files {
 		if pc, err = net.FileListener(file); err == nil {
@@ -86,7 +86,7 @@ func (wsv *web) ListenersSystemdWithoutNames() (ret []net.Listener, err error) {
 }
 
 // ListenersSystemdWithNames maps a listener name to a set of net.Listener instances
-func (wsv *web) ListenersSystemdWithNames() (ret map[string][]net.Listener, err error) {
+func (wsv *web) ListenersSystemdWithNames(unsetEnvAll bool) (ret map[string][]net.Listener, err error) {
 	var (
 		file    *os.File
 		files   []*os.File
@@ -95,7 +95,7 @@ func (wsv *web) ListenersSystemdWithNames() (ret map[string][]net.Listener, err 
 		ok      bool
 	)
 
-	files, err = wsv.ListenLoadFilesFdWithNames(true)
+	files, err = wsv.ListenLoadFilesFdWithNames(unsetEnvAll)
 	ret = make(map[string][]net.Listener)
 	for _, file = range files {
 		if pc, err = net.FileListener(file); err == nil {
@@ -112,7 +112,7 @@ func (wsv *web) ListenersSystemdWithNames() (ret map[string][]net.Listener, err 
 }
 
 // ListenersSystemdTLSWithoutNames returns a net.listener for each matching TCP socket type passed to this process
-func (wsv *web) ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) (ret []net.Listener, err error) {
+func (wsv *web) ListenersSystemdTLSWithoutNames(unsetEnvAll bool, tlsConfig *tls.Config) (ret []net.Listener, err error) {
 	const tcp = `tcp`
 	var (
 		listeners []net.Listener
@@ -120,7 +120,7 @@ func (wsv *web) ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) (ret []ne
 		n         int
 	)
 
-	if listeners, err = wsv.ListenersSystemdWithoutNames(); listeners == nil || err != nil {
+	if listeners, err = wsv.ListenersSystemdWithoutNames(unsetEnvAll); listeners == nil || err != nil {
 		return
 	}
 	if tlsConfig == nil {
@@ -136,7 +136,7 @@ func (wsv *web) ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) (ret []ne
 }
 
 // ListenersSystemdTLSWithNames maps a listener name to a net.Listener with the associated TLS configuration
-func (wsv *web) ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (ret map[string][]net.Listener, err error) {
+func (wsv *web) ListenersSystemdTLSWithNames(unsetEnvAll bool, tlsConfig *tls.Config) (ret map[string][]net.Listener, err error) {
 	const tcp = `tcp`
 	var (
 		listeners map[string][]net.Listener
@@ -145,7 +145,7 @@ func (wsv *web) ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (ret map[str
 		n         int
 	)
 
-	if listeners, err = wsv.ListenersSystemdWithNames(); listeners == nil || err != nil {
+	if listeners, err = wsv.ListenersSystemdWithNames(unsetEnvAll); listeners == nil || err != nil {
 		return
 	}
 	if tlsConfig == nil {
