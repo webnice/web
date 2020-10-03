@@ -10,6 +10,7 @@ const (
 	cListenSystemdPID              = `Environment variable LISTEN_PID is empty or contains an invalid value`
 	cListenSystemdFDS              = `Environment variable LISTEN_FDS is empty or contains an invalid value`
 	cListenSystemdUnexpectedNumber = `Unexpected number of socket activation fds`
+	cListenSystemdNotFound         = `Systemd socket with name not found`
 )
 
 // Constants are specified in objects as a fixed address all the time the application is running
@@ -21,6 +22,7 @@ var (
 	errListenSystemdPID              = err(cListenSystemdPID)
 	errListenSystemdFDS              = err(cListenSystemdFDS)
 	errListenSystemdUnexpectedNumber = err(cListenSystemdUnexpectedNumber)
+	errListenSystemdNotFound         = err(cListenSystemdNotFound)
 )
 
 type (
@@ -51,3 +53,6 @@ func ErrListenSystemdFDS() error { return &errListenSystemdFDS }
 
 // ErrListenSystemdUnexpectedNumber Error: Unexpected number of socket activation fds
 func ErrListenSystemdUnexpectedNumber() error { return &errListenSystemdUnexpectedNumber }
+
+// ErrListenSystemdNotFound Error: Systemd socket with name not found
+func ErrListenSystemdNotFound() error { return &errListenSystemdNotFound }

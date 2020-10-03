@@ -64,15 +64,28 @@ func (wsv *web) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.
 
 // NewListener Make new listener from web server configuration
 func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
-	var listeners []net.Listener
+	var (
+		lstWithNames map[string][]net.Listener
+		listeners    []net.Listener
+		ok           bool
+	)
 
 	defaultConfiguration(conf)
 	switch conf.Mode {
 	case netSystemd:
-		if listeners, err = wsv.ListenersSystemdWithoutNames(); err != nil {
-			return
+		if conf.Socket != "" {
+			// Выбор сокета по имени
+			if listeners, ok = lstWithNames[conf.Socket]; ok {
+				err = ErrListenSystemdNotFound()
+				return
+			}
+		} else {
+			// Имена сокетов не указаны
+			if listeners, err = wsv.ListenersSystemdWithoutNames(); err != nil {
+				return
+			}
 		}
-		if len(listeners) != 1 {
+		if len(listeners) < 1 {
 			err = ErrListenSystemdUnexpectedNumber()
 			return
 		}
