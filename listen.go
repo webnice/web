@@ -1,7 +1,7 @@
 package web
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
+import "gopkg.in/webnice/debug.v1"
+import "gopkg.in/webnice/log.v2"
 import (
 	"crypto/tls"
 	"net"
@@ -90,6 +90,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 			}
 		}
 		if len(listeners) == 0 {
+			log.Debug(debug.DumperString(lstWithNames, listeners, os.Environ()))
 			err = ErrListenSystemdUnexpectedNumber()
 			return
 		}
