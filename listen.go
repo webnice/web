@@ -79,7 +79,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 				return
 			}
 			// Выбор сокета по имени
-			if listeners, ok = lstWithNames[conf.Socket]; ok {
+			if listeners, ok = lstWithNames[conf.Socket]; !ok {
 				err = ErrListenSystemdNotFound()
 				return
 			}
@@ -89,8 +89,8 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 				return
 			}
 		}
+		log.Debug(debug.DumperString(lstWithNames, listeners, os.Environ(), conf.Socket, ok))
 		if len(listeners) == 0 {
-			log.Debug(debug.DumperString(lstWithNames, listeners, os.Environ()))
 			err = ErrListenSystemdUnexpectedNumber()
 			return
 		}
