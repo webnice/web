@@ -20,5 +20,5 @@ But at the same time framework adds to your application a full-functions routing
 
 #### Install
 ```bash
-go get github.com/webnice/web/v1
+go get github.com/webnice/web/v2
 ```
