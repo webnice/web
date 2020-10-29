@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/webnice/web/v1/context"
-	"github.com/webnice/web/v1/context/errors"
-	"github.com/webnice/web/v1/context/handlers"
+	"github.com/webnice/web/v2/context"
+	"github.com/webnice/web/v2/context/errors"
+	"github.com/webnice/web/v2/context/handlers"
 )
 
 // Interface is an interface of router consisting of the core routing methods, using only the standard net/http

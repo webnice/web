@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"github.com/webnice/web/v1/proxyp"
+	"github.com/webnice/web/v2/proxyp"
 )
 
 var awsTestCases = []struct {

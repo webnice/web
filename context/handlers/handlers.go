@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/webnice/web/v1/ambry"
-	"github.com/webnice/web/v1/context/errors"
+	"github.com/webnice/web/v2/ambry"
+	"github.com/webnice/web/v2/context/errors"
 )
 
 // New returns new context object

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/webnice/web/v1/status"
+	"github.com/webnice/web/v2/status"
 )
 
 var (

@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/webnice/web/v1/context"
-	"github.com/webnice/web/v1/status"
+	"github.com/webnice/web/v2/context"
+	"github.com/webnice/web/v2/status"
 )
 
 func testRequest(t *testing.T, method string, path string, body *bytes.Buffer) (rsp *http.Response, ret *bytes.Buffer, err error) {

@@ -8,9 +8,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/webnice/web/v1/context/errors"
-	"github.com/webnice/web/v1/context/handlers"
-	"github.com/webnice/web/v1/route"
+	"github.com/webnice/web/v2/context/errors"
+	"github.com/webnice/web/v2/context/handlers"
+	"github.com/webnice/web/v2/route"
 )
 
 const (

@@ -1,6 +1,6 @@
 package errors
 
-import "github.com/webnice/web/v1/ambry"
+import "github.com/webnice/web/v2/ambry"
 
 // New returns new context object
 func New() Interface {

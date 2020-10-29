@@ -1,6 +1,6 @@
 package errors
 
-import "github.com/webnice/web/v1/ambry"
+import "github.com/webnice/web/v2/ambry"
 
 const (
 	keyRouteConfigurationError uint32 = iota

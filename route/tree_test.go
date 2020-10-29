@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/webnice/web/v1/context"
-	"github.com/webnice/web/v1/method"
+	"github.com/webnice/web/v2/context"
+	"github.com/webnice/web/v2/method"
 )
 
 var (

@@ -1,6 +1,6 @@
 package route
 
-import "github.com/webnice/web/v1/param"
+import "github.com/webnice/web/v2/param"
 
 // This is the default routing context set on the root node of a request context to track URL parameters and an optional routing path
 type impl struct {

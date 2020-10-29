@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/webnice/web/v1/context"
-	"github.com/webnice/web/v1/method"
-	"github.com/webnice/web/v1/status"
+	"github.com/webnice/web/v2/context"
+	"github.com/webnice/web/v2/method"
+	"github.com/webnice/web/v2/status"
 )
 
 var countTestSubroute int64

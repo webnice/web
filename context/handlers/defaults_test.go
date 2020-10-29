@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/webnice/web/v1/context/errors"
+	"github.com/webnice/web/v2/context/errors"
 )
 
 func testDefaults(t *testing.T, handler http.HandlerFunc, hfName string, response string) {

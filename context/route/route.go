@@ -3,7 +3,7 @@ package route
 import (
 	"strings"
 
-	"github.com/webnice/web/v1/param"
+	"github.com/webnice/web/v2/param"
 )
 
 // New returns a new routing context object

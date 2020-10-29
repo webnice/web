@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/webnice/web/v1/context/errors"
+	"github.com/webnice/web/v2/context/errors"
 )
 
 type testHandler struct {

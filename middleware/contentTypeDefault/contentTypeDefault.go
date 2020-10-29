@@ -4,8 +4,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/webnice/web/v1/header"
-	"github.com/webnice/web/v1/status"
+	"github.com/webnice/web/v2/header"
+	"github.com/webnice/web/v2/status"
 )
 
 // Interface is an interface of package

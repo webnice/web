@@ -3,7 +3,7 @@ package tlvparse
 import (
 	"testing"
 
-	"github.com/webnice/web/v1/proxyp"
+	"github.com/webnice/web/v2/proxyp"
 )
 
 var testCases = []struct {

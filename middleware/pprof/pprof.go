@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/webnice/web/v1/middleware/nocache"
-	"github.com/webnice/web/v1/route"
-	"github.com/webnice/web/v1/status"
+	"github.com/webnice/web/v2/middleware/nocache"
+	"github.com/webnice/web/v2/route"
+	"github.com/webnice/web/v2/status"
 )
 
 // Handler Middleware to profiling

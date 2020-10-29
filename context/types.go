@@ -3,9 +3,9 @@ package context
 import (
 	"net/http"
 
-	"github.com/webnice/web/v1/context/errors"
-	"github.com/webnice/web/v1/context/handlers"
-	"github.com/webnice/web/v1/context/route"
+	"github.com/webnice/web/v2/context/errors"
+	"github.com/webnice/web/v2/context/handlers"
+	"github.com/webnice/web/v2/context/route"
 )
 
 var (

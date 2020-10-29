@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/webnice/web/v1/context"
-	"github.com/webnice/web/v1/context/errors"
-	"github.com/webnice/web/v1/context/handlers"
-	"github.com/webnice/web/v1/method"
+	"github.com/webnice/web/v2/context"
+	"github.com/webnice/web/v2/context/errors"
+	"github.com/webnice/web/v2/context/handlers"
+	"github.com/webnice/web/v2/method"
 )
 
 // New returns a newly initialized router object that implements the Router interface
