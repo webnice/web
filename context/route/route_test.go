@@ -31,12 +31,14 @@ func testEmpty(t *testing.T, rt Interface) {
 
 func TestAll(t *testing.T) {
 	var (
+		rsp1 string
+		rsp2 []string
+	)
+	var (
 		testPaths    = []string{"/a", "/b", "/c", "/d"}
 		testPatterns = []string{"*a", ":b"}
+		rt           = New()
 	)
-	var rsp1 string
-	var rsp2 []string
-	var rt = New()
 
 	rsp1 = rt.Path(testPaths...)
 	if rsp1 != rt.Path() {
@@ -45,7 +47,6 @@ func TestAll(t *testing.T) {
 	if rsp1 != strings.Join(testPaths, ``) {
 		t.Errorf("Erorr Path(), incorrest result")
 	}
-
 	rsp1 = rt.Pattern(testPatterns...)
 	if rsp1 != rt.Pattern() {
 		t.Errorf("Erorr Pattern()")
@@ -53,7 +54,6 @@ func TestAll(t *testing.T) {
 	if rsp1 != strings.Join(testPatterns, ``) {
 		t.Errorf("Erorr Pattern(), incorrest result")
 	}
-
 	rsp2 = rt.Patterns(testPaths, testPatterns)
 	if len(rsp2) != len(rt.Patterns()) {
 		t.Errorf("Erorr Patterns()")
@@ -61,7 +61,6 @@ func TestAll(t *testing.T) {
 	if strings.Join(rsp2, ``) != strings.Join(testPaths, ``)+strings.Join(testPatterns, ``) {
 		t.Errorf("Erorr Patterns(), incorrest result")
 	}
-
 	rt.Reset()
 	testEmpty(t, rt)
 }

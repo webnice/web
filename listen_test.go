@@ -2,8 +2,6 @@
 
 package web
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"net"
@@ -15,6 +13,7 @@ import (
 func TestInvalidPort(t *testing.T) {
 	const invalidAddress = `:170000`
 	var wsv = New()
+
 	wsv.ListenAndServe(invalidAddress)
 	if wsv.Error() == nil {
 		t.Errorf("Error ListenAndServe(), don't cheack listen address")
@@ -27,6 +26,7 @@ func TestAlreadyRunningError(t *testing.T) {
 		testAddress2 = `localhost:18081`
 	)
 	var wsv = New()
+
 	wsv.ListenAndServe(testAddress1)
 	defer wsv.Stop()
 	if wsv.Error() != nil {
@@ -75,10 +75,12 @@ func TestPortIsBusy(t *testing.T) {
 
 func TestUnixSocket(t *testing.T) {
 	const testAddress1 = `.test.socket`
-	var err error
-	var conf *Configuration
-	var w1 Interface
-	var fi os.FileInfo
+	var (
+		err  error
+		conf *Configuration
+		w1   Interface
+		fi   os.FileInfo
+	)
 
 	conf, _ = parseAddress("")
 	conf.Mode = "socket"
@@ -108,9 +110,11 @@ func TestServe(t *testing.T) {
 		testAddress1 = `localhost:18080`
 		testAddress2 = `127.0.0.1:18080`
 	)
-	var err error
-	var ltn net.Listener
-	var w1 = New()
+	var (
+		err error
+		ltn net.Listener
+		w1  = New()
+	)
 
 	if ltn, err = net.Listen("tcp", testAddress1); err != nil {
 		t.Errorf("Testing error, failed to open port '%s': %s", testAddress1, err.Error())
@@ -134,10 +138,12 @@ func TestWait(t *testing.T) {
 		testAddress1 = `localhost:18080`
 		testAddress2 = `.test.socket`
 	)
-	var tic *time.Ticker
-	var cou uint32
-	var w1 Interface
-	var conf *Configuration
+	var (
+		tic  *time.Ticker
+		cou  uint32
+		w1   Interface
+		conf *Configuration
+	)
 
 	w1 = New()
 	w1.ListenAndServe(testAddress1)
@@ -159,7 +165,6 @@ func TestWait(t *testing.T) {
 	if cou <= 4 {
 		t.Errorf("Error Wait()")
 	}
-
 	w1 = New()
 	conf, _ = parseAddress("")
 	conf.Mode = "socket"
@@ -191,8 +196,10 @@ func TestRunRouteConfigurationError(t *testing.T) {
 		testAddress1    = `localhost:18080`
 		testErrorString = `SvDJFQxV4Bscfn2tdP9bCr7CGnK7dYPJWrc6w5MJ`
 	)
-	var tic *time.Ticker
-	var w1 = New()
+	var (
+		tic *time.Ticker
+		w1  = New()
+	)
 
 	_ = w1.Errors().RouteConfigurationError(fmt.Errorf(testErrorString))
 	w1.ListenAndServe(testAddress1)

@@ -1,13 +1,11 @@
 package contentTypeDefault
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"io"
 	"net/http"
 
-	"gopkg.in/webnice/web.v1/header"
-	"gopkg.in/webnice/web.v1/status"
+	"github.com/webnice/web/v1/header"
+	"github.com/webnice/web/v1/status"
 )
 
 // Interface is an interface of package
@@ -46,6 +44,7 @@ func (dct *impl) Handler(hndl http.Handler) http.Handler {
 		}
 		hndl.ServeHTTP(rwr, rq)
 	}
+
 	return http.HandlerFunc(fn)
 }
 
@@ -66,5 +65,6 @@ func (rwr *rewr) Write(p []byte) (n int, err error) {
 		rwr.WriteHeader(status.Ok)
 	}
 	n, err = rwr.Writer.Write(p)
+
 	return
 }

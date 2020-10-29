@@ -1,7 +1,5 @@
 package contentTypeDefault
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"io/ioutil"
@@ -9,10 +7,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/header"
-	"gopkg.in/webnice/web.v1/mime"
-	"gopkg.in/webnice/web.v1/route"
-	"gopkg.in/webnice/web.v1/status"
+	"github.com/webnice/web/v1/header"
+	"github.com/webnice/web/v1/mime"
+	"github.com/webnice/web/v1/route"
+	"github.com/webnice/web/v1/status"
 )
 
 func testContentTypeDefaultHandlerFunc1(wr http.ResponseWriter, rq *http.Request) {
@@ -37,14 +35,12 @@ func testContentTypeDefault(t *testing.T, rou route.Interface, hf http.HandlerFu
 		srv.Config.Handler = rou
 	}
 	defer srv.Close()
-
 	rsp, err = http.Get(srv.URL)
 	if err != nil {
 		err = fmt.Errorf("response HandlerFunc error: %s", err)
 		return
 	}
-	defer rsp.Body.Close()
-
+	defer func() { _ = rsp.Body.Close() }()
 	if buf, err = ioutil.ReadAll(rsp.Body); err != nil {
 		err = fmt.Errorf("read response error: %s", err)
 		return
@@ -74,7 +70,6 @@ func TestDefaultContentType(t *testing.T) {
 	if err != nil || ctv != mime.TextRfc822Headers {
 		t.Errorf("error: %v", err)
 	}
-
 	rou = route.New()
 	ctd = New(mime.ApplicationMsgpack)
 	rou.Use(ctd.Handler)
@@ -83,7 +78,6 @@ func TestDefaultContentType(t *testing.T) {
 	if err != nil || ctv != mime.ApplicationMsgpack {
 		t.Errorf("error: %v", err)
 	}
-
 	rou = route.New()
 	ctd = New(mime.ImageXICON)
 	rou.Use(ctd.Handler)

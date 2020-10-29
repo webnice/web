@@ -31,9 +31,7 @@ func parseVersion1(reader *bufio.Reader) (*Header, error) {
 	if len(tokens) < 6 {
 		return nil, ErrCantReadProtocolVersionAndCommand
 	}
-
 	header := initVersion1()
-
 	// Read address family and protocol
 	switch tokens[1] {
 	case "TCP4":
@@ -43,7 +41,6 @@ func parseVersion1(reader *bufio.Reader) (*Header, error) {
 	default:
 		header.TransportProtocol = UNSPEC
 	}
-
 	// Read addresses and ports
 	header.SourceAddress, err = parseV1IPAddress(header.TransportProtocol, tokens[2])
 	if err != nil {
@@ -65,6 +62,8 @@ func parseVersion1(reader *bufio.Reader) (*Header, error) {
 }
 
 func (header *Header) formatVersion1() ([]byte, error) {
+	var buf bytes.Buffer
+
 	// As of version 1, only "TCP4" ( \x54 \x43 \x50 \x34 ) for TCP over IPv4,
 	// and "TCP6" ( \x54 \x43 \x50 \x36 ) for TCP over IPv6 are allowed.
 	proto := "UNKNOWN"
@@ -73,8 +72,6 @@ func (header *Header) formatVersion1() ([]byte, error) {
 	} else if header.TransportProtocol == TCPv6 {
 		proto = "TCP6"
 	}
-
-	var buf bytes.Buffer
 	buf.Write(SIGV1)
 	buf.WriteString(SEPARATOR)
 	buf.WriteString(proto)
@@ -112,5 +109,6 @@ func parseV1IPAddress(protocol AddressFamilyAndProtocol, addrStr string) (addr n
 	if (protocol == TCPv4 && tryV4 == nil) || (protocol == TCPv6 && tryV4 != nil) {
 		err = ErrInvalidAddress
 	}
+
 	return
 }

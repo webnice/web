@@ -54,7 +54,7 @@ var invalidParseV1Tests = []struct {
 func TestReadV1Invalid(t *testing.T) {
 	for _, tt := range invalidParseV1Tests {
 		if _, err := Read(tt.reader); err != tt.expectedError {
-			t.Fatalf("TestReadV1Invalid: expected %s, actual %s", tt.expectedError, err.Error())
+			t.Fatalf("TestReadV1Invalid: expected %s, actual %s", tt.expectedError, err)
 		}
 	}
 }
@@ -108,15 +108,13 @@ func TestWriteV1Valid(t *testing.T) {
 		if _, err := tt.expectedHeader.WriteTo(w); err != nil {
 			t.Fatal("TestWriteV1Valid: Unexpected error ", err)
 		}
-		w.Flush()
-
+		_ = w.Flush()
 		// Read written bytes to validate written header
 		r := bufio.NewReader(&b)
 		newHeader, err := Read(r)
 		if err != nil {
 			t.Fatal("TestWriteV1Valid: Unexpected error ", err)
 		}
-
 		if !newHeader.EqualsTo(tt.expectedHeader) {
 			t.Fatalf("TestWriteV1Valid: expected %#v, actual %#v", tt.expectedHeader, newHeader)
 		}

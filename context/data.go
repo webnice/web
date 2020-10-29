@@ -1,7 +1,5 @@
 package context
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"bytes"
 	"encoding/json"
@@ -12,8 +10,8 @@ import (
 	runtimeDebug "runtime/debug"
 	"strings"
 
-	"gopkg.in/webnice/web.v1/header"
-	"gopkg.in/webnice/web.v1/mime"
+	"github.com/webnice/web/v1/header"
+	"github.com/webnice/web/v1/mime"
 )
 
 // RegisterGlobalVerifyPlugin Register global external library of data verification

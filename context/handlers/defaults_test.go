@@ -1,7 +1,5 @@
 package handlers
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"io/ioutil"
@@ -9,24 +7,24 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/context/errors"
+	"github.com/webnice/web/v1/context/errors"
 )
 
 func testDefaults(t *testing.T, handler http.HandlerFunc, hfName string, response string) {
-	var err error
-	var srv *httptest.Server
-	var rsp *http.Response
-	var buf []byte
+	var (
+		err error
+		srv *httptest.Server
+		rsp *http.Response
+		buf []byte
+	)
 
 	srv = httptest.NewServer(handler)
 	defer srv.Close()
-
 	rsp, err = http.Get(srv.URL)
 	if err != nil {
 		t.Errorf("Error response HandlerFunc: %s", err.Error())
 	}
 	defer func() { _ = rsp.Body.Close() }()
-
 	if buf, err = ioutil.ReadAll(rsp.Body); err != nil {
 		t.Errorf("Error read response: %s", err.Error())
 	}
@@ -36,7 +34,6 @@ func testDefaults(t *testing.T, handler http.HandlerFunc, hfName string, respons
 	if response == "" {
 		return
 	}
-
 	if string(buf) != response {
 		t.Errorf("%s error: return staus code: %d, text: %s", hfName, rsp.StatusCode, string(buf))
 	}
@@ -44,8 +41,10 @@ func testDefaults(t *testing.T, handler http.HandlerFunc, hfName string, respons
 
 func TestDefaultsAll(t *testing.T) {
 	const testError = `ce8449d43faeb80d9365a916d1e3e1931b5f684979fa772ac658c985679d81047f0cc342228808b590166fcc257079816552abc66305a2cce3e2155076a75cca`
-	var obj *impl
-	var err = errors.New()
+	var (
+		obj *impl
+		err = errors.New()
+	)
 
 	obj = New(err).(*impl)
 

@@ -1,7 +1,5 @@
 package method
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"strings"
 	"testing"
@@ -51,6 +49,7 @@ func TestInt64(t *testing.T) {
 
 func TestAll(t *testing.T) {
 	var sum int64
+
 	for _, m := range All() {
 		sum += m.Int64()
 	}
@@ -60,8 +59,11 @@ func TestAll(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	var err error
-	var mp Method
+	var (
+		err error
+		mp  Method
+	)
+
 	for _, m := range All() {
 		mp, err = Parse(strings.ToTitle(m.String()))
 		if err != nil {

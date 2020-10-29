@@ -1,7 +1,5 @@
 package route
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import "net/http"
 
 // ChainHandler is a type of chain handlers
@@ -36,7 +34,6 @@ func chain(middlewares []func(http.Handler) http.Handler, endpoint http.Handler)
 		ret = endpoint
 		return
 	}
-
 	// Wrap the end handler with the middleware chain
 	ret = middlewares[len(middlewares)-1](endpoint)
 	for i = len(middlewares) - 2; i >= 0; i-- {

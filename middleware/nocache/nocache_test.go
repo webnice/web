@@ -1,7 +1,5 @@
 package nocache
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"io/ioutil"
@@ -10,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"gopkg.in/webnice/web.v1/header"
-	"gopkg.in/webnice/web.v1/route"
-	"gopkg.in/webnice/web.v1/status"
+	"github.com/webnice/web/v1/header"
+	"github.com/webnice/web/v1/route"
+	"github.com/webnice/web/v1/status"
 )
 
 const (
@@ -23,7 +21,7 @@ func testNoCacheHandlerFunc(wr http.ResponseWriter, rq *http.Request) {
 	wr.Header().Add(header.ETag, "686897696a7c876b7e")
 	wr.Header().Set(header.LastModified, time.Now().UTC().Format(ifModifiedSinceTimeFormat))
 	wr.Header().Set(header.IfUnmodifiedSince, time.Now().UTC().Format(ifModifiedSinceTimeFormat))
-	fmt.Fprint(wr, string(status.Bytes(status.Ok)))
+	_, _ = fmt.Fprint(wr, string(status.Bytes(status.Ok)))
 	wr.WriteHeader(status.Ok)
 }
 

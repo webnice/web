@@ -1,24 +1,24 @@
 package route
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/context"
-	"gopkg.in/webnice/web.v1/method"
-	"gopkg.in/webnice/web.v1/status"
+	"github.com/webnice/web/v1/context"
+	"github.com/webnice/web/v1/method"
+	"github.com/webnice/web/v1/status"
 )
 
 var countTestSubroute int64
 
 func testSubrouteFunc(wr http.ResponseWriter, rq *http.Request) {
 	const keyIpv4 = `address`
-	var ctx context.Interface
-	var ipsrc string
+	var (
+		ctx   context.Interface
+		ipsrc string
+	)
 
 	ctx = context.New(rq)
 	ipsrc = ctx.Route().Params().Get(keyIpv4)
@@ -37,10 +37,12 @@ func testSubrouteRoute(r Interface) {
 }
 
 func TestSubroute(t *testing.T) {
-	var err error
-	var w Interface
-	var srv *httptest.Server
-	var cou int64
+	var (
+		err error
+		w   Interface
+		srv *httptest.Server
+		cou int64
+	)
 
 	w = New()
 	w.Subroute("/api", testSubrouteRoute)
@@ -50,7 +52,6 @@ func TestSubroute(t *testing.T) {
 		_, _, err = testRequest(t, method.Get.String(), srv.URL+"/api/v1.0/info/188.42.231.207", &bytes.Buffer{})
 		if err != nil {
 			t.Fatalf("Error httptest get %s: %s", srv.URL, err.Error())
-			break
 		}
 	}
 	if countTestSubroute != 10000 {

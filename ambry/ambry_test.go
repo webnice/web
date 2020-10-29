@@ -1,10 +1,6 @@
 package ambry
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-import (
-	"testing"
-)
+import "testing"
 
 var (
 	k  = `A69F2F4D-0B8F-43D3-8E1B-1EA90766FEB5`
@@ -41,8 +37,10 @@ func TestGet(t *testing.T) {
 }
 
 func TestAdd(t *testing.T) {
-	var prm Interface
-	var all []interface{}
+	var (
+		prm Interface
+		all []interface{}
+	)
 
 	prm = New()
 
@@ -66,9 +64,11 @@ func TestAdd(t *testing.T) {
 }
 
 func TestKeys(t *testing.T) {
-	var prm Interface
-	var arr []interface{}
-	var oks []bool
+	var (
+		prm Interface
+		arr []interface{}
+		oks []bool
+	)
 
 	prm = New()
 	arr = prm.Keys()

@@ -1,12 +1,11 @@
 package param
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-
 // New is a constructor
 func New() Interface {
 	var itm = new(impl)
+
 	itm.items = map[key][]*item{}
+
 	return itm
 }
 
@@ -23,6 +22,7 @@ func (itm *impl) Set(k string, v string) {
 // It appends to any existing values associated with key
 func (itm *impl) Add(k string, v string) {
 	var ok bool
+
 	itm.RLock()
 	_, ok = itm.items[key(k)]
 	itm.RUnlock()
@@ -48,8 +48,10 @@ func (itm *impl) Has(k string) (ret bool) {
 // If there are no values associated with the key, Get returns "".
 // To access multiple values of a key, or to use access the map directly
 func (itm *impl) Get(k string) (ret string) {
-	var value []*item
-	var ok bool
+	var (
+		value []*item
+		ok    bool
+	)
 
 	itm.RLock()
 	value, ok = itm.items[key(k)]
@@ -58,13 +60,16 @@ func (itm *impl) Get(k string) (ret string) {
 		return
 	}
 	ret = value[0].Value
+
 	return
 }
 
 // Del deletes the values associated with key
 func (itm *impl) Del(k string) (ret string) {
-	var value []*item
-	var ok bool
+	var (
+		value []*item
+		ok    bool
+	)
 
 	itm.RLock()
 	value, ok = itm.items[key(k)]
@@ -76,6 +81,7 @@ func (itm *impl) Del(k string) (ret string) {
 	delete(itm.items, key(k))
 	itm.Unlock()
 	ret = value[0].Value
+
 	return
 }
 
@@ -83,20 +89,24 @@ func (itm *impl) Del(k string) (ret string) {
 // If there are no values, Keys returns empty slice
 func (itm *impl) Keys() (ret []string) {
 	var i key
+
 	itm.RLock()
 	for i = range itm.items {
 		ret = append(ret, string(i))
 	}
 	itm.RUnlock()
+
 	return
 }
 
 // Get gets the all value associated with the given key.
 // If there are no values associated with the key, Get returns empty slice
 func (itm *impl) GetAll(k string) (ret []string) {
-	var value []*item
-	var ok bool
-	var i int
+	var (
+		value []*item
+		ok    bool
+		n     int
+	)
 
 	itm.RLock()
 	value, ok = itm.items[key(k)]
@@ -104,8 +114,9 @@ func (itm *impl) GetAll(k string) (ret []string) {
 	if !ok {
 		return
 	}
-	for i = range value {
-		ret = append(ret, value[i].Value)
+	for n = range value {
+		ret = append(ret, value[n].Value)
 	}
+
 	return
 }

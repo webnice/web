@@ -1,7 +1,5 @@
 package web
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"crypto/tls"
 	"net"
@@ -10,9 +8,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"gopkg.in/webnice/web.v1/context/errors"
-	"gopkg.in/webnice/web.v1/context/handlers"
-	"gopkg.in/webnice/web.v1/route"
+	"github.com/webnice/web/v1/context/errors"
+	"github.com/webnice/web/v1/context/handlers"
+	"github.com/webnice/web/v1/route"
 )
 
 const (

@@ -1,21 +1,20 @@
 package route
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"net/http"
 	"runtime"
 
-	"gopkg.in/webnice/web.v1/context"
-	"gopkg.in/webnice/web.v1/context/errors"
-	"gopkg.in/webnice/web.v1/context/handlers"
-	"gopkg.in/webnice/web.v1/method"
+	"github.com/webnice/web/v1/context"
+	"github.com/webnice/web/v1/context/errors"
+	"github.com/webnice/web/v1/context/handlers"
+	"github.com/webnice/web/v1/method"
 )
 
 // New returns a newly initialized router object that implements the Router interface
 func New() Interface {
 	var rou = &impl{tree: &node{}}
+
 	rou.context = context.New()
 	rou.pool.New = func() interface{} {
 		rp := context.New()
@@ -23,6 +22,7 @@ func New() Interface {
 		rp.Errors(rou.context.Errors())
 		return rp
 	}
+
 	return rou
 }
 
@@ -35,6 +35,7 @@ func (rou *impl) Handlers() handlers.Interface { return rou.context.Handlers() }
 // Copy all errors to errors named object
 func (rou *impl) setErrors() {
 	var err = "Errors:\n"
+
 	if len(rou.errors) == 0 {
 		return
 	}
@@ -59,7 +60,6 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 		rq = ctx.NewRequest(rq)
 		defer rou.pool.Put(ctx)
 	}
-
 	// Ensure the route has some routes defined on the route
 	if rou.handler == nil {
 		ctx = context.New(rq)
@@ -68,7 +68,6 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 		rou.pool.Put(ctx)
 		return
 	}
-
 	if len(rou.errors) > 0 {
 		rou.setErrors()
 		ctx = context.New(rq)
@@ -79,7 +78,6 @@ func (rou *impl) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 		rou.pool.Put(ctx)
 		return
 	}
-
 	rou.handler.ServeHTTP(wr, rq)
 }
 
@@ -160,23 +158,24 @@ func (rou *impl) Chain(middlewares ...func(http.Handler) http.Handler) Middlewar
 
 // With adds inline middlewares for an endpoint handler
 func (rou *impl) With(middlewares ...func(http.Handler) http.Handler) Interface {
-	var mws Middlewares
-	var im *impl
+	var (
+		mws Middlewares
+		im  *impl
+	)
 
 	// Similarly as in handle(), we must build the route handler once further
 	// middleware registration isn't allowed for this stack, like now
 	if !rou.inline && rou.handler == nil {
 		rou.buildRouteHandler()
 	}
-
 	// Copy middlewares from parent inline route
 	if rou.inline {
 		mws = make(Middlewares, len(rou.middlewares))
 		copy(mws, rou.middlewares)
 	}
 	mws = append(mws, middlewares...)
-
 	im = &impl{inline: true, parent: rou, tree: rou.tree, middlewares: mws}
+
 	return im
 }
 
@@ -184,9 +183,11 @@ func (rou *impl) With(middlewares ...func(http.Handler) http.Handler) Interface 
 // for a group of handlers along the same routing path that use an additional set of middlewares
 func (rou *impl) Group(fn func(r Interface)) Interface {
 	var im = rou.With().(*impl)
+
 	if fn != nil {
 		fn(im)
 	}
+
 	return im
 }
 
@@ -194,6 +195,7 @@ func (rou *impl) Group(fn func(r Interface)) Interface {
 // along the `pattern` as a subrouter. Effectively, this is a short-hand call to Mount
 func (rou *impl) Subroute(pattern string, fn func(r Interface)) Interface {
 	var subRouter = New()
+
 	subRouter.(*impl).context.Handlers(rou.context.Handlers())
 	subRouter.(*impl).context.Errors(rou.context.Errors())
 	if fn != nil {
@@ -203,6 +205,7 @@ func (rou *impl) Subroute(pattern string, fn func(r Interface)) Interface {
 	if len(subRouter.(*impl).errors) > 0 {
 		rou.errors = append(rou.errors, subRouter.(*impl).errors...)
 	}
+
 	return subRouter
 }
 
@@ -215,39 +218,37 @@ func (rou *impl) Subroute(pattern string, fn func(r Interface)) Interface {
 // As a result, if you define two Mount() routes on the exact same pattern the mount will panic
 func (rou *impl) Mount(pattern string, handler http.Handler) {
 	const existingPath = `Attempting to Mount() a handler on an existing path %q`
-	var subr *impl
-	var ok bool
-	var mtd method.Method
-	var n *node
-	var subHandler http.HandlerFunc
-	var subroutes Routes
+	var (
+		subr       *impl
+		ok         bool
+		mtd        method.Method
+		n          *node
+		subHandler http.HandlerFunc
+		subroutes  Routes
+	)
 
 	// Provide runtime safety for ensuring a pattern isn't mounted on an existing routing pattern
 	if rou.tree.findPattern(pattern+"*") != nil || rou.tree.findPattern(pattern+"/*") != nil {
 		rou.errors = append(rou.errors, fmt.Errorf(existingPath, pattern))
 		return
 	}
-
 	// Assign sub-Router's with the parent not found & method not allowed handler if not specified
 	if subr, ok = handler.(*impl); ok && subr.context.Handlers() != rou.context.Handlers() {
 		subr.context.Handlers().NotFound(rou.context.Handlers().NotFound(nil))
 		subr.context.Handlers().MethodNotAllowed(rou.context.Handlers().MethodNotAllowed(nil))
 		subr.context.Handlers().InternalServerError(rou.context.Handlers().InternalServerError(nil))
 	}
-
 	// Wrap the sub-router in a handlerFunc to scope the request path for routing.
 	subHandler = http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {
 		var ctx = context.New(rq)
 		ctx.Route().Path("/" + ctx.Route().Params().Del("*"))
 		handler.ServeHTTP(wr, rq)
 	})
-
 	if pattern == "" || pattern[len(pattern)-1] != '/' {
 		rou.handle(method.Any|method.Stub, pattern, subHandler)
 		rou.handle(method.Any|method.Stub, pattern+"/", rou.Handlers().NotFound(nil))
 		pattern += "/"
 	}
-
 	mtd = method.Any
 	subroutes, _ = handler.(Routes)
 	if subroutes != nil {
@@ -281,8 +282,10 @@ func (rou *impl) handle(mtd method.Method, pattern string, handler http.Handler)
 		mustBeginWith    = `Routing pattern must begin with '/' in %q`
 		insertRouteError = `Insert route error: %s`
 	)
-	var err error
-	var her http.Handler
+	var (
+		err error
+		her http.Handler
+	)
 
 	if len(pattern) == 0 || pattern[0] != '/' {
 		if _, file, line, ok := runtime.Caller(2); ok {
@@ -290,24 +293,19 @@ func (rou *impl) handle(mtd method.Method, pattern string, handler http.Handler)
 		} else {
 			rou.errors = append(rou.errors, fmt.Errorf(mustBeginWith, pattern))
 		}
-
 		return nil
 	}
-
 	// Build the final routing handler for this route
 	if !rou.inline && rou.handler == nil {
 		rou.buildRouteHandler()
 	}
-
 	// Build endpoint handler with inline middlewares for the route
-
 	if rou.inline {
 		rou.handler = http.HandlerFunc(rou.routeHTTP)
 		her = rou.Chain(rou.middlewares...).Handler(handler)
 	} else {
 		her = handler
 	}
-
 	// Add the endpoint to the tree and return the node
 	nde, err = rou.tree.InsertRoute(mtd, pattern, her)
 	if err != nil {
@@ -324,13 +322,15 @@ func (rou *impl) handle(mtd method.Method, pattern string, handler http.Handler)
 
 // routes a http.Request through the routing tree to serve the matching handler for a particular http method
 func (rou *impl) routeHTTP(wr http.ResponseWriter, rq *http.Request) {
-	var err error
-	var ctx context.Interface
-	var routePath string
-	var mtd method.Method
-	var hs methodHandlers
-	var h http.Handler
-	var ok bool
+	var (
+		err       error
+		ctx       context.Interface
+		routePath string
+		mtd       method.Method
+		hs        methodHandlers
+		h         http.Handler
+		ok        bool
+	)
 
 	// Grab the route context object
 	ctx = context.New(rq)

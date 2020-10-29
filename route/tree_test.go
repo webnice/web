@@ -4,15 +4,13 @@ package route
 // Armon Dadgar in https://github.com/armon/go-radix/blob/master/radix.go
 // (MIT licensed).
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"net/http"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/context"
-	"gopkg.in/webnice/web.v1/method"
+	"github.com/webnice/web/v1/context"
+	"github.com/webnice/web/v1/method"
 )
 
 var (

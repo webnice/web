@@ -1,14 +1,12 @@
 package nocache
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"io"
 	"net/http"
 	"time"
 
-	"gopkg.in/webnice/web.v1/header"
-	"gopkg.in/webnice/web.v1/status"
+	"github.com/webnice/web/v1/header"
+	"github.com/webnice/web/v1/status"
 )
 
 type impl struct {
@@ -38,13 +36,19 @@ func cleanHeaders(wr http.ResponseWriter) {
 }
 
 func setHeaders(wr http.ResponseWriter) {
+	const (
+		xAccelExpires    = `X-Accel-Expires`
+		keyCacheControl  = `no-cache, private, max-age=0`
+		keyPragmaNoCache = `no-cache`
+		keyExpires       = `0`
+	)
 	var (
 		key, value string
 		headers    = map[string]string{
 			header.Expires:      time.Unix(0, 0).Format(time.RFC1123),
-			header.CacheControl: "no-cache, private, max-age=0",
-			header.Pragma:       "no-cache",
-			"X-Accel-Expires":   "0",
+			header.CacheControl: keyCacheControl,
+			header.Pragma:       keyPragmaNoCache,
+			xAccelExpires:       keyExpires,
 		}
 	)
 
@@ -63,6 +67,7 @@ func Handler(hndl http.Handler) http.Handler {
 		setHeaders(wr)
 		hndl.ServeHTTP(nch, rq)
 	}
+
 	return http.HandlerFunc(fn)
 }
 
@@ -81,5 +86,6 @@ func (nch *impl) Write(p []byte) (n int, err error) {
 		nch.WriteHeader(status.Ok)
 	}
 	n, err = nch.Writer.Write(p)
+
 	return
 }

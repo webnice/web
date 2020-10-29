@@ -86,7 +86,7 @@ func (p *Conn) Close() error {
 // protocol is being used, otherwise just returns the address of
 // the socket server.
 func (p *Conn) LocalAddr() net.Addr {
-	p.once.Do(func() { p.readHeader() })
+	p.once.Do(func() { _ = p.readHeader() })
 	if p.header == nil || p.header.Command.IsLocal() {
 		return p.conn.LocalAddr()
 	}
@@ -98,7 +98,7 @@ func (p *Conn) LocalAddr() net.Addr {
 // protocol is being used, otherwise just returns the address of
 // the socket peer.
 func (p *Conn) RemoteAddr() net.Addr {
-	p.once.Do(func() { p.readHeader() })
+	p.once.Do(func() { _ = p.readHeader() })
 	if p.header == nil || p.header.Command.IsLocal() {
 		return p.conn.RemoteAddr()
 	}

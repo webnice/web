@@ -1,19 +1,19 @@
 package handlers
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"net/http"
 
-	"gopkg.in/webnice/web.v1/ambry"
-	"gopkg.in/webnice/web.v1/context/errors"
+	"github.com/webnice/web/v1/ambry"
+	"github.com/webnice/web/v1/context/errors"
 )
 
 // New returns new context object
 func New(errors errors.Interface) Interface {
 	var hndl = new(impl)
+
 	hndl.handlers = ambry.New()
 	hndl.errors = errors
+
 	return hndl
 }
 
@@ -28,6 +28,7 @@ func (hndl *impl) do(key uint32, fn http.HandlerFunc, defaultFn http.HandlerFunc
 		return
 	}
 	ret = defaultFn
+
 	return
 }
 

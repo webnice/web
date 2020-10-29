@@ -13,17 +13,15 @@ func TestPassthrough(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
-
 	pl := &Listener{Listener: l}
-
 	go func() {
 		conn, err := net.Dial("tcp", pl.Addr().String())
 		if err != nil {
 			t.Fatalf("err: %v", err)
 		}
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 
-		conn.Write([]byte("ping"))
+		_, _ = conn.Write([]byte("ping"))
 		recv := make([]byte, 4)
 		_, err = conn.Read(recv)
 		if err != nil {
@@ -33,13 +31,11 @@ func TestPassthrough(t *testing.T) {
 			t.Fatalf("bad: %v", recv)
 		}
 	}()
-
 	conn, err := pl.Accept()
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
-	defer conn.Close()
-
+	defer func() { _ = conn.Close() }()
 	recv := make([]byte, 4)
 	_, err = conn.Read(recv)
 	if err != nil {
@@ -48,7 +44,6 @@ func TestPassthrough(t *testing.T) {
 	if !bytes.Equal(recv, []byte("ping")) {
 		t.Fatalf("bad: %v", recv)
 	}
-
 	if _, err := conn.Write([]byte("pong")); err != nil {
 		t.Fatalf("err: %v", err)
 	}
@@ -59,16 +54,13 @@ func TestParse_ipv4(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
-
 	pl := &Listener{Listener: l}
-
 	go func() {
 		conn, err := net.Dial("tcp", pl.Addr().String())
 		if err != nil {
 			t.Fatalf("err: %v", err)
 		}
-		defer conn.Close()
-
+		defer func() { _ = conn.Close() }()
 		// Write out the header!
 		header := &Header{
 			Version:            2,
@@ -79,9 +71,8 @@ func TestParse_ipv4(t *testing.T) {
 			DestinationAddress: net.ParseIP("20.2.2.2"),
 			DestinationPort:    2000,
 		}
-		header.WriteTo(conn)
-
-		conn.Write([]byte("ping"))
+		_, _ = header.WriteTo(conn)
+		_, _ = conn.Write([]byte("ping"))
 		recv := make([]byte, 4)
 		_, err = conn.Read(recv)
 		if err != nil {
@@ -91,13 +82,11 @@ func TestParse_ipv4(t *testing.T) {
 			t.Fatalf("bad: %v", recv)
 		}
 	}()
-
 	conn, err := pl.Accept()
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
-	defer conn.Close()
-
+	defer func() { _ = conn.Close() }()
 	recv := make([]byte, 4)
 	_, err = conn.Read(recv)
 	if err != nil {
@@ -106,11 +95,9 @@ func TestParse_ipv4(t *testing.T) {
 	if !bytes.Equal(recv, []byte("ping")) {
 		t.Fatalf("bad: %v", recv)
 	}
-
 	if _, err := conn.Write([]byte("pong")); err != nil {
 		t.Fatalf("err: %v", err)
 	}
-
 	// Check the remote addr
 	addr := conn.RemoteAddr().(*net.TCPAddr)
 	if addr.IP.String() != "10.1.1.1" {
@@ -126,16 +113,13 @@ func TestParse_ipv6(t *testing.T) {
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
-
 	pl := &Listener{Listener: l}
-
 	go func() {
 		conn, err := net.Dial("tcp", pl.Addr().String())
 		if err != nil {
 			t.Fatalf("err: %v", err)
 		}
-		defer conn.Close()
-
+		defer func() { _ = conn.Close() }()
 		// Write out the header!
 		header := &Header{
 			Version:            2,
@@ -146,9 +130,8 @@ func TestParse_ipv6(t *testing.T) {
 			DestinationAddress: net.ParseIP("ffff::ffff"),
 			DestinationPort:    2000,
 		}
-		header.WriteTo(conn)
-
-		conn.Write([]byte("ping"))
+		_, _ = header.WriteTo(conn)
+		_, _ = conn.Write([]byte("ping"))
 		recv := make([]byte, 4)
 		_, err = conn.Read(recv)
 		if err != nil {
@@ -158,13 +141,11 @@ func TestParse_ipv6(t *testing.T) {
 			t.Fatalf("bad: %v", recv)
 		}
 	}()
-
 	conn, err := pl.Accept()
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
-	defer conn.Close()
-
+	defer func() { _ = conn.Close() }()
 	recv := make([]byte, 4)
 	_, err = conn.Read(recv)
 	if err != nil {
@@ -173,11 +154,9 @@ func TestParse_ipv6(t *testing.T) {
 	if !bytes.Equal(recv, []byte("ping")) {
 		t.Fatalf("bad: %v", recv)
 	}
-
 	if _, err := conn.Write([]byte("pong")); err != nil {
 		t.Fatalf("err: %v", err)
 	}
-
 	// Check the remote addr
 	addr := conn.RemoteAddr().(*net.TCPAddr)
 	if addr.IP.String() != "ffff::ffff" {

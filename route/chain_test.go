@@ -19,16 +19,16 @@ func (h *testHandler) Middleware(next http.Handler) http.Handler {
 }
 
 func TestChainHandlerServeHTTP(t *testing.T) {
-	var obj *ChainHandler
-	var h *testHandler
-	var rq *http.Request
+	var (
+		obj *ChainHandler
+		h   *testHandler
+		rq  *http.Request
+	)
 
 	obj = new(ChainHandler)
 	h = new(testHandler)
-
 	obj.chain = h
 	obj.Endpoint = h
-
 	rq, _ = http.NewRequest("", "", nil)
 	obj.ServeHTTP(nil, rq)
 	obj.ServeHTTP(nil, rq)
@@ -38,17 +38,17 @@ func TestChainHandlerServeHTTP(t *testing.T) {
 }
 
 func TestHandler(t *testing.T) {
-	var mws *Middlewares
-	var h *testHandler
-	var hndl http.Handler
-	var rq *http.Request
+	var (
+		mws  *Middlewares
+		h    *testHandler
+		hndl http.Handler
+		rq   *http.Request
+	)
 
 	mws = new(Middlewares)
 	h = new(testHandler)
-
 	hndl = mws.Handler(h)
 	rq, _ = http.NewRequest("", "", nil)
-
 	hndl.ServeHTTP(nil, rq)
 	hndl.ServeHTTP(nil, rq)
 	if h.C != 2 {
@@ -57,17 +57,17 @@ func TestHandler(t *testing.T) {
 }
 
 func TestHandlerFunc(t *testing.T) {
-	var mws *Middlewares
-	var h *testHandler
-	var hndl http.Handler
-	var rq *http.Request
+	var (
+		mws  *Middlewares
+		h    *testHandler
+		hndl http.Handler
+		rq   *http.Request
+	)
 
 	mws = new(Middlewares)
 	h = new(testHandler)
-
 	hndl = mws.HandlerFunc(h.ServeHTTP)
 	rq, _ = http.NewRequest("", "", nil)
-
 	hndl.ServeHTTP(nil, rq)
 	hndl.ServeHTTP(nil, rq)
 	if h.C != 2 {
@@ -76,19 +76,19 @@ func TestHandlerFunc(t *testing.T) {
 }
 
 func TestChainMiddlewares(t *testing.T) {
-	var mws Middlewares
-	var h *testHandler
-	var hndl http.Handler
-	var rq *http.Request
+	var (
+		mws  Middlewares
+		h    *testHandler
+		hndl http.Handler
+		rq   *http.Request
+	)
 
 	h = new(testHandler)
 	mws = make(Middlewares, 0)
 	mws = append(mws, h.Middleware)
 	mws = append(mws, h.Middleware)
-
 	hndl = mws.Handler(h)
 	rq, _ = http.NewRequest("", "", nil)
-
 	hndl.ServeHTTP(nil, rq)
 	hndl.ServeHTTP(nil, rq)
 	if h.C != 6 {

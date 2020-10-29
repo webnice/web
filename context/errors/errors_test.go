@@ -6,8 +6,10 @@ import (
 )
 
 func TestReset(t *testing.T) {
-	var p1, p2 string
-	var obj = New().(*impl)
+	var (
+		p1, p2 string
+		obj    = New().(*impl)
+	)
 
 	p1 = fmt.Sprintf("%p", obj.errors)
 	obj.Reset()
@@ -19,8 +21,10 @@ func TestReset(t *testing.T) {
 
 func TestDo(t *testing.T) {
 	const testKey uint32 = (1 << 32) - 1
-	var obj *impl
-	var err = fmt.Errorf("Test error value")
+	var (
+		obj *impl
+		err = fmt.Errorf("test error value")
+	)
 
 	obj = New().(*impl)
 	if obj.do(testKey, err) != err {
@@ -29,7 +33,6 @@ func TestDo(t *testing.T) {
 	if obj.do(testKey, nil) != err {
 		t.Errorf("Error do(), returns object is incorrect")
 	}
-
 	obj.Reset()
 	if obj.do(testKey, nil) != nil {
 		t.Errorf("Error do(), return object is incorrect")

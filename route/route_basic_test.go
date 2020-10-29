@@ -1,7 +1,5 @@
 package route
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"bufio"
 	"bytes"
@@ -11,14 +9,16 @@ import (
 	"strings"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/context"
-	"gopkg.in/webnice/web.v1/status"
+	"github.com/webnice/web/v1/context"
+	"github.com/webnice/web/v1/status"
 )
 
 func testRequest(t *testing.T, method string, path string, body *bytes.Buffer) (rsp *http.Response, ret *bytes.Buffer, err error) {
-	var req *http.Request
-	var buf *bytes.Buffer
-	var tmp [][]byte
+	var (
+		req *http.Request
+		buf *bytes.Buffer
+		tmp [][]byte
+	)
 
 	ret = &bytes.Buffer{}
 	if req, err = http.NewRequest(method, path, body); err != nil {
@@ -28,7 +28,6 @@ func testRequest(t *testing.T, method string, path string, body *bytes.Buffer) (
 		return
 	}
 	defer func() { _ = rsp.Body.Close() }()
-
 	buf = &bytes.Buffer{}
 	if err = rsp.Write(buf); err != nil {
 		return
@@ -36,12 +35,10 @@ func testRequest(t *testing.T, method string, path string, body *bytes.Buffer) (
 	if rsp, err = http.ReadResponse(bufio.NewReader(buf), req); err != nil {
 		return
 	}
-
 	buf.Reset()
 	if err = rsp.Write(buf); err != nil {
 		return
 	}
-
 	if tmp = bytes.SplitN(buf.Bytes(), []byte{'\r', '\n', '\r', '\n'}, 2); len(tmp) > 1 {
 		ret = bytes.NewBuffer(tmp[1])
 	} else if tmp = bytes.SplitN(buf.Bytes(), []byte{'\n', '\n'}, 2); len(tmp) > 1 {
@@ -54,8 +51,10 @@ func testRequest(t *testing.T, method string, path string, body *bytes.Buffer) (
 }
 
 func TestNew(t *testing.T) {
-	var ok bool
-	var rou = New().(*impl)
+	var (
+		ok  bool
+		rou = New().(*impl)
+	)
 
 	if rou.tree == nil {
 		t.Errorf("Error New(), tree is nil")
@@ -73,6 +72,7 @@ func TestNew(t *testing.T) {
 
 func TestErrorsHandlers(t *testing.T) {
 	var r = New()
+
 	if r.Errors() == nil {
 		t.Errorf("Errors() returns nil")
 	}
@@ -111,11 +111,13 @@ func testServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 }
 
 func TestServeHTTP(t *testing.T) {
-	var err error
-	var w1 Interface
-	var srv *httptest.Server
-	var rsp *http.Response
-	var buf *bytes.Buffer
+	var (
+		err error
+		w1  Interface
+		srv *httptest.Server
+		rsp *http.Response
+		buf *bytes.Buffer
+	)
 
 	// Empty handler
 	w1 = New()
@@ -131,7 +133,6 @@ func TestServeHTTP(t *testing.T) {
 		t.Errorf("Error ServeHTTP(), returns incorrect error description: %q", buf.String())
 	}
 	srv.Close()
-
 	// Incorrect routing
 	w1 = New()
 	w1.Get("/", testServeHTTP)
@@ -148,7 +149,6 @@ func TestServeHTTP(t *testing.T) {
 		t.Errorf("Error ServeHTTP(), returns incorrect error description: %q", buf.String())
 	}
 	srv.Close()
-
 	// Correct handler
 	w1 = New()
 	w1.Get("/", testServeHTTP)

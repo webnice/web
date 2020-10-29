@@ -1,14 +1,12 @@
 package context
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	stdContext "context"
 	"net/http"
 
-	"gopkg.in/webnice/web.v1/context/errors"
-	"gopkg.in/webnice/web.v1/context/handlers"
-	"gopkg.in/webnice/web.v1/context/route"
+	"github.com/webnice/web/v1/context/errors"
+	"github.com/webnice/web/v1/context/handlers"
+	"github.com/webnice/web/v1/context/route"
 )
 
 // New returns a new routing context object
@@ -18,11 +16,13 @@ import (
 // from Interface of this package.
 // If an invalid argument type is passed, the function will return nil
 func New(obj ...interface{}) Interface {
-	var ctx *impl
-	var i int
+	var (
+		ctx *impl
+		n   int
+	)
 
-	for i = range obj {
-		switch val := obj[i].(type) {
+	for n = range obj {
+		switch val := obj[n].(type) {
 		case *http.Request:
 			ctx = request(val)
 			ctx.Request = val
@@ -36,7 +36,7 @@ func New(obj ...interface{}) Interface {
 			if ctx.handlers == nil {
 				ctx.handlers = handlers.New(ctx.errors)
 			}
-			// Allways new route object
+			// Always new route object
 			ctx.route = route.New()
 		default:
 			// invalid argument type is passed
@@ -46,7 +46,6 @@ func New(obj ...interface{}) Interface {
 			return ctx
 		}
 	}
-
 	ctx = new(impl)
 	ctx.route = route.New()
 	ctx.errors = errors.New()

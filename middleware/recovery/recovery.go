@@ -1,13 +1,11 @@
 package recovery
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"net/http"
 	runtimeDebug "runtime/debug"
 
-	"gopkg.in/webnice/web.v1/context"
+	"github.com/webnice/web/v1/context"
 )
 
 // Handler is a middleware that recovers from panics

@@ -1,11 +1,9 @@
 package web
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
-	"gopkg.in/webnice/web.v1/context/errors"
-	"gopkg.in/webnice/web.v1/context/handlers"
-	"gopkg.in/webnice/web.v1/route"
+	"github.com/webnice/web/v1/context/errors"
+	"github.com/webnice/web/v1/context/handlers"
+	"github.com/webnice/web/v1/route"
 )
 
 // New is a constructor of new web server implementation
@@ -14,6 +12,7 @@ func New() Interface {
 	wsv.route = route.New()
 	wsv.inCloseUp = make(chan bool, 1)
 	wsv.isRun.Store(false)
+
 	return wsv
 }
 

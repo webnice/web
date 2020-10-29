@@ -6,7 +6,7 @@ package tlvparse
 import (
 	"regexp"
 
-	"gopkg.in/webnice/web.v1/proxyp"
+	"github.com/webnice/web/v1/proxyp"
 )
 
 const (
@@ -29,6 +29,7 @@ func AWSVPCEndpointID(tlv proxyproto.TLV) (string, error) {
 	if !vpceRe.MatchString(vpce) {
 		return "", proxyproto.ErrMalformedTLV
 	}
+
 	return vpce, nil
 }
 
@@ -39,5 +40,6 @@ func FindAWSVPCEndpointID(tlvs []proxyproto.TLV) string {
 			return vpc
 		}
 	}
+
 	return ""
 }

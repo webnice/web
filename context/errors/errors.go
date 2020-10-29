@@ -1,13 +1,13 @@
 package errors
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/ambry"
+import "github.com/webnice/web/v1/ambry"
 
 // New returns new context object
 func New() Interface {
 	var ce = new(impl)
+
 	ce.errors = ambry.New()
+
 	return ce
 }
 

@@ -1,7 +1,5 @@
 package recovery
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"io/ioutil"
@@ -10,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/route"
+	"github.com/webnice/web/v1/route"
 )
 
 const (
@@ -22,29 +20,28 @@ func testPanic(wr http.ResponseWriter, rq *http.Request) {
 }
 
 func testRecover(t *testing.T, rou route.Interface) (err error) {
-	var srv *httptest.Server
-	var rsp *http.Response
-	var buf []byte
+	var (
+		srv *httptest.Server
+		rsp *http.Response
+		buf []byte
+	)
 
 	defer func() {
 		if e := recover(); e != nil {
 			err = fmt.Errorf("Panic fail. Catch: %s", e.(error))
 		}
 	}()
-
 	srv = httptest.NewServer(http.HandlerFunc(testPanic))
 	if rou != nil {
 		srv.Config.Handler = rou
 	}
 	defer srv.Close()
-
 	rsp, err = http.Get(srv.URL)
 	if err != nil {
 		err = fmt.Errorf("Error response HandlerFunc: %s", err)
 		return
 	}
 	defer func() { _ = rsp.Body.Close() }()
-
 	if buf, err = ioutil.ReadAll(rsp.Body); err != nil {
 		err = fmt.Errorf("Error read response: %s", err)
 		return
@@ -54,7 +51,7 @@ func testRecover(t *testing.T, rou route.Interface) (err error) {
 		return
 	}
 	if !strings.Contains(string(buf), testPanicString) {
-		err = fmt.Errorf("Error, response not contains test panic string")
+		err = fmt.Errorf("error, response not contains test panic string")
 		return
 	}
 
@@ -62,8 +59,10 @@ func testRecover(t *testing.T, rou route.Interface) (err error) {
 }
 
 func TestRecover(t *testing.T) {
-	var rou route.Interface
-	var err error
+	var (
+		rou route.Interface
+		err error
+	)
 
 	rou = route.New()
 	rou.Use(Handler)

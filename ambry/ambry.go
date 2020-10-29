@@ -1,8 +1,5 @@
 package ambry
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-
 // New is a constructor
 func New() Interface {
 	var itm = new(impl)
@@ -23,6 +20,7 @@ func (itm *impl) Set(k interface{}, v interface{}) {
 // It appends to any existing values associated with key
 func (itm *impl) Add(k interface{}, v interface{}) {
 	var ok bool
+
 	itm.RLock()
 	_, ok = itm.items[key(k)]
 	itm.RUnlock()
@@ -48,8 +46,10 @@ func (itm *impl) Has(k interface{}) (ret bool) {
 // If there are no values associated with the key, Get returns "".
 // To access multiple values of a key, or to use access the map directly
 func (itm *impl) Get(k interface{}) (ret interface{}) {
-	var value []*item
-	var ok bool
+	var (
+		value []*item
+		ok    bool
+	)
 
 	itm.RLock()
 	value, ok = itm.items[key(k)]
@@ -58,13 +58,16 @@ func (itm *impl) Get(k interface{}) (ret interface{}) {
 		return
 	}
 	ret = value[0].Value
+
 	return
 }
 
 // Del deletes the values associated with key
 func (itm *impl) Del(k interface{}) (ret interface{}) {
-	var value []*item
-	var ok bool
+	var (
+		value []*item
+		ok    bool
+	)
 
 	itm.RLock()
 	value, ok = itm.items[key(k)]
@@ -76,6 +79,7 @@ func (itm *impl) Del(k interface{}) (ret interface{}) {
 	delete(itm.items, key(k))
 	itm.Unlock()
 	ret = value[0].Value
+
 	return
 }
 
@@ -83,20 +87,24 @@ func (itm *impl) Del(k interface{}) (ret interface{}) {
 // If there are no values, Keys returns empty slice
 func (itm *impl) Keys() (ret []interface{}) {
 	var i key
+
 	itm.RLock()
 	for i = range itm.items {
 		ret = append(ret, i)
 	}
 	itm.RUnlock()
+
 	return
 }
 
 // Get gets the all value associated with the given key.
 // If there are no values associated with the key, Get returns empty slice
 func (itm *impl) GetAll(k interface{}) (ret []interface{}) {
-	var value []*item
-	var ok bool
-	var i int
+	var (
+		value []*item
+		ok    bool
+		n     int
+	)
 
 	itm.RLock()
 	value, ok = itm.items[key(k)]
@@ -104,8 +112,9 @@ func (itm *impl) GetAll(k interface{}) (ret []interface{}) {
 	if !ok {
 		return
 	}
-	for i = range value {
-		ret = append(ret, value[i].Value)
+	for n = range value {
+		ret = append(ret, value[n].Value)
 	}
+
 	return
 }

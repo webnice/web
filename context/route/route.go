@@ -1,17 +1,17 @@
 package route
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"strings"
 
-	"gopkg.in/webnice/web.v1/param"
+	"github.com/webnice/web/v1/param"
 )
 
 // New returns a new routing context object
 func New() Interface {
 	var rt = new(impl)
+
 	rt.params = param.New()
+
 	return rt
 }
 
@@ -33,6 +33,7 @@ func (rt *impl) Path(str ...string) string {
 		return rt.path
 	}
 	rt.path = strings.Join(str, ``)
+
 	return rt.path
 }
 
@@ -43,6 +44,7 @@ func (rt *impl) Pattern(str ...string) string {
 		return rt.pattern
 	}
 	rt.pattern = strings.Join(str, ``)
+
 	return rt.pattern
 }
 
@@ -63,5 +65,6 @@ func (rt *impl) Patterns(items ...[]string) []string {
 		copy(rt.patterns[j:j+len(items[i])], items[i])
 		j += len(items[i])
 	}
+
 	return rt.patterns
 }

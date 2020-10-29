@@ -1,7 +1,5 @@
 package method
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"strings"
@@ -70,8 +68,9 @@ func All() (ret []Method) {
 func Parse(mtd string) (ret Method, err error) {
 	var ok bool
 	if ret, ok = methodMap[strings.ToUpper(mtd)]; !ok {
-		err = fmt.Errorf("Unknown request method %s", mtd)
+		err = fmt.Errorf("unknown request method %s", mtd)
 	}
+
 	return
 }
 
@@ -97,6 +96,7 @@ func (mt Method) String() string {
 	case Trace:
 		return `TRACE`
 	}
+
 	return ``
 }
 

@@ -1,17 +1,19 @@
 package param
 
-import (
-	"testing"
-)
+import "testing"
 
-const KEY = "foo"
-const VAL = "bar"
+const (
+	KEY = "foo"
+	VAL = "bar"
+)
 
 var res interface{}
 
 func BenchmarkGet(b *testing.B) {
-	var str string
-	var prm = New()
+	var (
+		str string
+		prm = New()
+	)
 
 	prm.Set(KEY, VAL)
 	for n := 0; n < b.N; n++ {
@@ -31,10 +33,13 @@ func BenchmarkSet(b *testing.B) {
 }
 
 func BenchmarkHas(b *testing.B) {
-	var has bool
-	var prm = New()
+	var (
+		has bool
+		n   int
+		prm = New()
+	)
 
-	for n := 0; n < b.N; n++ {
+	for n = 0; n < b.N; n++ {
 		res = prm.Has(KEY)
 	}
 	res = has

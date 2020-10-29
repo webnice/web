@@ -1,7 +1,5 @@
 package route
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"bytes"
 	"net/http"
@@ -9,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/status"
+	"github.com/webnice/web/v1/status"
 )
 
 var (
@@ -24,11 +22,13 @@ func testMiddlewareCounter(next http.Handler) http.Handler {
 }
 
 func TestUse(t *testing.T) {
-	var err error
-	var srv *httptest.Server
-	var rsp *http.Response
-	var buf *bytes.Buffer
-	var r = New()
+	var (
+		err error
+		srv *httptest.Server
+		rsp *http.Response
+		buf *bytes.Buffer
+		r   = New()
+	)
 	var hf = func(wr http.ResponseWriter, rq *http.Request) {
 		wr.WriteHeader(status.Ok)
 		_, _ = wr.Write(status.Bytes(status.Ok))
@@ -37,7 +37,6 @@ func TestUse(t *testing.T) {
 	// Correct middlewares
 	r.Use(testMiddlewareCounter)
 	r.Get("/", hf)
-
 	srv = httptest.NewServer(r)
 	rsp, buf, err = testRequest(t, "GET", srv.URL, &bytes.Buffer{})
 	if err != nil {
@@ -50,13 +49,11 @@ func TestUse(t *testing.T) {
 		t.Errorf("Error in handlefunc")
 	}
 	srv.Close()
-
 	// Incorrect call use
 	testMiddlewareCount = 0
 	r = New()
 	r.Get("/", hf)
 	r.Use(testMiddlewareCounter)
-
 	srv = httptest.NewServer(r)
 	rsp, buf, err = testRequest(t, "GET", srv.URL, &bytes.Buffer{})
 	if err != nil {
