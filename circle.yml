@@ -1,7 +1,7 @@
 dependencies:
   override:
-    - mkdir -p src/gopkg.in/webnice
-    - cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null
+    - mkdir -p src/github.com/webnice
+    - cd src/github.com/webnice && ln -s ../../.. web 2>/dev/null
 
 test:
   override:

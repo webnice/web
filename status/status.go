@@ -1,10 +1,6 @@
 package status
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-import (
-	"fmt"
-)
+import "fmt"
 
 // Text returns a text for the HTTP status code as string
 // If the code is unknown, return "HTTP status code %d"

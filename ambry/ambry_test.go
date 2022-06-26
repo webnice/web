@@ -1,10 +1,6 @@
 package ambry
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-import (
-	"testing"
-)
+import "testing"
 
 var (
 	k  = `A69F2F4D-0B8F-43D3-8E1B-1EA90766FEB5`

@@ -1,8 +1,5 @@
 package param
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-
 // New is a constructor
 func New() Interface {
 	var itm = new(impl)
@@ -91,7 +88,7 @@ func (itm *impl) Keys() (ret []string) {
 	return
 }
 
-// Get gets the all value associated with the given key.
+// GetAll Get gets the all value associated with the given key.
 // If there are no values associated with the key, Get returns empty slice
 func (itm *impl) GetAll(k string) (ret []string) {
 	var value []*item

@@ -1,8 +1,6 @@
 package param
 
-import (
-	"testing"
-)
+import "testing"
 
 var (
 	k  = `A69F2F4D-0B8F-43D3-8E1B-1EA90766FEB5`

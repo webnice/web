@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/proxyp"
+	"github.com/webnice/web/proxyp"
 )
 
 func checkTLVs(t *testing.T, name string, raw []byte, expected []proxyproto.PP2Type) []proxyproto.TLV {

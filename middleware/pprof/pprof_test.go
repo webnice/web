@@ -1,7 +1,5 @@
 package pprof
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"fmt"
 	"io/ioutil"
@@ -10,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/route"
+	"github.com/webnice/web/route"
 )
 
 const testTitleString = `<title>/debug/pprof/</title>`

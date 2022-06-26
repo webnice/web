@@ -1,15 +1,13 @@
 package status
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-import (
-	"testing"
-)
+import "testing"
 
 func TestStatus(tst *testing.T) {
-	var v int
-	var t string
-	var b []byte
+	var (
+		v int
+		t string
+		b []byte
+	)
 
 	v = Ok
 	t = Text(v)

@@ -1,8 +1,6 @@
 package proxyproto
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestTCPoverIPv4(t *testing.T) {
 	b := byte(TCPv4)

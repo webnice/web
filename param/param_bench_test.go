@@ -1,11 +1,11 @@
 package param
 
-import (
-	"testing"
-)
+import "testing"
 
-const KEY = "foo"
-const VAL = "bar"
+const (
+	KEY = "foo"
+	VAL = "bar"
+)
 
 var res interface{}
 

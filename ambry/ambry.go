@@ -1,8 +1,5 @@
 package ambry
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-
 // New is a constructor
 func New() Interface {
 	var itm = new(impl)

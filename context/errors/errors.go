@@ -1,8 +1,6 @@
 package errors
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/ambry"
+import "github.com/webnice/web/ambry"
 
 // New returns new context object
 func New() Interface {

@@ -1,8 +1,6 @@
 package route
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
-import "gopkg.in/webnice/web.v1/param"
+import "github.com/webnice/web/param"
 
 // This is the default routing context set on the root node of a request context to track URL parameters and an optional routing path
 type impl struct {

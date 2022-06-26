@@ -6,7 +6,7 @@ package tlvparse
 import (
 	"regexp"
 
-	"gopkg.in/webnice/web.v1/proxyp"
+	"github.com/webnice/web/proxyp"
 )
 
 const (

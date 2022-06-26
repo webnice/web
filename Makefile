@@ -15,7 +15,7 @@ GO111MODULE ?= $(GO111MODULE:on)
 default: help
 
 link:
-	@mkdir -p src/gopkg.in/webnice; cd src/gopkg.in/webnice && ln -s ../../.. web.v1 2>/dev/null; true
+	@mkdir -p src/github.com/webnice; cd src/github.com/webnice && ln -s ../../.. web 2>/dev/null; true
 .PHONY: link
 
 ## Code generation (run only during development)
@@ -30,7 +30,7 @@ test: link
 	@echo "mode: set" > coverage.log
 	@for PACKET in $(TESTPACKETS); do \
 		touch coverage-tmp.log; \
-		GOPATH=${GOPATH} go test -v -covermode=count -coverprofile=coverage-tmp.log $$PACKET; \
+		GO111MODULE="off" go test -v -covermode=count -coverprofile=coverage-tmp.log $$PACKET; \
 		if [ "$$?" -ne "0" ]; then exit $$?; fi; \
 		tail -n +2 coverage-tmp.log | sort -r | awk '{if($$1 != last) {print $$0;last=$$1}}' >> coverage.log; \
 		rm -f coverage-tmp.log; true; \
@@ -39,7 +39,7 @@ test: link
 
 	## Displaying in the browser coverage of tested code, on the html report (run only during development)
 cover: test
-	@GOPATH=${GOPATH} go tool cover -html=$(DIR)/coverage.log
+	@GOPATH=${GOPATH} GO111MODULE="off" go tool cover -html=$(DIR)/coverage.log
 .PHONY: cover
 
 ## Performance testing

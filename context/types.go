@@ -1,13 +1,11 @@
 package context
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"net/http"
 
-	"gopkg.in/webnice/web.v1/context/errors"
-	"gopkg.in/webnice/web.v1/context/handlers"
-	"gopkg.in/webnice/web.v1/context/route"
+	"github.com/webnice/web/context/errors"
+	"github.com/webnice/web/context/handlers"
+	"github.com/webnice/web/context/route"
 )
 
 var (

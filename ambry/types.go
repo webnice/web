@@ -1,7 +1,5 @@
 package ambry
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import "sync"
 
 // Interface is an interface of package

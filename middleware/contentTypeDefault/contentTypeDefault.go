@@ -1,13 +1,11 @@
 package contentTypeDefault
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"io"
 	"net/http"
 
-	"gopkg.in/webnice/web.v1/header"
-	"gopkg.in/webnice/web.v1/status"
+	"github.com/webnice/web/header"
+	"github.com/webnice/web/status"
 )
 
 // Interface is an interface of package

@@ -1,14 +1,12 @@
 package route
 
-// import "gopkg.in/webnice/debug.v1"
-// import "gopkg.in/webnice/log.v2"
 import (
 	"net/http"
 	"sync"
 
-	"gopkg.in/webnice/web.v1/context"
-	"gopkg.in/webnice/web.v1/context/errors"
-	"gopkg.in/webnice/web.v1/context/handlers"
+	"github.com/webnice/web/context"
+	"github.com/webnice/web/context/errors"
+	"github.com/webnice/web/context/handlers"
 )
 
 // Interface is an interface of router consisting of the core routing methods, using only the standard net/http

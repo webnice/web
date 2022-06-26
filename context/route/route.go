@@ -1,11 +1,9 @@
 package route
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"strings"
 
-	"gopkg.in/webnice/web.v1/param"
+	"github.com/webnice/web/param"
 )
 
 // New returns a new routing context object

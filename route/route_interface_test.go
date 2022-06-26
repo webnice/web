@@ -1,7 +1,5 @@
 package route
 
-//import "gopkg.in/webnice/debug.v1"
-//import "gopkg.in/webnice/log.v2"
 import (
 	"bytes"
 	"net/http"
@@ -9,12 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	"gopkg.in/webnice/web.v1/status"
+	"github.com/webnice/web/status"
 )
 
-var (
-	testMiddlewareCount int64
-)
+var testMiddlewareCount int64
 
 func testMiddlewareCounter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {
