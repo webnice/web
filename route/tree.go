@@ -18,7 +18,6 @@ const (
 	ntStatic   nodeTyp = iota // /string
 	ntParam                   // /:variable
 	ntCatchAll                // /api/v1.0/*
-	//ntRegexp                  // /:id([0-9]+) or #id^[0-9]+$
 )
 
 type (

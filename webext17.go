@@ -1,12 +1,9 @@
+//go:build go1.7 && !go1.8
 // +build go1.7,!go1.8
 
 package web
 
-
-
-import (
-	"net/http"
-)
+import "net/http"
 
 // Stop web server
 func (wsv *web) Stop() Interface {

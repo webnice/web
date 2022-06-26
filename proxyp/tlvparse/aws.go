@@ -11,6 +11,7 @@ import (
 
 const (
 	// Amazon's extension
+
 	PP2_TYPE_AWS            = 0xEA
 	PP2_SUBTYPE_AWS_VPCE_ID = 0x01
 )

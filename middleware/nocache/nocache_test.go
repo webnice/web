@@ -13,9 +13,7 @@ import (
 	"github.com/webnice/web/v2/status"
 )
 
-const (
-	ifModifiedSinceTimeFormat = `Mon, 02 Jan 2006 15:04:05 GMT`
-)
+const ifModifiedSinceTimeFormat = `Mon, 02 Jan 2006 15:04:05 GMT`
 
 func testNoCacheHandlerFunc(wr http.ResponseWriter, rq *http.Request) {
 	wr.Header().Add(header.ETag, "686897696a7c876b7e")

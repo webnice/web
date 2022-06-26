@@ -13,9 +13,7 @@ import (
 	"github.com/webnice/web/v2/method"
 )
 
-var (
-	emptyParams = map[string]string{}
-)
+var emptyParams = map[string]string{}
 
 func TestTree(t *testing.T) {
 	hStub := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})

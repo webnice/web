@@ -1,7 +1,5 @@
 package web
 
-
-
 import (
 	"fmt"
 	"testing"

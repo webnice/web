@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	// Protocol
+	// Protocols
+
 	SIGV1 = []byte{'\x50', '\x52', '\x4F', '\x58', '\x59'}
 	SIGV2 = []byte{'\x0D', '\x0A', '\x0D', '\x0A', '\x00', '\x0D', '\x0A', '\x51', '\x55', '\x49', '\x54', '\x0A'}
 

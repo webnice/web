@@ -1,8 +1,6 @@
 package ambry
 
-import (
-	"testing"
-)
+import "testing"
 
 const (
 	KEY = "foo"

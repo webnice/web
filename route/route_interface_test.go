@@ -10,9 +10,7 @@ import (
 	"github.com/webnice/web/v2/status"
 )
 
-var (
-	testMiddlewareCount int64
-)
+var testMiddlewareCount int64
 
 func testMiddlewareCounter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(wr http.ResponseWriter, rq *http.Request) {

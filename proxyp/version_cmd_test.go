@@ -1,8 +1,6 @@
 package proxyproto
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestLocal(t *testing.T) {
 	b := byte(LOCAL)
