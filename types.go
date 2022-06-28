@@ -93,11 +93,11 @@ type web struct {
 	err         error           // The last of error
 }
 
-// Configuration is a structure of web server configuration
-type Configuration struct { // nolint: maligned
+// Configuration Структура конфигурации веб сервера.
+type Configuration struct {
 	// HostPort (readonly) Адрес составленный автоматически из Host:Port
 	// Значение создаётся автоматически при инициализации конфигурации
-	// Default value: ":http"
+	// Default value: ""
 	HostPort string `yaml:"-" json:"-"`
 
 	// Address Публичный адрес на котором сервер доступен извне
@@ -118,24 +118,23 @@ type Configuration struct { // nolint: maligned
 	// TLSPrivateKeyPEM Путь и имя файла содержащего приватный ключ в PEM формате
 	TLSPrivateKeyPEM string `yaml:"TLSPrivateKeyPEM" json:"tls_private_key_pem"`
 
-	// Host IP адрес или имя хоста на котором запускается web сервер,
-	// можно указывать 0.0.0.0 для всех ip адресов
-	// Default value: ""
-	Host string `yaml:"Host" json:"host"`
+	// Host IP адрес или имя хоста на котором запускается web сервер, можно указывать 0.0.0.0 для всех ip адресов.
+	// Default value: "0.0.0.0"
+	Host string `yaml:"Host" json:"host" default-value:"0.0.0.0"`
 
 	// Port tcp/ip порт занимаемый сервером
 	// Default value: 80
-	Port uint16 `yaml:"Port" json:"port"`
+	Port uint16 `yaml:"Port" json:"port" default-value:"80"`
 
 	// Socket Unix socket на котором поднимается сервер, только для unix-like операционных систем Linux, Unix, Mac
 	// Default value: "" - unix socket is off
-	Socket string `yaml:"Socket" json:"socket"`
+	Socket string `yaml:"Socket" json:"socket" default-value:"-"`
 
 	// Mode Режим работы, tcp, tcp4, tcp6, unix, unixpacket, socket, systemd
 	// systemd - systemd is configures to open the port or unix socket and passes over the file descriptor the port
 	// listener to the service. See systemd.socket(5) manual.
 	// Default value: "tcp"
-	Mode string `yaml:"Mode" json:"mode"`
+	Mode string `yaml:"Mode" json:"mode" default-value:"tcp"`
 
 	// ReadTimeout Время в наносекундах ожидания запроса включая ReadHeaderTimeout
 	// Если не указано или рано 0 - таймаута нет
@@ -160,11 +159,11 @@ type Configuration struct { // nolint: maligned
 	// ShutdownTimeout is the maximum amount of time to wait for the server graceful shutdown
 	// Если не указано или рано 0 - таймаута нет
 	// Default value: 30s
-	ShutdownTimeout time.Duration `yaml:"ShutdownTimeout" json:"shutdown_timeout"`
+	ShutdownTimeout time.Duration `yaml:"ShutdownTimeout" json:"shutdown_timeout" default-value:"30s"`
 
 	// MaxHeaderBytes controls the maximum number of bytes the server will read parsing the request header's keys and values, including the request line
 	// Default value: 1 MB (from net/http/DefaultMaxHeaderBytes)
-	MaxHeaderBytes int `yaml:"MaxHeaderBytes" json:"max_header_bytes"`
+	MaxHeaderBytes int `yaml:"MaxHeaderBytes" json:"max_header_bytes" default-value:"1048576"`
 
 	// TODO Сделать ограничение на максимальный размер тела запроса
 	// MaxBodyBytes controls the maximum number of bytes the server will read request body
@@ -179,5 +178,6 @@ type Configuration struct { // nolint: maligned
 	// The PROXY protocol enables web server to receive client connection information passed through proxy servers and
 	// load balancers such as HAproxy and Amazon Elastic Load Balancer (ELB).
 	// With the PROXY protocol, web server can learn the originating IP address from HTTP, SSL, HTTP/2, SPDY, WebSocket, and TCP.
+	// Default value: false
 	ProxyProtocol bool `yaml:"ProxyProtocol" json:"proxy_protocol"`
 }
