@@ -5,7 +5,7 @@ import (
 	"net/http"
 	runtimeDebug "runtime/debug"
 
-	"github.com/webnice/web/v2/context"
+	"github.com/webnice/web/v3/context"
 )
 
 // Handler is a middleware that recovers from panics

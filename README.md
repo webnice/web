@@ -1,6 +1,6 @@
 # web
 
-[![GoDoc](https://godoc.org/github.com/webnice/web/v2?status.png)](http://godoc.org/github.com/webnice/web/v2)
+[![GoDoc](https://godoc.org/github.com/webnice/web/v3?status.png)](http://godoc.org/github.com/webnice/web/v3)
 [![Go Report Card](https://goreportcard.com/badge/github.com/webnice/web)](https://goreportcard.com/report/github.com/webnice/web)
 [![Coverage Status](https://coveralls.io/repos/github/webnice/web/badge.svg?branch=v1)](https://coveralls.io/github/webnice/web?branch=v1)
 [![Build Status](https://travis-ci.org/webnice/web.svg?branch=v1)](https://travis-ci.org/webnice/web)
@@ -20,5 +20,5 @@ But at the same time framework adds to your application a full-functions routing
 
 #### Install
 ```bash
-go get github.com/webnice/web/v2
+go get github.com/webnice/web/v3
 ```

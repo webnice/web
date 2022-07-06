@@ -4,9 +4,9 @@ import (
 	stdContext "context"
 	"net/http"
 
-	"github.com/webnice/web/v2/context/errors"
-	"github.com/webnice/web/v2/context/handlers"
-	"github.com/webnice/web/v2/context/route"
+	"github.com/webnice/web/v3/context/errors"
+	"github.com/webnice/web/v3/context/handlers"
+	"github.com/webnice/web/v3/context/route"
 )
 
 // New returns a new routing context object

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/webnice/web/v2/route"
+	"github.com/webnice/web/v3/route"
 )
 
 const testPanicString = `8b56addac65f178e35a0fb560ac910e281a23c39fd6302034e90b03816a0924ab54ff3229d739ae098bdacf8fbfe55f61a08efb5ee5e74c5c5ccd519c9e15318`

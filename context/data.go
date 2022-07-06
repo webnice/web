@@ -10,8 +10,8 @@ import (
 	runtimeDebug "runtime/debug"
 	"strings"
 
-	"github.com/webnice/web/v2/header"
-	"github.com/webnice/web/v2/mime"
+	"github.com/webnice/web/v3/header"
+	"github.com/webnice/web/v3/mime"
 )
 
 // RegisterGlobalVerifyPlugin Register global external library of data verification

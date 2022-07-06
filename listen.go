@@ -174,7 +174,7 @@ func (wsv *web) Serve(ltn net.Listener) Interface { return wsv.ServeTLS(ltn, nil
 func (wsv *web) ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface {
 	var conf *Configuration
 
-	// TODO: Реализовать поддержку PROXY Protocol через "github.com/webnice/web/v2/proxyp", conf.ProxyProtocol
+	// TODO: Реализовать поддержку PROXY Protocol через "github.com/webnice/web/v3/proxyp", conf.ProxyProtocol
 
 	if wsv.conf == nil {
 		conf, _ = parseAddress(ltn.Addr().String())

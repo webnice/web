@@ -31,9 +31,9 @@ func (wsv *web) Stop() Interface {
 }
 
 func (wsv *web) loadConfiguration(tlsConfig *tls.Config) (srv *http.Server) {
-	if wsv.route.Errors().RouteConfigurationError(nil) != nil {
-		wsv.err = wsv.route.Errors().RouteConfigurationError(nil)
-	}
+	//if wsv.route.Errors().RouteConfigurationError(nil) != nil {
+	//	wsv.err = wsv.route.Errors().RouteConfigurationError(nil)
+	//}
 	srv = &http.Server{
 		Addr:              wsv.conf.HostPort,
 		IdleTimeout:       wsv.conf.IdleTimeout,

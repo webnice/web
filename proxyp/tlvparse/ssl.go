@@ -5,7 +5,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/webnice/web/v2/proxyp"
+	"github.com/webnice/web/v3/proxyp"
 )
 
 const (

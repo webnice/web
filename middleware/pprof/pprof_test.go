@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/webnice/web/v2/route"
+	"github.com/webnice/web/v3/route"
 )
 
 const testTitleString = `<title>/debug/pprof/</title>`

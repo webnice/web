@@ -1,15 +1,13 @@
 package web
 
 import (
-	"github.com/webnice/web/v2/context/errors"
-	"github.com/webnice/web/v2/context/handlers"
-	"github.com/webnice/web/v2/route"
+	"github.com/labstack/echo/v4"
 )
 
 // New is a constructor of new web server implementation
 func New() Interface {
 	var wsv = new(web)
-	wsv.route = route.New()
+	wsv.route = echo.New()
 	wsv.inCloseUp = make(chan bool, 1)
 	wsv.isRun.Store(false)
 
@@ -20,10 +18,10 @@ func New() Interface {
 func (wsv *web) Error() error { return wsv.err }
 
 // Route interface
-func (wsv *web) Route() route.Interface { return wsv.route }
+func (wsv *web) Route() *echo.Echo { return wsv.route }
 
 // Errors interface
-func (wsv *web) Errors() errors.Interface { return wsv.route.Errors() }
+//func (wsv *web) Errors() errors.Interface { return wsv.route.Errors() }
 
 // Handlers interface
-func (wsv *web) Handlers() handlers.Interface { return wsv.route.Handlers() }
+//func (wsv *web) Handlers() handlers.Interface { return wsv.route.Handlers() }

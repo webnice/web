@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/webnice/web/v2/header"
-	"github.com/webnice/web/v2/route"
-	"github.com/webnice/web/v2/status"
+	"github.com/webnice/web/v3/header"
+	"github.com/webnice/web/v3/route"
+	"github.com/webnice/web/v3/status"
 )
 
 const ifModifiedSinceTimeFormat = `Mon, 02 Jan 2006 15:04:05 GMT`

@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/webnice/web/v2/header"
-	"github.com/webnice/web/v2/mime"
-	"github.com/webnice/web/v2/status"
+	"github.com/webnice/web/v3/header"
+	"github.com/webnice/web/v3/mime"
+	"github.com/webnice/web/v3/status"
 )
 
 // Default handler for internal server errors

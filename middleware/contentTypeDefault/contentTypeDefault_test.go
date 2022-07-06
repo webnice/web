@@ -7,10 +7,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/webnice/web/v2/header"
-	"github.com/webnice/web/v2/mime"
-	"github.com/webnice/web/v2/route"
-	"github.com/webnice/web/v2/status"
+	"github.com/webnice/web/v3/header"
+	"github.com/webnice/web/v3/mime"
+	"github.com/webnice/web/v3/route"
+	"github.com/webnice/web/v3/status"
 )
 
 func testContentTypeDefaultHandlerFunc1(wr http.ResponseWriter, rq *http.Request) {

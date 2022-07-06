@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/webnice/web/v2/proxyp"
+	"github.com/webnice/web/v3/proxyp"
 )
 
 func checkTLVs(t *testing.T, name string, raw []byte, expected []proxyproto.PP2Type) []proxyproto.TLV {

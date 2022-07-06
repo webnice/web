@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/webnice/web/v2/status"
+	"github.com/webnice/web/v3/status"
 )
 
 var testMiddlewareCount int64

@@ -8,9 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/webnice/web/v2/context/errors"
-	"github.com/webnice/web/v2/context/handlers"
-	"github.com/webnice/web/v2/route"
+	"github.com/labstack/echo/v4"
 )
 
 const (
@@ -72,25 +70,25 @@ type Interface interface {
 	Stop() Interface
 
 	// Route interface
-	Route() route.Interface
+	Route() *echo.Echo
 
 	// Errors interface
-	Errors() errors.Interface
+	//Errors() errors.Interface
 
 	// Handlers interface
-	Handlers() handlers.Interface
+	//Handlers() handlers.Interface
 }
 
 // Is an private implementation of web server
 type web struct {
-	isRun       atomic.Value    // The indicator of web server goroutine. =true-goroutine is started, =false-goroutine is stopped
-	inCloseUp   chan bool       // The indicator of web server state, true in channel means we're in shutdown goroutine and web server
-	doCloseDone sync.WaitGroup  // Wait while goroutine stopped
-	conf        *Configuration  // The web server configuration
-	listener    net.Listener    // The web server listener
-	server      *http.Server    // The net/http web server object
-	route       route.Interface // Routing settings interface
-	err         error           // The last of error
+	isRun       atomic.Value   // The indicator of web server goroutine. =true-goroutine is started, =false-goroutine is stopped
+	inCloseUp   chan bool      // The indicator of web server state, true in channel means we're in shutdown goroutine and web server
+	doCloseDone sync.WaitGroup // Wait while goroutine stopped
+	conf        *Configuration // The web server configuration
+	listener    net.Listener   // The web server listener
+	server      *http.Server   // The net/http web server object
+	route       *echo.Echo     // Routing
+	err         error          // The last of error
 }
 
 // Configuration Структура конфигурации веб сервера.

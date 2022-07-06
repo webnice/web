@@ -5,7 +5,7 @@
 ## Project source directory path
 DIR         := $(strip $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST)))))
 
-GOPATH      := $(DIR):$(GOPATH)
+GOPATH      := $(GOPATH)
 DATE        := $(shell date -u +%Y%m%d.%H%M%S.%Z)
 GOGENERATE   = $(shell if [ -f .gogenerate ]; then cat .gogenerate; fi)
 TESTPACKETS  = $(shell if [ -f .testpackages ]; then cat .testpackages; fi)
@@ -16,6 +16,18 @@ default: help
 
 link:
 .PHONY: link
+
+## Загрузка зависимостей.
+dep-init:
+	@rm -rf ${DIR}/vendor 2>/dev/null; true
+.PHONY: dep-init
+dep: dep-init
+	@go clean -cache -modcache
+	@go get -u ./...
+	@go mod download
+	@go mod tidy
+	@go mod vendor
+.PHONY: dep
 
 ## Code generation (run only during development)
 # All generating files are included in a .gogenerate file
