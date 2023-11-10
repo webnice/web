@@ -11,15 +11,15 @@ import (
 )
 
 // ListenLoadFilesFdWithNames Загрузка файловых дескрипторов на основе переменных окружения
-func (wsv *web) ListenLoadFilesFdWithNames() (ret []*os.File, err error) {
+func (wbo *web) ListenLoadFilesFdWithNames() (ret []*os.File, err error) {
 	const (
 		listenFdBegin  = 3
 		listenPID      = `LISTEN_PID`
 		listenFds      = `LISTEN_FDS`
 		listenFdNames  = `LISTEN_FDNAMES`
 		listenFdPrefix = `LISTEN_FD_`
-		errPIDTpl      = `getting pid from environment %q, error: %s`
-		errFDSTpl      = `getting FD id from environment %q, error: %s`
+		errPIDTpl      = `получение PID из переменной окружения %q прервано ошибкой: %s`
+		errFDSTpl      = `получение файлового дескриптора из переменной окружения %q прервано ошибкой: %s`
 	)
 	var (
 		pID        int
@@ -58,8 +58,8 @@ func (wsv *web) ListenLoadFilesFdWithNames() (ret []*os.File, err error) {
 	return
 }
 
-// ListenersSystemdWithoutNames returns a net.Listener for each matching socket type passed to this process
-func (wsv *web) ListenersSystemdWithoutNames() (ret []net.Listener, err error) {
+// ListenersSystemdWithoutNames Возвращает срез net.Listener сокетов переданных в процесс веб сервера из systemd.
+func (wbo *web) ListenersSystemdWithoutNames() (ret []net.Listener, err error) {
 	var (
 		file  *os.File
 		files []*os.File
@@ -67,7 +67,7 @@ func (wsv *web) ListenersSystemdWithoutNames() (ret []net.Listener, err error) {
 		pc    net.Listener
 	)
 
-	files, err = wsv.ListenLoadFilesFdWithNames()
+	files, err = wbo.ListenLoadFilesFdWithNames()
 	ret = make([]net.Listener, len(files))
 	for n, file = range files {
 		if pc, err = net.FileListener(file); err == nil {
@@ -78,8 +78,9 @@ func (wsv *web) ListenersSystemdWithoutNames() (ret []net.Listener, err error) {
 	return
 }
 
-// ListenersSystemdWithNames maps a listener name to a set of net.Listener instances
-func (wsv *web) ListenersSystemdWithNames() (ret map[string][]net.Listener, err error) {
+// ListenersSystemdWithNames Возвращает карту срезов net.Listener сокетов переданных в процесс веб сервера
+// из systemd.
+func (wbo *web) ListenersSystemdWithNames() (ret map[string][]net.Listener, err error) {
 	var (
 		file    *os.File
 		files   []*os.File
@@ -88,7 +89,7 @@ func (wsv *web) ListenersSystemdWithNames() (ret map[string][]net.Listener, err 
 		ok      bool
 	)
 
-	files, err = wsv.ListenLoadFilesFdWithNames()
+	files, err = wbo.ListenLoadFilesFdWithNames()
 	ret = make(map[string][]net.Listener)
 	for _, file = range files {
 		if pc, err = net.FileListener(file); err == nil {
@@ -104,15 +105,16 @@ func (wsv *web) ListenersSystemdWithNames() (ret map[string][]net.Listener, err 
 	return
 }
 
-// ListenersSystemdTLSWithoutNames returns a net.listener for each matching TCP socket type passed to this process
-func (wsv *web) ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) (ret []net.Listener, err error) {
+// ListenersSystemdTLSWithoutNames Возвращает срез net.listener для TLS сокетов переданных в процесс веб сервера
+// из systemd.
+func (wbo *web) ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) (ret []net.Listener, err error) {
 	var (
 		listeners []net.Listener
 		l         net.Listener
 		n         int
 	)
 
-	if listeners, err = wsv.ListenersSystemdWithoutNames(); listeners == nil || err != nil {
+	if listeners, err = wbo.ListenersSystemdWithoutNames(); listeners == nil || err != nil {
 		return
 	}
 	if tlsConfig == nil {
@@ -126,8 +128,9 @@ func (wsv *web) ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) (ret []ne
 	return
 }
 
-// ListenersSystemdTLSWithNames maps a listener name to a net.Listener with the associated TLS configuration
-func (wsv *web) ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (ret map[string][]net.Listener, err error) {
+// ListenersSystemdTLSWithNames Возвращает карту срезов net.listener для TLS сокетов переданных в процесс веб сервера
+// из systemd.
+func (wbo *web) ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (ret map[string][]net.Listener, err error) {
 	var (
 		listeners map[string][]net.Listener
 		ll        []net.Listener
@@ -135,7 +138,7 @@ func (wsv *web) ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (ret map[str
 		n         int
 	)
 
-	if listeners, err = wsv.ListenersSystemdWithNames(); listeners == nil || err != nil {
+	if listeners, err = wbo.ListenersSystemdWithNames(); listeners == nil || err != nil {
 		return
 	}
 	if tlsConfig == nil {

@@ -23,7 +23,7 @@ func TestStatus(tst *testing.T) {
 	}
 	t = Text(999)
 	b = Bytes(999)
-	if t != string(b) || t != `HTTP status code 999` {
+	if t != string(b) || t != `HTTP код: 999` {
 		tst.Errorf("Error constant")
 	}
 }

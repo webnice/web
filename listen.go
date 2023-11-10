@@ -7,62 +7,62 @@ import (
 	"path"
 )
 
-// Wait while web server is running
-func (wsv *web) Wait() Interface { wsv.doCloseDone.Wait(); return wsv }
-
-// ListenAndServe listens on the TCP network address addr and then calls Serve with handler to handle requests on incoming connections
-func (wsv *web) ListenAndServe(addr string) Interface {
+// ListenAndServe Открытие адреса или сокета без использования конфигурации веб сервера (конфигурация по
+// умолчанию), запуск веб сервера для обслуживания входящих соединений.
+func (wbo *web) ListenAndServe(addr string) Interface {
 	var conf *Configuration
 
-	if conf, wsv.err = parseAddress(addr); wsv.err != nil {
-		return wsv
+	if conf, wbo.err = parseAddress(addr); wbo.err != nil {
+		return wbo
 	}
 
-	return wsv.ListenAndServeWithConfig(conf)
+	return wbo.ListenAndServeWithConfig(conf)
 }
 
-// ListenAndServeTLS listens on the TCP network address address with TLS and then calls Serve with handler
-// to handle requests on incoming connections
-func (wsv *web) ListenAndServeTLS(addr string, certFile string, keyFile string, tlsConfig *tls.Config) Interface {
+// ListenAndServeTLS Открытие адреса или сокета с использованием TLS, без использования конфигурации веб сервера
+// (конфигурация по умолчанию), запуск веб сервера для обслуживания входящих соединений.
+func (wbo *web) ListenAndServeTLS(addr string, certFile string, keyFile string, tlsConfig *tls.Config) Interface {
 	var conf *Configuration
 
-	if conf, wsv.err = parseAddress(addr); wsv.err != nil {
-		return wsv
+	if conf, wbo.err = parseAddress(addr); wbo.err != nil {
+		return wbo
 	}
 	conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM = certFile, keyFile
 
-	return wsv.ListenAndServeTLSWithConfig(conf, tlsConfig)
+	return wbo.ListenAndServeTLSWithConfig(conf, tlsConfig)
 }
 
-// ListenAndServeWithConfig Fully configurable web server listens and then calls Serve on incoming connections
-func (wsv *web) ListenAndServeWithConfig(conf *Configuration) Interface {
+// ListenAndServeWithConfig Настройка сервера с использованием переданной конфигурации, открытие адреса или сокета
+// на прослушивание, запуск веб сервера для обслуживания входящих соединений.
+func (wbo *web) ListenAndServeWithConfig(conf *Configuration) Interface {
 	if conf == nil {
-		wsv.err = ErrNoConfiguration()
-		return wsv
+		wbo.err = ErrNoConfiguration()
+		return wbo
 	}
-	wsv.conf = conf
+	wbo.conf = conf
 
-	return wsv.Listen(nil)
+	return wbo.Listen(nil)
 }
 
-// ListenAndServeTLSWithConfig Fully configurable web server listens and then calls Serve on incoming connections
-func (wsv *web) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.Config) Interface {
+// ListenAndServeTLSWithConfig Настройка сервера с использованием переданной конфигурации в режиме TLS, открытие
+// адреса или сокета на прослушивание, запуск веб сервера для обслуживания входящих соединений.
+func (wbo *web) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.Config) Interface {
 	if conf == nil {
-		wsv.err = ErrNoConfiguration()
-		return wsv
+		wbo.err = ErrNoConfiguration()
+		return wbo
 	}
-	wsv.conf = conf
+	wbo.conf = conf
 	if tlsConfig == nil {
-		if tlsConfig, wsv.err = wsv.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); wsv.err != nil {
-			return wsv
+		if tlsConfig, wbo.err = wbo.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); wbo.err != nil {
+			return wbo
 		}
 	}
 
-	return wsv.Listen(tlsConfig)
+	return wbo.Listen(tlsConfig)
 }
 
-// NewListener Make new listener from web server configuration
-func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
+// NewListener Создание нового слушателя соединений net.Listener на основе конфигурации веб сервера.
+func (wbo *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	var (
 		lstWithNames map[string][]net.Listener
 		listeners    []net.Listener
@@ -74,7 +74,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	case netSystemd:
 		if conf.Socket != "" {
 			// Имена сокетов указаны
-			if lstWithNames, err = wsv.ListenersSystemdWithNames(); err != nil {
+			if lstWithNames, err = wbo.ListenersSystemdWithNames(); err != nil {
 				return
 			}
 			// Выбор сокета по имени
@@ -84,7 +84,7 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 			}
 		} else {
 			// Имена сокетов не указаны
-			if listeners, err = wsv.ListenersSystemdWithoutNames(); err != nil {
+			if listeners, err = wbo.ListenersSystemdWithoutNames(); err != nil {
 				return
 			}
 		}
@@ -104,15 +104,16 @@ func (wsv *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	return
 }
 
-// NewListenerTLS Make new listener with TLS from web server configuration
-func (wsv *web) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error) {
+// NewListenerTLS Создание нового слушателя соединений net.Listener в режиме TLS, на основе конфигурации
+// веб сервера.
+func (wbo *web) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error) {
 	var lst net.Listener
 
-	if lst, err = wsv.NewListener(conf); err != nil {
+	if lst, err = wbo.NewListener(conf); err != nil {
 		return
 	}
 	if tlsConfig == nil {
-		if tlsConfig, err = wsv.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); err != nil {
+		if tlsConfig, err = wbo.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); err != nil {
 			return
 		}
 	}
@@ -125,8 +126,8 @@ func (wsv *web) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret 
 	return
 }
 
-// Конфигурация TLS по умолчанию
-func (wsv *web) tlsConfigDefault(tlsPublicFile string, tlsPrivateFile string) (ret *tls.Config, err error) {
+// Конфигурация TLS по умолчанию.
+func (wbo *web) tlsConfigDefault(tlsPublicFile string, tlsPrivateFile string) (ret *tls.Config, err error) {
 	ret = &tls.Config{
 		MinVersion:       tls.VersionTLS12,
 		CurvePreferences: []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
@@ -145,77 +146,101 @@ func (wsv *web) tlsConfigDefault(tlsPublicFile string, tlsPrivateFile string) (r
 	return
 }
 
-// Listen Begin listen port and web server serve
-func (wsv *web) Listen(tlsConfig *tls.Config) Interface {
+// Listen Запуск прослушивания входящих соединений и веб сервера.
+func (wbo *web) Listen(tlsConfig *tls.Config) Interface {
 	var ltn net.Listener
 
-	if wsv.isRun.Load().(bool) {
-		wsv.err = ErrAlreadyRunning()
-		return wsv
+	if wbo.isRun.Load().(bool) {
+		wbo.err = ErrAlreadyRunning()
+		return wbo
 	}
 	switch tlsConfig == nil {
 	case true:
-		ltn, wsv.err = wsv.NewListener(wsv.conf)
+		ltn, wbo.err = wbo.NewListener(wbo.conf)
 	case false:
-		ltn, wsv.err = wsv.NewListenerTLS(wsv.conf, tlsConfig)
+		ltn, wbo.err = wbo.NewListenerTLS(wbo.conf, tlsConfig)
 	}
-	if wsv.err != nil {
-		return wsv
+	if wbo.err != nil {
+		return wbo
 	}
 
-	return wsv.ServeTLS(ltn, tlsConfig)
+	return wbo.ServeTLS(ltn, tlsConfig)
 }
 
-// Serve accepts incoming connections on the listener, creating a new web server goroutine
-func (wsv *web) Serve(ltn net.Listener) Interface { return wsv.ServeTLS(ltn, nil) }
+// Serve Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener.
+func (wbo *web) Serve(ltn net.Listener) Interface { return wbo.ServeTLS(ltn, nil) }
 
-// ServeTLS accepts incoming connections on the listener with TLS configuration, creating a new web server goroutine
-func (wsv *web) ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface {
-	var conf *Configuration
+// ServeTLS Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener с
+// использованием TLS.
+func (wbo *web) ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface {
+	var (
+		conf *Configuration
+		onUp chan struct{}
+	)
 
-	// TODO: Реализовать поддержку PROXY Protocol через "github.com/webnice/web/v3/proxyp", conf.ProxyProtocol
+	// TODO: Сделать поддержку PROXY Protocol через "github.com/webnice/web/v3/proxyp", conf.ProxyProtocol
 
-	if wsv.conf == nil {
+	if wbo.conf == nil {
 		conf, _ = parseAddress(ltn.Addr().String())
 		defaultConfiguration(conf)
-		wsv.conf = conf
+		wbo.conf = conf
 	}
-	wsv.listener = ltn
-	wsv.isRun.Store(true)
-	wsv.doCloseDone.Add(1)
-	go wsv.run(tlsConfig)
+	wbo.listener, wbo.onCloseDone = ltn, make(chan struct{})
+	wbo.isRun.Store(true)
+	onUp = make(chan struct{})
+	go wbo.run(onUp, tlsConfig)
+	onEnd(onUp)
 
-	return wsv
+	return wbo
 }
 
-// Goroutine of the web server
-func (wsv *web) run(tlsConfig *tls.Config) {
-	defer wsv.doCloseDone.Done()
-	defer wsv.isRun.Store(false)
+// Процесс веб сервера.
+func (wbo *web) run(onUp chan struct{}, tlsConfig *tls.Config) {
 	defer func() {
-		if wsv.conf.Socket == "" {
+		wbo.isRun.Store(false)
+		wbo.onCloseDone <- struct{}{}
+	}()
+	defer func() {
+		if wbo.conf.Socket == "" {
 			return
 		}
-		switch wsv.conf.Mode {
+		switch wbo.conf.Mode {
 		case netSystemd:
 			return
 		case netUnix, netUnixPacket:
-			_ = os.Remove(wsv.conf.Socket)
+			_ = os.Remove(wbo.conf.Socket)
 		}
 	}()
+	// Обеспечение синхронного запуска потока.
+	onUp <- struct{}{}
+	// Присвоение конфигурации веб серверу.
+	if wbo.server = wbo.loadConfiguration(tlsConfig); wbo.err != nil {
+		return
+	}
+	// Проверка наличия обработчика запросов ВЕБ сервера.
+	if wbo.server.Handler == nil || wbo.handler == nil {
+		wbo.err = ErrHandlerIsNotSet()
+		return
+	}
+	// Конфигурация "оставаться в живых".
+	if wbo.conf.KeepAliveDisable {
+		wbo.server.SetKeepAlivesEnabled(false)
+	}
+	// Запуск веб сервера.
+	if wbo.conf.TLSPrivateKeyPEM == "" || wbo.conf.TLSPublicKeyPEM == "" {
+		wbo.err = wbo.server.Serve(wbo.listener)
+		return
+	}
+	wbo.err = wbo.server.ServeTLS(wbo.listener, wbo.conf.TLSPublicKeyPEM, wbo.conf.TLSPrivateKeyPEM)
+}
 
-	// Configure net/http web server
-	if wsv.server = wsv.loadConfiguration(tlsConfig); wsv.err != nil {
-		return
+// Wait Блокируемая функция ожидания завершения веб сервера, если он запущен.
+// Если сервер не запущен, функция завершается немедленно.
+func (wbo *web) Wait() Interface {
+	if !wbo.isRun.Load().(bool) {
+		return wbo
 	}
-	// Configure keepalive of web server
-	if wsv.conf.KeepAliveDisable {
-		wsv.server.SetKeepAlivesEnabled(false)
-	}
-	// Begin serve
-	if wsv.conf.TLSPrivateKeyPEM == "" || wsv.conf.TLSPublicKeyPEM == "" {
-		wsv.err = wsv.server.Serve(wsv.listener)
-		return
-	}
-	wsv.err = wsv.server.ServeTLS(wsv.listener, wsv.conf.TLSPublicKeyPEM, wsv.conf.TLSPrivateKeyPEM)
+	onEnd(wbo.onCloseDone)
+
+	return wbo
 }

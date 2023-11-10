@@ -76,3 +76,10 @@ func parseAddress(addr string) (ret *Configuration, err error) {
 
 	return
 }
+
+// Функция ожидания и закрытие канала.
+func onEnd(run chan struct{}) {
+	defer func() { _ = recover() }()
+	<-run
+	close(run)
+}

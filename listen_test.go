@@ -4,11 +4,12 @@
 package web
 
 import (
-	"fmt"
 	"net"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/labstack/echo/v4"
 )
 
 func TestInvalidPort(t *testing.T) {
@@ -26,7 +27,7 @@ func TestAlreadyRunningError(t *testing.T) {
 		testAddress1 = `localhost:18080`
 		testAddress2 = `localhost:18081`
 	)
-	var wsv = New()
+	var wsv = New().Handler(echo.New())
 
 	wsv.ListenAndServe(testAddress1)
 	defer wsv.Stop()
@@ -59,14 +60,14 @@ func TestPortIsBusy(t *testing.T) {
 	const testAddress1 = `localhost:18080`
 	var w1, w2 Interface
 
-	w1 = New()
+	w1 = New().Handler(echo.New())
 	w1.ListenAndServe(testAddress1)
 	defer w1.Stop()
 	if w1.Error() != nil {
 		t.Errorf("Error ListenAndServe(): %s", w1.Error().Error())
 	}
 
-	w2 = New()
+	w2 = New().Handler(echo.New())
 	w2.ListenAndServe(testAddress1)
 	defer w2.Stop()
 	if w2.Error() == nil {
@@ -87,7 +88,7 @@ func TestUnixSocket(t *testing.T) {
 	conf.Mode = "socket"
 	conf.Socket = testAddress1
 	conf.KeepAliveDisable = true
-	w1 = New()
+	w1 = New().Handler(echo.New())
 	w1.ListenAndServeWithConfig(conf)
 	if w1.Error() != nil {
 		t.Errorf("Error listen unix socket: %s", w1.Error().Error())
@@ -146,7 +147,7 @@ func TestWait(t *testing.T) {
 		conf *Configuration
 	)
 
-	w1 = New()
+	w1 = New().Handler(echo.New())
 	w1.ListenAndServe(testAddress1)
 	if w1.Error() != nil {
 		t.Errorf("Error starting web server: %s", w1.Error().Error())
@@ -166,7 +167,7 @@ func TestWait(t *testing.T) {
 	if cou <= 4 {
 		t.Errorf("Error Wait()")
 	}
-	w1 = New()
+	w1 = New().Handler(echo.New())
 	conf, _ = parseAddress("")
 	conf.Mode = "socket"
 	conf.Socket = testAddress2
@@ -190,29 +191,4 @@ func TestWait(t *testing.T) {
 	if cou <= 4 {
 		t.Errorf("Error Wait()")
 	}
-}
-
-func TestRunRouteConfigurationError(t *testing.T) {
-	const (
-		testAddress1    = `localhost:18080`
-		testErrorString = `SvDJFQxV4Bscfn2tdP9bCr7CGnK7dYPJWrc6w5MJ`
-	)
-	var (
-		tic *time.Ticker
-		w1  = New()
-	)
-
-	_ = w1.Errors().RouteConfigurationError(fmt.Errorf(testErrorString))
-	w1.ListenAndServe(testAddress1)
-	go func() {
-		tic = time.NewTicker(time.Second)
-		defer tic.Stop()
-		<-tic.C
-		w1.Stop()
-	}()
-	w1.Wait()
-	if w1.Error() == nil || w1.Error().Error() != testErrorString {
-		t.Errorf("Error starting web server with routing configuration error")
-	}
-	w1.Stop()
 }

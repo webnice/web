@@ -8,7 +8,7 @@ func Text(code int) (ret string) {
 	var ok bool
 
 	if ret, ok = statusText[code]; !ok {
-		ret = fmt.Sprintf("HTTP status code %d", code)
+		ret = fmt.Sprintf("HTTP код: %d", code)
 	}
 
 	return
@@ -23,7 +23,7 @@ func Bytes(code int) (ret []byte) {
 	)
 
 	if buf, ok = statusText[code]; !ok {
-		buf = fmt.Sprintf("HTTP status code %d", code)
+		buf = fmt.Sprintf("HTTP код: %d", code)
 	}
 	ret = []byte(buf)
 

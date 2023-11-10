@@ -1,27 +1,27 @@
 package web
 
-import (
-	"github.com/labstack/echo/v4"
-)
+import "net/http"
 
-// New is a constructor of new web server implementation
+// New Конструктор объекта сущности пакета, возвращается интерфейс пакета.
 func New() Interface {
-	var wsv = new(web)
-	wsv.route = echo.New()
-	wsv.inCloseUp = make(chan bool, 1)
-	wsv.isRun.Store(false)
+	var wbo = &web{
+		inCloseUp: make(chan struct{}, 1),
+	}
+	wbo.isRun.Store(false)
 
-	return wsv
+	return wbo
 }
 
-// Error Return last error of web server
-func (wsv *web) Error() error { return wsv.err }
+// Handler Назначение обработчика запросов ВЕБ сервера.
+// Обработчик необходимо назначить до запуска ВЕБ сервера.
+func (wbo *web) Handler(handler http.Handler) Interface {
+	wbo.handler = handler
 
-// Route interface
-func (wsv *web) Route() *echo.Echo { return wsv.route }
+	return wbo
+}
 
-// Errors interface
-//func (wsv *web) Errors() errors.Interface { return wsv.route.Errors() }
+// Error Функция возвращает последнюю ошибку веб сервера.
+func (wbo *web) Error() error { return wbo.err }
 
-// Handlers interface
-//func (wsv *web) Handlers() handlers.Interface { return wsv.route.Handlers() }
+// Errors Справочник ошибок.
+func (wbo *web) Errors() *Error { return errSingleton }

@@ -1,16 +1,15 @@
 ## Simple projects tooling for every day
 ## (c)Alex Geer <monoflash@gmail.com>
-## Version: 2018.11.10
+## Version: 2023.11.10
 
-## Project source directory path
-DIR         := $(strip $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST)))))
-
-GOPATH      := $(GOPATH)
-DATE        := $(shell date -u +%Y%m%d.%H%M%S.%Z)
-GOGENERATE   = $(shell if [ -f .gogenerate ]; then cat .gogenerate; fi)
-TESTPACKETS  = $(shell if [ -f .testpackages ]; then cat .testpackages; fi)
-BENCHPACKETS = $(shell if [ -f .benchpackages ]; then cat .benchpackages; fi)
-GO111MODULE ?= $(GO111MODULE:on)
+DIR                 := $(strip $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST)))))
+GOPATH              := $(GOPATH)
+DATE                := $(shell date -u +%Y%m%d.%H%M%S.%Z)
+GOGENERATE           = $(shell if [ -f .gogenerate ]; then cat .gogenerate; fi)
+TESTPACKETS          = $(shell if [ -f .testpackages ]; then cat .testpackages; fi)
+BENCHPACKETS         = $(shell if [ -f .benchpackages ]; then cat .benchpackages; fi)
+GO111MODULE         ?= $(GO111MODULE:on)
+PACKAGES_LOCK_VER    = $(shell if [ -f .packages_lock_version ]; then cat .packages_lock_version; fi)
 
 default: help
 
@@ -22,15 +21,24 @@ dep-init:
 	@rm -rf ${DIR}/vendor 2>/dev/null; true
 .PHONY: dep-init
 dep: dep-init
-	@go clean -cache -modcache
-	@go get -u ./...
 	@go mod download
 	@go mod tidy
 	@go mod vendor
 .PHONY: dep
 
-## Code generation (run only during development)
-# All generating files are included in a .gogenerate file
+update: upd
+upd:
+	@go clean -cache -modcache
+	@go get -u ./...
+	@for item in $(PACKAGES_LOCK_VER); do \
+		go get -u "$${item}"; \
+		true; \
+	done
+.PHONY: upd
+.PHONY: update
+
+## Кодогенерация (run only during development).
+## All generating files are included in a .gogenerate file.
 gen:
 	@for PKGNAME in $(GOGENERATE); do GOPATH="$(DIR)" go generate $${PKGNAME}; done
 .PHONY: gen

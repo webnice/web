@@ -9,47 +9,44 @@ import (
 	"net/http"
 )
 
-// Stop web server
-func (wsv *web) Stop() Interface {
+// Stop Отправка сигнала прерывания работы веб сервера с учётом значения ShutdownTimeout.
+func (wbo *web) Stop() Interface {
 	var (
 		ctx context.Context
 		cfn context.CancelFunc
 	)
 
-	if wsv.server != nil {
+	if wbo.server != nil {
 		ctx = context.Background()
-		if wsv.conf.ShutdownTimeout > 0 {
-			ctx, cfn = context.WithTimeout(ctx, wsv.conf.ShutdownTimeout)
+		if wbo.conf.ShutdownTimeout > 0 {
+			ctx, cfn = context.WithTimeout(ctx, wbo.conf.ShutdownTimeout)
 			defer cfn()
 		}
-		wsv.err = wsv.server.Shutdown(ctx)
-	} else if wsv.listener != nil {
-		wsv.err = wsv.listener.Close()
+		wbo.err = wbo.server.Shutdown(ctx)
+	} else if wbo.listener != nil {
+		wbo.err = wbo.listener.Close()
 	}
 
-	return wsv
+	return wbo
 }
 
-func (wsv *web) loadConfiguration(tlsConfig *tls.Config) (srv *http.Server) {
-	//if wsv.route.Errors().RouteConfigurationError(nil) != nil {
-	//	wsv.err = wsv.route.Errors().RouteConfigurationError(nil)
-	//}
+func (wbo *web) loadConfiguration(tlsConfig *tls.Config) (srv *http.Server) {
 	srv = &http.Server{
-		Addr:              wsv.conf.HostPort,
-		IdleTimeout:       wsv.conf.IdleTimeout,
-		ReadHeaderTimeout: wsv.conf.ReadHeaderTimeout,
-		ReadTimeout:       wsv.conf.ReadTimeout,
-		WriteTimeout:      wsv.conf.WriteTimeout,
-		MaxHeaderBytes:    wsv.conf.MaxHeaderBytes,
-		Handler:           wsv.route,
+		Addr:              wbo.conf.HostPort,
+		Handler:           wbo.handler,
+		ReadTimeout:       wbo.conf.ReadTimeout,
+		ReadHeaderTimeout: wbo.conf.ReadHeaderTimeout,
+		WriteTimeout:      wbo.conf.WriteTimeout,
+		IdleTimeout:       wbo.conf.IdleTimeout,
+		MaxHeaderBytes:    wbo.conf.MaxHeaderBytes,
 	}
-	if wsv.conf.TLSPrivateKeyPEM == "" || wsv.conf.TLSPublicKeyPEM == "" {
+	if wbo.conf.TLSPrivateKeyPEM == "" || wbo.conf.TLSPublicKeyPEM == "" {
 		return
 	}
 	// TLS конфигурация по умолчанию
 	if tlsConfig == nil {
-		tlsConfig, wsv.err = wsv.tlsConfigDefault(wsv.conf.TLSPublicKeyPEM, wsv.conf.TLSPrivateKeyPEM)
-		if wsv.err != nil {
+		tlsConfig, wbo.err = wbo.tlsConfigDefault(wbo.conf.TLSPublicKeyPEM, wbo.conf.TLSPrivateKeyPEM)
+		if wbo.err != nil {
 			return
 		}
 	}

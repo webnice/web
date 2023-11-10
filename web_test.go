@@ -3,15 +3,18 @@ package web
 import (
 	"fmt"
 	"testing"
+
+	"github.com/labstack/echo/v4"
 )
 
 func TestNew(t *testing.T) {
-	var wsv = New().(*web)
+	var wsv = New().
+		Handler(echo.New()).(*web)
 	if wsv == nil {
 		t.Errorf("Error New(), return nil")
 	}
-	if wsv.route == nil {
-		t.Errorf("Error New(), Route is nil")
+	if wsv.handler == nil {
+		t.Errorf("Error New(), Handler is nil")
 	}
 	if wsv.inCloseUp == nil {
 		t.Errorf("Error New(), inCloseUp is nil")
@@ -28,18 +31,5 @@ func TestError(t *testing.T) {
 	err = fmt.Errorf("%s", _TestString)
 	if wsv.err = err; wsv.Error() != err {
 		t.Errorf("Error function Error()")
-	}
-}
-
-func TestRouteErrorsHandlers(t *testing.T) {
-	var wsv = New().(*web)
-	if wsv.Route() != wsv.route {
-		t.Errorf("Error function Route()")
-	}
-	if wsv.route.Errors() != wsv.Errors() {
-		t.Errorf("Error function Errors()")
-	}
-	if wsv.route.Handlers() != wsv.Handlers() {
-		t.Errorf("Error function Handlers()")
 	}
 }

@@ -6,22 +6,22 @@ package web
 import "net/http"
 
 // Stop web server
-func (wsv *web) Stop() Interface {
-	if wsv.listener != nil {
-		wsv.err = wsv.listener.Close()
+func (wbo *web) Stop() Interface {
+	if wbo.listener != nil {
+		wbo.err = wbo.listener.Close()
 	}
-	return wsv
+	return wbo
 }
 
-func (wsv *web) loadConfiguration() *http.Server {
-	if wsv.route.Errors().RouteConfigurationError(nil) != nil {
-		wsv.err = wsv.route.Errors().RouteConfigurationError(nil)
+func (wbo *web) loadConfiguration() *http.Server {
+	if wbo.route.Errors().RouteConfigurationError(nil) != nil {
+		wbo.err = wbo.route.Errors().RouteConfigurationError(nil)
 	}
 	return &http.Server{
-		Addr:           wsv.conf.HostPort,
-		ReadTimeout:    wsv.conf.ReadTimeout,
-		WriteTimeout:   wsv.conf.WriteTimeout,
-		MaxHeaderBytes: wsv.conf.MaxHeaderBytes,
-		Handler:        wsv.route,
+		Addr:           wbo.conf.HostPort,
+		ReadTimeout:    wbo.conf.ReadTimeout,
+		WriteTimeout:   wbo.conf.WriteTimeout,
+		MaxHeaderBytes: wbo.conf.MaxHeaderBytes,
+		Handler:        wbo.route,
 	}
 }
