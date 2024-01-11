@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"net"
 	"net/http"
-	"sync/atomic"
+
+	"github.com/webnice/dic"
+	wnet "github.com/webnice/net"
 )
 
 const (
@@ -17,81 +19,36 @@ const (
 	netSystemd    = `systemd`
 )
 
-// Interface Интерфейс пакета.
-type Interface interface {
-	// Handler Назначение обработчика запросов ВЕБ сервера.
-	// Обработчик необходимо назначить до запуска ВЕБ сервера.
-	Handler(handler http.Handler) Interface
+// Справочники реализованы в отдельной библиотеке. Но есть две причины их появления тут:
+// 1. При написании кода не требуется подключать отдельную библиотеку, а библиотека web уже будет подключена.
+// 2. Все справочник уже являются объектами-одиночками, поэтому ссылки на них не влияют на память, только на удобство.
+var (
+	// Mime Справочник MIME типов.
+	Mime = dic.Mime()
 
-	// ListenAndServe Открытие адреса или сокета без использования конфигурации веб сервера (конфигурация по
-	// умолчанию), запуск веб сервера для обслуживания входящих соединений.
-	ListenAndServe(addr string) Interface
+	// Method Справочник HTTP методов запросов.
+	Method = dic.Method()
 
-	// ListenAndServeTLS Открытие адреса или сокета с использованием TLS, без использования конфигурации веб сервера
-	// (конфигурация по умолчанию), запуск веб сервера для обслуживания входящих соединений.
-	ListenAndServeTLS(addr string, certFile string, keyFile string, tlsConfig *tls.Config) Interface
+	// Header Справочник заголовков.
+	Header = dic.Header()
 
-	// ListenAndServeWithConfig Настройка сервера с использованием переданной конфигурации, открытие адреса или сокета
-	// на прослушивание, запуск веб сервера для обслуживания входящих соединений.
-	ListenAndServeWithConfig(conf *Configuration) Interface
+	// Status Справочник статусов HTTP ответов.
+	Status = dic.Status()
+)
 
-	// ListenAndServeTLSWithConfig Настройка сервера с использованием переданной конфигурации в режиме TLS, открытие
-	// адреса или сокета на прослушивание, запуск веб сервера для обслуживания входящих соединений.
-	ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.Config) Interface
-
-	// ListenersSystemdWithoutNames Возвращает срез net.Listener сокетов переданных в процесс веб сервера из systemd.
-	ListenersSystemdWithoutNames() (ret []net.Listener, err error)
-
-	// ListenersSystemdWithNames Возвращает карту срезов net.Listener сокетов переданных в процесс веб сервера
-	// из systemd.
-	ListenersSystemdWithNames() (ret map[string][]net.Listener, err error)
-
-	// ListenersSystemdTLSWithoutNames Возвращает срез net.listener для TLS сокетов переданных в процесс веб сервера
-	// из systemd.
-	ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) (ret []net.Listener, err error)
-
-	// ListenersSystemdTLSWithNames Возвращает карту срезов net.listener для TLS сокетов переданных в процесс веб сервера
-	// из systemd.
-	ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (ret map[string][]net.Listener, err error)
-
-	// NewListener Создание нового слушателя соединений net.Listener на основе конфигурации веб сервера.
-	NewListener(conf *Configuration) (ret net.Listener, err error)
-
-	// NewListenerTLS Создание нового слушателя соединений net.Listener в режиме TLS, на основе конфигурации
-	// веб сервера.
-	NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error)
-
-	// Serve Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener.
-	Serve(net.Listener) Interface
-
-	// ServeTLS Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener с
-	// использованием TLS.
-	ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface
-
-	// Wait Блокируемая функция ожидания завершения веб сервера, если он запущен.
-	// Если сервер не запущен, функция завершается немедленно.
-	Wait() Interface
-
-	// Stop Отправка сигнала прерывания работы веб сервера с учётом значения ShutdownTimeout.
-	Stop() Interface
-
-	// ОШИБКИ
-
-	// Errors Справочник ошибок.
-	Errors() *Error
-
-	// Error Функция возвращает последнюю ошибку веб сервера.
-	Error() error
-}
+var _, _, _, _ = Mime, Method, Header, Status
 
 // Объект сущности, реализующий интерфейс Interface.
-type web struct {
-	isRun       atomic.Value   // Состояние запуска веб сервера. =истина - запущен. =ложь - остановлен.
-	inCloseUp   chan struct{}  // Канал начала завершения работы веб сервера.
-	onCloseDone chan struct{}  // Канал сигнала окончания завершения работы веб сервера.
-	conf        *Configuration // Конфигурация веб сервера.
-	listener    net.Listener   // Слушатель сокета веб сервера.
-	server      *http.Server   // Объект net/http веб сервера.
-	handler     http.Handler   // Интерфейс обработчика запросов ВЕБ сервера.
-	err         error          // Последняя ошибка веб сервера.
+type impl struct {
+	err     error          // Сохранение последней ошибки.
+	net     wnet.Interface // Интерфейс "github.com/webnice/net".
+	cfg     *Configuration // Конфигурация веб сервера.
+	handler http.Handler   // Обработчик запросов.
+	server  *http.Server   // Объект веб сервера "net/http".
+
+	// Функции которые невозможно протестировать в обычных условиях практически никаким образом.
+	listenersSystemdWithoutNames    func() ([]net.Listener, error)
+	listenersSystemdWithNames       func() (map[string][]net.Listener, error)
+	listenersSystemdTLSWithoutNames func(*tls.Config) ([]net.Listener, error)
+	listenersSystemdTLSWithNames    func(*tls.Config) (map[string][]net.Listener, error)
 }

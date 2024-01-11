@@ -1,115 +1,45 @@
 package web
 
 import (
-	"fmt"
-	"net/http"
+	"errors"
 	"testing"
 )
 
-func TestDefaultConfiguration(t *testing.T) {
-	const (
-		_TestHost    = "5BjSMzDCuHJWHKx2JqbW.Dd5Vr8ytnD968dDrNc3s"
-		_TestAddress = "https://abc.pw"
-		_TestSocket  = "/var/run/test.socket"
-	)
-	var conf = new(Configuration)
-
-	defaultConfiguration(conf)
-	if conf.Port != 80 {
-		t.Errorf("Error configuration defaults: Port is '80' expected '%d'", conf.Port)
-	}
-	if conf.Mode != "tcp" {
-		t.Errorf("Error configuration defaults: Mode is '%s' expected '%s'", conf.Mode, "tcp")
-	}
-	if conf.MaxHeaderBytes != http.DefaultMaxHeaderBytes {
-		t.Errorf("Error configuration defaults: MaxHeaderBytes is '%d' expected '%d'", conf.MaxHeaderBytes, http.DefaultMaxHeaderBytes)
-	}
-	if conf.ShutdownTimeout != shutdownTimeout {
-		t.Errorf("Error configuration defaults: ShutdownTimeout is '%s' expected '%s'", conf.ShutdownTimeout.String(), shutdownTimeout.String())
-	}
-
-	conf.Host = _TestHost
-	conf.Mode = "socket"
-	defaultConfiguration(conf)
-	if conf.Mode != "tcp" {
-		t.Errorf("Error configuration defaults: Mode is '%s' expected '%s'", conf.Mode, "tcp")
-	}
-	if conf.Address != _TestHost {
-		t.Errorf("Error configuration defaults: Address is '%s' expected '%s'", conf.Address, _TestHost)
-	}
-
-	conf = new(Configuration)
-	conf.Host = _TestHost
-	conf.Port = 1234
-	conf.Mode = _TestHost
-	defaultConfiguration(conf)
-	if conf.Mode != "tcp" {
-		t.Errorf("Error configuration defaults: Mode is '%s' expected '%s'", conf.Mode, "tcp")
-	}
-	if conf.Address != fmt.Sprintf("%s:%d", _TestHost, conf.Port) {
-		t.Errorf("Error configuration defaults: Address is '%s' expected '%s'", conf.Address, fmt.Sprintf("%s:%d", _TestHost, conf.Port))
-	}
-
-	conf = new(Configuration)
-	conf.Address = _TestAddress
-	conf.Host = _TestHost
-	conf.Port = 3210
-	conf.Mode = "unixpacket"
-	defaultConfiguration(conf)
-	if conf.Mode != "tcp" {
-		t.Errorf("Error configuration defaults: Mode is '%s' expected '%s'", conf.Mode, "tcp")
-	}
-	if conf.Address != _TestAddress {
-		t.Errorf("Error configuration defaults: Address is '%s' expected '%s'", conf.Address, _TestAddress)
-	}
-
-	conf = new(Configuration)
-	conf.Host = _TestHost
-	conf.Mode = "socket"
-	conf.Socket = _TestSocket
-	defaultConfiguration(conf)
-	if conf.Mode != "unix" {
-		t.Errorf("Error configuration defaults: Mode is '%s' expected '%s'", conf.Mode, "unix")
-	}
-	if conf.Address != "" {
-		t.Errorf("Error configuration defaults: Address is '%s' expected '%s'", conf.Address, _TestAddress)
-	}
-	if conf.Mode != "unix" {
-		t.Errorf("Error configuration defaults: Mode is '%s' expected '%s'", conf.Mode, "unix")
-	}
-	if conf.HostPort != fmt.Sprintf("unix:%s", _TestSocket) {
-		t.Errorf("Error configuration defaults: HostPort is '%s' expected '%s'", conf.HostPort, fmt.Sprintf("unix:%s", _TestSocket))
-	}
-}
-
 func TestParseAddress(t *testing.T) {
-	var err error
-	var conf *Configuration
+	var (
+		err   error
+		cfg   *Configuration
+		tests = []struct {
+			addr string
+			host string
+			port uint16
+			err  error
+		}{
+			{addr: "localhost", host: "localhost", port: 0, err: nil},
+			{addr: ":https", host: "", port: 443, err: nil},
+			{addr: ":http", host: "", port: 80, err: nil},
+			{addr: "localhost:80", host: "localhost", port: 80, err: nil},
+			{addr: "localhost:443", host: "localhost", port: 443, err: nil},
+			{addr: "", host: "", port: 0, err: nil},
+			{addr: "Nmm4zmSnXh1ymGctOtgf6", host: "Nmm4zmSnXh1ymGctOtgf6", port: 0, err: nil},
+			{addr: ":abc", host: "", port: 0, err: errors.New("lookup tcp/abc: nodename nor servname provided, or not known")},
+		}
+		n int
+	)
 
-	conf, err = parseAddress("")
-	if conf == nil && err == nil {
-		t.Errorf("Error parseAddress(), configuration is nil")
-	}
-
-	conf, err = parseAddress(":https")
-	if conf.Port != 443 || err != nil {
-		t.Errorf("Error parseAddress(): Port is '%d' expected '443', error is '%v'", conf.Port, err)
-	}
-	conf, err = parseAddress(":http")
-	if conf.Port != 80 || err != nil {
-		t.Errorf("Error parseAddress(): Port is '%d' expected '80', error is '%v'", conf.Port, err)
-	}
-	conf, err = parseAddress("abcd:9080")
-	if conf.Port != 9080 || err != nil {
-		t.Errorf("Error parseAddress(): Port is '%d' expected '9080', error is '%v'", conf.Port, err)
-	}
-	if conf.Host != "abcd" {
-		t.Errorf("Error parseAddress(): Host is '%s' expected 'abcd'", conf.Host)
-	}
-
-	// Check error
-	_, err = parseAddress("abcd:abcd")
-	if err == nil {
-		t.Errorf("Error parseAddress()")
+	for n = range tests {
+		cfg, err = parseAddress(tests[n].addr)
+		if tests[n].err != nil && err == nil {
+			t.Errorf(
+				"функция parseAddress(%q), ошибка: \"%v\", ожидалось: \"%v\"",
+				tests[n].addr, err, tests[n].err,
+			)
+		}
+		if tests[n].host != cfg.Host {
+			t.Errorf("функция parseAddress(%q), Host: %q, ожидалось: %q", tests[n].addr, cfg.Host, tests[n].host)
+		}
+		if tests[n].port != cfg.Port {
+			t.Errorf("функция parseAddress(%q), Port: %d, ожидалось: %d", tests[n].addr, cfg.Port, tests[n].port)
+		}
 	}
 }

@@ -1,194 +1,132 @@
-//go:build !race
-// +build !race
-
 package web
 
 import (
-	"net"
-	"os"
+	"errors"
+	"net/http"
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/go-chi/chi/v5"
 )
 
-func TestInvalidPort(t *testing.T) {
-	const invalidAddress = `:170000`
-	var wsv = New()
+func getTestHandlerFn(t *testing.T) (ret http.Handler) {
+	return chi.NewMux()
+}
 
-	wsv.ListenAndServe(invalidAddress)
-	if wsv.Error() == nil {
-		t.Errorf("Error ListenAndServe(), don't cheack listen address")
+func TestNew_InvalidAddress(t *testing.T) {
+	const invalidAddress = `:170000`
+	var web Interface
+
+	web = New().
+		ListenAndServe(invalidAddress)
+	if web.Error() == nil {
+		t.Errorf("функция ListenAndServe(), не корректная проверка адреса")
+	}
+	web = New().
+		ListenAndServeTLS(invalidAddress, "", "", nil)
+	if web.Error() == nil {
+		t.Errorf("функция ListenAndServe(), не корректная проверка адреса")
 	}
 }
 
-func TestAlreadyRunningError(t *testing.T) {
+func TestNew_NoConfiguration(t *testing.T) {
+	var web = New()
+
+	web.ListenAndServeWithConfig(nil)
+	defer web.Stop()
+	if web.Error() == nil {
+		t.Errorf("функция ListenAndServe(), не корректная проверка адреса")
+	}
+	if !errors.Is(web.Error(), Errors().NoConfiguration()) {
+		t.Errorf("функция ListenAndServe(), получена не корректная ошибка")
+	}
+}
+
+func TestImpl_ListenAndServe_AlreadyRunning(t *testing.T) {
 	const (
 		testAddress1 = `localhost:18080`
 		testAddress2 = `localhost:18081`
 	)
-	var wsv = New().Handler(echo.New())
+	var web Interface
 
-	wsv.ListenAndServe(testAddress1)
-	defer wsv.Stop()
-	if wsv.Error() != nil {
-		t.Errorf("Error ListenAndServe(), error: %s", wsv.Error().Error())
+	web = New().
+		Handler(getTestHandlerFn(t)).
+		ListenAndServe(testAddress1)
+	defer web.Stop()
+	if web.Error() != nil {
+		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалось: %v", web.Error(), nil)
 	}
-	wsv.ListenAndServe(testAddress2)
-	if wsv.Error() == nil {
-		t.Errorf("Error ListenAndServe(), do not check already running")
+	web.ListenAndServe(testAddress2)
+	if web.Error() == nil {
+		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалось: %v", web.Error(), Errors().AlreadyRunning())
 	}
-	if wsv.Error() != ErrAlreadyRunning() {
-		t.Errorf("Error ListenAndServe(), incorrect error")
+	if !errors.Is(web.Error(), Errors().AlreadyRunning()) {
+		t.Errorf("функция ListenAndServe(), не корректная ошибка")
 	}
-}
-
-func TestNoConfigurationError(t *testing.T) {
-	var wsv = New()
-
-	wsv.ListenAndServeWithConfig(nil)
-	defer wsv.Stop()
-	if wsv.Error() == nil {
-		t.Errorf("Error ListenAndServe(), do not check configuration")
-	}
-	if wsv.Error() != ErrNoConfiguration() {
-		t.Errorf("Error ListenAndServe(), incorrect error")
+	if !errors.Is(web.
+		Clean().                      // Очистка последней ошибки.
+		ListenAndServe(testAddress1). // Запуск сервера, который уже запущен.
+		Error(), Errors().AlreadyRunning()) {
+		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалось: %v", web.Error(), Errors().AlreadyRunning())
 	}
 }
 
-func TestPortIsBusy(t *testing.T) {
-	const testAddress1 = `localhost:18080`
-	var w1, w2 Interface
-
-	w1 = New().Handler(echo.New())
-	w1.ListenAndServe(testAddress1)
-	defer w1.Stop()
-	if w1.Error() != nil {
-		t.Errorf("Error ListenAndServe(): %s", w1.Error().Error())
-	}
-
-	w2 = New().Handler(echo.New())
-	w2.ListenAndServe(testAddress1)
-	defer w2.Stop()
-	if w2.Error() == nil {
-		t.Errorf("Error ListenAndServe(), error is nil, but port busy another program")
-	}
-}
-
-func TestUnixSocket(t *testing.T) {
-	const testAddress1 = `.test.socket`
-	var (
-		err  error
-		conf *Configuration
-		w1   Interface
-		fi   os.FileInfo
-	)
-
-	conf, _ = parseAddress("")
-	conf.Mode = "socket"
-	conf.Socket = testAddress1
-	conf.KeepAliveDisable = true
-	w1 = New().Handler(echo.New())
-	w1.ListenAndServeWithConfig(conf)
-	if w1.Error() != nil {
-		t.Errorf("Error listen unix socket: %s", w1.Error().Error())
-	}
-
-	if fi, err = os.Stat(testAddress1); err != nil {
-		t.Errorf("Error check unix socket: %s", err)
-	}
-	if fi.Mode().Perm() != os.FileMode(0666).Perm() {
-		t.Logf("Error umix socket Mode(): %v expected %v", fi.Mode(), os.FileMode(0666))
-	}
-
-	w1.Stop()
-	if _, err = os.Stat(testAddress1); os.IsExist(err) {
-		t.Errorf("Error delete unix socket after server stop")
-	}
-}
-
-func TestServe(t *testing.T) {
+func TestImpl_ListenAndServe_Wait(t *testing.T) {
 	const (
-		testAddress1 = `localhost:18080`
-		testAddress2 = `127.0.0.1:18080`
-	)
-	var (
-		err error
-		ltn net.Listener
-		w1  = New()
-	)
-
-	if ltn, err = net.Listen("tcp", testAddress1); err != nil {
-		t.Errorf("Testing error, failed to open port '%s': %s", testAddress1, err.Error())
-	}
-	defer func() { _ = ltn.Close() }()
-
-	w1.Serve(ltn)
-	if w1.(*web).conf == nil {
-		t.Errorf("Error, configuration is nil")
-	}
-	if w1.(*web).conf.Address != testAddress1 && w1.(*web).conf.Address != testAddress2 {
-		t.Errorf("Error restore server address from net.Listener. Address is '%s' expected '%s'",
-			w1.(*web).conf.Address,
-			testAddress1,
-		)
-	}
-}
-
-func TestWait(t *testing.T) {
-	const (
-		testAddress1 = `localhost:18080`
+		testAddress1 = `localhost:1080`
 		testAddress2 = `.test.socket`
+		ticTimeout   = time.Second / 4
 	)
 	var (
 		tic  *time.Ticker
 		cou  uint32
-		w1   Interface
+		web  Interface
 		conf *Configuration
 	)
 
-	w1 = New().Handler(echo.New())
-	w1.ListenAndServe(testAddress1)
-	if w1.Error() != nil {
-		t.Errorf("Error starting web server: %s", w1.Error().Error())
+	web = New().
+		Handler(getTestHandlerFn(t)).
+		ListenAndServe(testAddress1)
+	if web.Error() != nil {
+		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалась: %v", web.Error(), nil)
 	}
 	go func() {
-		tic = time.NewTicker(time.Second / 2)
+		tic = time.NewTicker(ticTimeout)
 		defer tic.Stop()
 		for {
 			<-tic.C
 			if cou++; cou > 4 {
-				w1.Stop()
+				web.Stop()
 				break
 			}
 		}
 	}()
-	w1.Wait()
+	web.Wait()
 	if cou <= 4 {
-		t.Errorf("Error Wait()")
+		t.Errorf("функция Wait() повреждена")
 	}
-	w1 = New().Handler(echo.New())
+	web = New().
+		Handler(getTestHandlerFn(t))
 	conf, _ = parseAddress("")
 	conf.Mode = "socket"
 	conf.Socket = testAddress2
-	conf.KeepAliveDisable = true
-	w1.ListenAndServeWithConfig(conf)
-	if w1.Error() != nil {
-		t.Errorf("Error starting web server: %s", w1.Error().Error())
+	web.ListenAndServeWithConfig(conf)
+	if web.Error() != nil {
+		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалась: %v", web.Error(), nil)
 	}
 	go func() {
-		tic = time.NewTicker(time.Second / 2)
+		tic = time.NewTicker(ticTimeout)
 		defer tic.Stop()
 		for {
 			<-tic.C
 			if cou++; cou > 4 {
-				w1.Stop()
+				web.Stop()
 				break
 			}
 		}
 	}()
-	w1.Wait()
+	web.Wait()
 	if cou <= 4 {
-		t.Errorf("Error Wait()")
+		t.Errorf("функция Wait() повреждена")
 	}
 }

@@ -1,68 +1,39 @@
 // Package web
 package web
 
-import "time"
+import (
+	"time"
+
+	"github.com/webnice/net"
+)
 
 // Configuration Структура конфигурации веб сервера.
 type Configuration struct {
-	// HostPort (readonly) Адрес составленный автоматически из Host:Port.
-	// Значение создаётся автоматически при инициализации конфигурации.
-	// Default value: ""
-	HostPort string `yaml:"-" json:"-"`
-
-	// Address Публичный адрес на котором сервер доступен извне.
-	// Например, если сервер находится за прокси, тут указывается реальный адрес подключения к серверу.
-	// Default value: "" - make automatically
-	Address string `yaml:"Address" json:"address"`
+	// Настройки базового сервера.
+	net.Configuration `yaml:"Network" json:"network"`
 
 	// TODO Сделать ограничение по доменам.
 	// Domains Список всех доменов, на которые отвечает сервер.
 	// Если не пусто, то для всех других доменов будет ответ "Requested host unavailable".
 	// Default value: [] - all domain
-	//Domains []string `yaml:"Domains" json:"domains"`
+	Domain []string `yaml:"Domain" json:"domain"`
 
-	// TLSPublicKeyPEM Путь и имя файла содержащего публичный ключ (сертификат) в PEM формате, включая CA сертификаты
-	// всех промежуточных центров сертификации, если ими подписан ключ.
-	TLSPublicKeyPEM string `yaml:"TLSPublicKeyPEM" json:"tls_public_key_pem"`
-
-	// TLSPrivateKeyPEM Путь и имя файла содержащего приватный ключ в PEM формате.
-	TLSPrivateKeyPEM string `yaml:"TLSPrivateKeyPEM" json:"tls_private_key_pem"`
-
-	// Host IP адрес или имя хоста на котором запускается web сервер, можно указывать 0.0.0.0 для всех ip адресов.
-	// Default value: "0.0.0.0"
-	Host string `yaml:"Host" json:"host" default-value:"0.0.0.0"`
-
-	// Port tcp/ip порт занимаемый сервером.
-	// Default value: 80
-	Port uint16 `yaml:"Port" json:"port" default-value:"80"`
-
-	// Socket Unix socket на котором поднимается сервер, только для unix-like операционных систем Linux, Unix, Mac.
-	// Default value: "" - unix socket is off
-	Socket string `yaml:"Socket" json:"socket" default-value:"-"`
-
-	// Mode Режим работы, tcp, tcp4, tcp6, unix, unixpacket, socket, systemd.
-	// systemd - Открытие порта выполняется службой линукса systemd, веб серверу передаётся открытое соединение, через
-	// файловый дескриптор, в который поступают входящие соединения.
-	// Более подробно можно посмотреть в документации man systemd.socket(5).
-	// Default value: "tcp"
-	Mode string `yaml:"Mode" json:"mode" default-value:"tcp"`
-
-	// ReadTimeout Время в наносекундах ожидания запроса включая ReadHeaderTimeout.
+	// ReadTimeout Время ожидания запроса включая ReadHeaderTimeout.
 	// Если не указано или рано 0 - таймаута нет.
 	// Default value: 0 - no timeout
 	ReadTimeout time.Duration `yaml:"ReadTimeout" json:"read_timeout"`
 
-	// ReadHeaderTimeout Время в наносекундах ожидания заголовка запроса.
+	// ReadHeaderTimeout Время ожидания заголовка запроса.
 	// Если не указано или рано 0 - таймаута нет.
 	// Default value: 0 - no timeout
 	ReadHeaderTimeout time.Duration `yaml:"ReadHeaderTimeout" json:"read_header_timeout"`
 
-	// WriteTimeout Время в наносекундах ожидания выдачи ответа.
+	// WriteTimeout Время ожидания выдачи ответа.
 	// Если не указано или рано 0 - таймаута нет.
 	// Default value: 0 - no timeout
 	WriteTimeout time.Duration `yaml:"WriteTimeout" json:"write_timeout"`
 
-	// IdleTimeout Максимальное время ожидания следующего входящего соединения для открытого сокета, дл его закрытия.
+	// IdleTimeout Максимальное время ожидания следующего входящего соединения для открытого сокета, до его закрытия.
 	// Используется при включённом keep-alives.
 	// Если не указано или рано 0 - таймаута нет
 	// Default value: 0 - no timeout
@@ -81,12 +52,20 @@ type Configuration struct {
 	// TODO Сделать ограничение на максимальный размер тела запроса.
 	// MaxBodyBytes Максимальный размер тела запроса.
 	// Default value: 0 - unlimited
-	//MaxBodyBytes uint64 `yaml:"MaxBodyBytes" json:"max_body_bytes"`
+	MaxBodyBytes uint64 `yaml:"MaxBodyBytes" json:"max_body_bytes"`
 
 	// KeepAliveDisable Отключение режима "оставаться в живых" (keep alive).
-	// Default value: false - keep alive are enabled
+	// Default value: false - keep alive are enabled.
 	KeepAliveDisable bool `yaml:"KeepAliveDisable" json:"keep_alive_disable"`
 
+	// DisableGeneralOptionsHandler Отключение обработки HTTP запросов методом OPTION.
+	// Если установлено значение "истина", на все запросы методом OPTION сервер отвечает кодом 200 и передаёт в
+	// заголовке Content-Length значение 0.
+	// Если установлено значение "ложь", запросы передаются контроллеру и обрабатываются обычным образом.
+	// Default value: false - запросы передаются контроллеру.
+	DisableGeneralOptionsHandler bool `yaml:"DisableGeneralOptionsHandler" json:"disable_general_options_handler"`
+
+	// TODO Сделать загрузку данных по прокси протоколу.
 	// ProxyProtocol Включение прокси протокола.
 	// Прокси протокол позволяет веб-серверу получать информацию о подключении клиента, передаваемую через
 	// прокси-серверы и средства балансировки нагрузки, такие как HAProxy, Amazon Elastic Load Balancer (ELB) и другие.
@@ -95,3 +74,120 @@ type Configuration struct {
 	// Default value: false
 	ProxyProtocol bool `yaml:"ProxyProtocol" json:"proxy_protocol"`
 }
+
+/**
+
+   Пример конфигурации YAML:
+
+      ## Настройки базового сервера.
+      Network:
+            ## Публичный адрес по которому сервер доступен извне.
+            ## Например, если сервер находится за прокси, тут указывается реальный адрес подключения к серверу.
+            ## Default value: ""
+            Address: !!str "http://localhost/"
+
+            ## IP адрес или имя хоста на котором поднимается сервер, можно указывать 0.0.0.0 для всех ip адресов.
+            ## Default value: "0.0.0.0".
+            #Host: !!str "[2a03:e2c0:a32::2]"
+            #Host: !!str "example.hostname.local"
+            Host: !!str "0.0.0.0"
+
+            ## Tcp/ip порт занимаемый сервером.
+            ## Default value: 80
+            Port: !!int 80
+
+            ## Юникс сокет на котором поднимается сервер, только для unix-like операционных систем Linux, Unix, Mac.
+            ## Default value: ""
+            Socket: !!str "run/example.sock"
+
+            ## Файловые разрешения доступа к юникс сокету, при его использовании.
+            ## Default value: "640"
+            SocketMode: !!int 640
+
+            ## Режим открытия сокета, возможные значения: tcp, tcp4, tcp6, unix, unixpacket, socket, systemd.
+            ## udp, udp4, udp6 - Сервер поднимается на указанном Host:Port;
+            ## tcp, tcp4, tcp6 - Сервер поднимается на указанном Host:Port;
+            ## unix, unixpacket - Сервер поднимается на указанном unix/unixpacket;
+            ## socket  - Сервер поднимается на socket, только для unix-like операционных систем. Параметры Host:Port
+            ##           игнорируются, используется только путь к сокету;
+            ## systemd - Порт или сокет открывает systemd и передаёт слушателя порта через файловый дескриптор сервису,
+            ##           запущенному от пользователя без права открытия привилегированных портов. Максимально удобный
+            ##           способ при использовании правильного безопасно настроенного linux сервера.
+            ##           Более подробно можно посмотреть в документации man systemd.socket(5);
+            ## Default value: "tcp"
+            Mode: !!str "tcp"
+
+            ## Путь и имя файла содержащего публичный ключ (сертификат) в PEM формате, включая CA
+            ## сертификаты всех промежуточных центров сертификации, если ими подписан ключ.
+            ## Применяется только для TCP соединений, для UDP не используется.
+            ## Default value: ""
+            TLSPublicKeyPEM: !!str "/etc/application/certificate.pub"
+
+            ## Путь и имя файла содержащего секретный/приватный ключ в PEM формате.
+            ## Применяется только для TCP соединений, для UDP не используется.
+            ## Default value: ""
+            TLSPrivateKeyPEM: !!str "/etc/application/certificate.key"
+
+      ## Список всех доменов, на которые отвечает сервер.
+      ## Если не пусто, то для всех других доменов будет ответ "Requested host unavailable".
+      ## Default value: [] - любое имя домена.
+      Domain:
+      - !!str "localhost"
+      - !!str "example.domain.tld"
+
+      ## Время ожидания запроса включая ReadHeaderTimeout.
+      ## Если не указано или рано 0 - таймаута нет.
+      ## Default value: 0 - no timeout
+      ReadTimeout: 0s
+
+      ## Время ожидания заголовка запроса.
+      ## Если не указано или рано 0 - таймаута нет.
+      ## Default value: 0 - no timeout
+      ReadHeaderTimeout: 0s
+
+      ## Время ожидания выдачи ответа.
+      ## Если не указано или рано 0 - таймаута нет.
+      ## Default value: 0 - no timeout
+      WriteTimeout: 0s
+
+      ## Максимальное время ожидания следующего входящего соединения для открытого сокета, до его закрытия.
+      ## Используется при включённом keep-alives.
+      ## Если не указано или рано 0 - таймаута нет
+      ## Default value: 0 - no timeout
+      IdleTimeout: 0s
+
+      ## Максимальное время ожидания завершения работы веб сервера до начала принудительного обрыва
+      ## соединений и остановки процессов.
+      ## Если не указано или рано 0 - таймаута нет.
+      ## Default value: 30s
+      ShutdownTimeout: 30s
+
+      ## Максимальный размер заголовка запроса.
+      ## Default value: 1 MB (from net/http/DefaultMaxHeaderBytes)
+      MaxHeaderBytes: !!int 1048576
+
+      ## Максимальный размер тела запроса.
+      ## Default value: 0 - без ограничений.
+      MaxBodyBytes: !!int 0
+
+      ## Отключение режима "оставаться в живых" (keep alive).
+      ## Default value: false - оставаться в живых включён.
+      KeepAliveDisable: !!bool false
+
+      ## Отключение обработки HTTP запросов методом OPTION.
+      ## Если установлено значение "истина", на все запросы методом OPTION сервер отвечает кодом 200 и передаёт в
+      ## заголовке Content-Length значение 0.
+      ## Если установлено значение "ложь", запросы передаются контроллеру и обрабатываются обычным образом.
+      ## Default value: false - запросы передаются контроллеру.
+      DisableGeneralOptionsHandler: !!bool false
+
+      ## Включение прокси протокола.
+      ## Прокси протокол позволяет веб-серверу получать информацию о подключении клиента, передаваемую через
+      ## прокси-серверы и средства балансировки нагрузки, такие как HAProxy, Amazon Elastic Load Balancer (ELB) и другие.
+      ## С помощью прокси протокола веб-сервер может узнать IP-адрес клиента для HTTP, SSL, HTTP/2, SPDY, WebSocket, TCP
+      ## запросов приходящих от прокси сервера.
+      ## Default value: false
+      ProxyProtocol: !!bool false
+
+
+**/
