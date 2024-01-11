@@ -1,7 +1,0 @@
-package: .
-homepage: https://github.com/webnice/web
-license: MIT
-import:
-- package: golang.org/x/net
-- package: golang.org/x/text
-- package: golang.org/x/crypto

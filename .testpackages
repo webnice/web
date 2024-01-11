@@ -1,8 +1,1 @@
-github.com/webnice/web/v3
-github.com/webnice/web/v3/ambry
-github.com/webnice/web/v3/header
-github.com/webnice/web/v3/method
-github.com/webnice/web/v3/mime
-github.com/webnice/web/v3/status
-github.com/webnice/web/v3/proxyp
-github.com/webnice/web/v3/proxyp/tlvparse
+github.com/webnice/web/v4

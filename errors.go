@@ -1,29 +1,17 @@
 package web
 
+import wnet "github.com/webnice/net"
+
 // Все ошибки определены как константы.
 const (
-	cAlreadyRunning                = `Веб сервер уже запущен.`
-	cNoConfiguration               = `Конфигурация ВЕБ сервера отсутствует либо равна nil.`
-	cListenSystemdPID              = `Переменная окружения LISTEN_PID пустая либо содержит не верное значение.`
-	cListenSystemdFDS              = `Переменная окружения LISTEN_FDS пустая либо содержит не верное значение.`
-	cListenSystemdUnexpectedNumber = `Неожиданное количество сокетов активации FDS.`
-	cListenSystemdNotFound         = `Получение сокета systemd по имени, имя не найдено.`
-	cTLSIsNil                      = `Конфигурация TLS веб сервера пустая.`
-	cHandlerIsNotSet               = `Не установлен обработчик ВЕБ запросов.`
+	cHandlerIsNotSet = "Не установлен обработчик запросов ВЕБ сервера."
 )
 
 // Константы указываются в объектах в качестве фиксированного адреса на протяжении всего времени работы приложения.
 // Ошибка с ошибкой могут сравниваться по содержимому, по адресу и т.д.
 var (
-	errSingleton                     = &Error{}
-	errAlreadyRunning                = err(cAlreadyRunning)
-	errNoConfiguration               = err(cNoConfiguration)
-	errListenSystemdPID              = err(cListenSystemdPID)
-	errListenSystemdFDS              = err(cListenSystemdFDS)
-	errListenSystemdUnexpectedNumber = err(cListenSystemdUnexpectedNumber)
-	errListenSystemdNotFound         = err(cListenSystemdNotFound)
-	errTLSIsNil                      = err(cTLSIsNil)
-	errHandlerIsNotSet               = err(cHandlerIsNotSet)
+	errSingleton       = &Error{}
+	errHandlerIsNotSet = err(cHandlerIsNotSet)
 )
 
 type (
@@ -40,26 +28,31 @@ func Errors() *Error { return errSingleton }
 
 // ОШИБКИ.
 
-// ErrAlreadyRunning Веб сервер уже запущен.
-func ErrAlreadyRunning() error { return &errAlreadyRunning }
+// AlreadyRunning Сервер уже запущен.
+func (e *Error) AlreadyRunning() error { return wnet.Errors().AlreadyRunning() }
 
-// ErrNoConfiguration Конфигурация ВЕБ сервера отсутствует либо равна nil.
-func ErrNoConfiguration() error { return &errNoConfiguration }
+// NoConfiguration Конфигурация сервера отсутствует либо равна nil.
+func (e *Error) NoConfiguration() error { return wnet.Errors().NoConfiguration() }
 
-// ErrListenSystemdPID Переменная окружения LISTEN_PID пустая либо содержит не верное значение.
-func ErrListenSystemdPID() error { return &errListenSystemdPID }
+// ListenSystemdPID Переменная окружения LISTEN_PID пустая, либо содержит не верное значение.
+func (e *Error) ListenSystemdPID() error { return wnet.Errors().ListenSystemdPID() }
 
-// ErrListenSystemdFDS Переменная окружения LISTEN_FDS пустая либо содержит не верное значение.
-func ErrListenSystemdFDS() error { return &errListenSystemdFDS }
+// ListenSystemdFDS Переменная окружения LISTEN_FDS пустая, либо содержит не верное значение.
+func (e *Error) ListenSystemdFDS() error { return wnet.Errors().ListenSystemdFDS() }
 
-// ErrListenSystemdUnexpectedNumber Неожиданное количество сокетов активации FDS.
-func ErrListenSystemdUnexpectedNumber() error { return &errListenSystemdUnexpectedNumber }
+// ListenSystemdNotFound Получение сокета systemd по имени, имя не найдено.
+func (e *Error) ListenSystemdNotFound() error { return wnet.Errors().ListenSystemdNotFound() }
 
-// ErrListenSystemdNotFound Получение сокета systemd по имени, имя не найдено.
-func ErrListenSystemdNotFound() error { return &errListenSystemdNotFound }
+// ListenSystemdQuantityNotMatch Полученное количество LISTEN_FDS не соответствует переданному LISTEN_FDNAMES.
+func (e *Error) ListenSystemdQuantityNotMatch() error {
+	return wnet.Errors().ListenSystemdQuantityNotMatch()
+}
 
-// ErrTLSIsNil Конфигурация TLS веб сервера пустая.
-func ErrTLSIsNil() error { return &errTLSIsNil }
+// TLSIsNil Конфигурация TLS сервера пустая.
+func (e *Error) TLSIsNil() error { return wnet.Errors().TLSIsNil() }
 
-// ErrHandlerIsNotSet Не установлен обработчик ВЕБ запросов.
-func ErrHandlerIsNotSet() error { return &errHandlerIsNotSet }
+// ServerHandlerIsNotSet Не установлен обработчик основной функции TCP сервера.
+func (e *Error) ServerHandlerIsNotSet() error { return wnet.Errors().ServerHandlerIsNotSet() }
+
+// HandlerIsNotSet Не установлен обработчик запросов ВЕБ сервера.
+func (e *Error) HandlerIsNotSet() error { return &errHandlerIsNotSet }

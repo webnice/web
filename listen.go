@@ -3,244 +3,114 @@ package web
 import (
 	"crypto/tls"
 	"net"
-	"os"
-	"path"
 )
 
 // ListenAndServe Открытие адреса или сокета без использования конфигурации веб сервера (конфигурация по
 // умолчанию), запуск веб сервера для обслуживания входящих соединений.
-func (wbo *web) ListenAndServe(addr string) Interface {
+func (web *impl) ListenAndServe(addr string) Interface {
 	var conf *Configuration
 
-	if conf, wbo.err = parseAddress(addr); wbo.err != nil {
-		return wbo
+	if conf, web.err = parseAddress(addr); web.err != nil {
+		return web
 	}
-
-	return wbo.ListenAndServeWithConfig(conf)
+	return web.ListenAndServeWithConfig(conf)
 }
 
 // ListenAndServeTLS Открытие адреса или сокета с использованием TLS, без использования конфигурации веб сервера
 // (конфигурация по умолчанию), запуск веб сервера для обслуживания входящих соединений.
-func (wbo *web) ListenAndServeTLS(addr string, certFile string, keyFile string, tlsConfig *tls.Config) Interface {
+func (web *impl) ListenAndServeTLS(addr string, certFile string, keyFile string, tlsConfig *tls.Config) Interface {
 	var conf *Configuration
 
-	if conf, wbo.err = parseAddress(addr); wbo.err != nil {
-		return wbo
+	if conf, web.err = parseAddress(addr); web.err != nil {
+		return web
 	}
 	conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM = certFile, keyFile
 
-	return wbo.ListenAndServeTLSWithConfig(conf, tlsConfig)
+	return web.ListenAndServeTLSWithConfig(conf, tlsConfig)
 }
 
 // ListenAndServeWithConfig Настройка сервера с использованием переданной конфигурации, открытие адреса или сокета
 // на прослушивание, запуск веб сервера для обслуживания входящих соединений.
-func (wbo *web) ListenAndServeWithConfig(conf *Configuration) Interface {
-	if conf == nil {
-		wbo.err = ErrNoConfiguration()
-		return wbo
-	}
-	wbo.conf = conf
+func (web *impl) ListenAndServeWithConfig(conf *Configuration) Interface {
+	var listener net.Listener
 
-	return wbo.Listen(nil)
+	if conf == nil {
+		web.err = Errors().NoConfiguration()
+		return web
+	}
+	web.cfg = conf
+	if listener, web.err = web.NewListener(web.cfg); web.err != nil {
+		return web
+	}
+
+	return web.Serve(listener)
 }
 
 // ListenAndServeTLSWithConfig Настройка сервера с использованием переданной конфигурации в режиме TLS, открытие
 // адреса или сокета на прослушивание, запуск веб сервера для обслуживания входящих соединений.
-func (wbo *web) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.Config) Interface {
+func (web *impl) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls.Config) Interface {
+	var listener net.Listener
+
 	if conf == nil {
-		wbo.err = ErrNoConfiguration()
-		return wbo
+		web.err = Errors().NoConfiguration()
+		return web
 	}
-	wbo.conf = conf
+	web.cfg = conf
 	if tlsConfig == nil {
-		if tlsConfig, wbo.err = wbo.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); wbo.err != nil {
-			return wbo
+		tlsConfig, web.err = web.net.NewTLSConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM)
+		if web.err != nil {
+			return web
 		}
 	}
+	if listener, web.err = web.NewListenerTLS(web.cfg, tlsConfig); web.err != nil {
+		return web
+	}
 
-	return wbo.Listen(tlsConfig)
+	return web.ServeTLS(listener, tlsConfig)
+}
+
+// ListenersSystemdWithoutNames Возвращает срез net.Listener сокетов переданных в процесс веб сервера из systemd.
+func (web *impl) ListenersSystemdWithoutNames() ([]net.Listener, error) {
+	return web.listenersSystemdWithoutNames()
+}
+
+// ListenersSystemdWithNames Возвращает карту срезов net.Listener сокетов переданных в процесс веб сервера
+// из systemd.
+func (web *impl) ListenersSystemdWithNames() (map[string][]net.Listener, error) {
+	return web.listenersSystemdWithNames()
+}
+
+// ListenersSystemdTLSWithoutNames Возвращает срез net.listener для TLS сокетов переданных в процесс веб сервера
+// из systemd.
+func (web *impl) ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) ([]net.Listener, error) {
+	return web.listenersSystemdTLSWithoutNames(tlsConfig)
+}
+
+// ListenersSystemdTLSWithNames Возвращает карту срезов net.listener для TLS сокетов переданных в процесс веб сервера
+// из systemd.
+func (web *impl) ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (map[string][]net.Listener, error) {
+	return web.listenersSystemdTLSWithNames(tlsConfig)
 }
 
 // NewListener Создание нового слушателя соединений net.Listener на основе конфигурации веб сервера.
-func (wbo *web) NewListener(conf *Configuration) (ret net.Listener, err error) {
-	var (
-		lstWithNames map[string][]net.Listener
-		listeners    []net.Listener
-		ok           bool
-	)
-
-	defaultConfiguration(conf)
-	switch conf.Mode {
-	case netSystemd:
-		if conf.Socket != "" {
-			// Имена сокетов указаны
-			if lstWithNames, err = wbo.ListenersSystemdWithNames(); err != nil {
-				return
-			}
-			// Выбор сокета по имени
-			if listeners, ok = lstWithNames[path.Base(conf.Socket)]; !ok {
-				err = ErrListenSystemdNotFound()
-				return
-			}
-		} else {
-			// Имена сокетов не указаны
-			if listeners, err = wbo.ListenersSystemdWithoutNames(); err != nil {
-				return
-			}
-		}
-		if len(listeners) == 0 {
-			err = ErrListenSystemdUnexpectedNumber()
-			return
-		}
-		ret = listeners[0]
-	case netUnix, netUnixPacket:
-		_ = os.Remove(conf.Socket)
-		ret, err = net.Listen(conf.Mode, conf.Socket)
-		_ = os.Chmod(conf.Socket, os.FileMode(0666))
-	default:
-		ret, err = net.Listen(conf.Mode, conf.HostPort)
+func (web *impl) NewListener(conf *Configuration) (ret net.Listener, err error) {
+	if web.net.IsRunning() {
+		err = Errors().AlreadyRunning()
+		return
 	}
+	ret, _, err = web.net.NewListener(&conf.Configuration)
 
 	return
 }
 
 // NewListenerTLS Создание нового слушателя соединений net.Listener в режиме TLS, на основе конфигурации
 // веб сервера.
-func (wbo *web) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error) {
-	var lst net.Listener
-
-	if lst, err = wbo.NewListener(conf); err != nil {
+func (web *impl) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error) {
+	if web.net.IsRunning() {
+		err = Errors().AlreadyRunning()
 		return
 	}
-	if tlsConfig == nil {
-		if tlsConfig, err = wbo.tlsConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); err != nil {
-			return
-		}
-	}
-	if tlsConfig == nil {
-		err = ErrTLSIsNil()
-		return
-	}
-	ret = tls.NewListener(lst, tlsConfig)
+	ret, _, err = web.net.NewListenerTLS(&conf.Configuration, tlsConfig)
 
 	return
-}
-
-// Конфигурация TLS по умолчанию.
-func (wbo *web) tlsConfigDefault(tlsPublicFile string, tlsPrivateFile string) (ret *tls.Config, err error) {
-	ret = &tls.Config{
-		MinVersion:       tls.VersionTLS12,
-		CurvePreferences: []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
-		CipherSuites: []uint16{
-			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
-			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
-		},
-		Certificates: make([]tls.Certificate, 1),
-	}
-	if ret.Certificates[0], err = tls.LoadX509KeyPair(tlsPublicFile, tlsPrivateFile); err != nil {
-		return
-	}
-
-	return
-}
-
-// Listen Запуск прослушивания входящих соединений и веб сервера.
-func (wbo *web) Listen(tlsConfig *tls.Config) Interface {
-	var ltn net.Listener
-
-	if wbo.isRun.Load().(bool) {
-		wbo.err = ErrAlreadyRunning()
-		return wbo
-	}
-	switch tlsConfig == nil {
-	case true:
-		ltn, wbo.err = wbo.NewListener(wbo.conf)
-	case false:
-		ltn, wbo.err = wbo.NewListenerTLS(wbo.conf, tlsConfig)
-	}
-	if wbo.err != nil {
-		return wbo
-	}
-
-	return wbo.ServeTLS(ltn, tlsConfig)
-}
-
-// Serve Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener.
-func (wbo *web) Serve(ltn net.Listener) Interface { return wbo.ServeTLS(ltn, nil) }
-
-// ServeTLS Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener с
-// использованием TLS.
-func (wbo *web) ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface {
-	var (
-		conf *Configuration
-		onUp chan struct{}
-	)
-
-	// TODO: Сделать поддержку PROXY Protocol через "github.com/webnice/web/v3/proxyp", conf.ProxyProtocol
-
-	if wbo.conf == nil {
-		conf, _ = parseAddress(ltn.Addr().String())
-		defaultConfiguration(conf)
-		wbo.conf = conf
-	}
-	wbo.listener, wbo.onCloseDone = ltn, make(chan struct{})
-	wbo.isRun.Store(true)
-	onUp = make(chan struct{})
-	go wbo.run(onUp, tlsConfig)
-	onEnd(onUp)
-
-	return wbo
-}
-
-// Процесс веб сервера.
-func (wbo *web) run(onUp chan struct{}, tlsConfig *tls.Config) {
-	defer func() {
-		wbo.isRun.Store(false)
-		wbo.onCloseDone <- struct{}{}
-	}()
-	defer func() {
-		if wbo.conf.Socket == "" {
-			return
-		}
-		switch wbo.conf.Mode {
-		case netSystemd:
-			return
-		case netUnix, netUnixPacket:
-			_ = os.Remove(wbo.conf.Socket)
-		}
-	}()
-	// Обеспечение синхронного запуска потока.
-	onUp <- struct{}{}
-	// Присвоение конфигурации веб серверу.
-	if wbo.server = wbo.loadConfiguration(tlsConfig); wbo.err != nil {
-		return
-	}
-	// Проверка наличия обработчика запросов ВЕБ сервера.
-	if wbo.server.Handler == nil || wbo.handler == nil {
-		wbo.err = ErrHandlerIsNotSet()
-		return
-	}
-	// Конфигурация "оставаться в живых".
-	if wbo.conf.KeepAliveDisable {
-		wbo.server.SetKeepAlivesEnabled(false)
-	}
-	// Запуск веб сервера.
-	if wbo.conf.TLSPrivateKeyPEM == "" || wbo.conf.TLSPublicKeyPEM == "" {
-		wbo.err = wbo.server.Serve(wbo.listener)
-		return
-	}
-	wbo.err = wbo.server.ServeTLS(wbo.listener, wbo.conf.TLSPublicKeyPEM, wbo.conf.TLSPrivateKeyPEM)
-}
-
-// Wait Блокируемая функция ожидания завершения веб сервера, если он запущен.
-// Если сервер не запущен, функция завершается немедленно.
-func (wbo *web) Wait() Interface {
-	if !wbo.isRun.Load().(bool) {
-		return wbo
-	}
-	onEnd(wbo.onCloseDone)
-
-	return wbo
 }
