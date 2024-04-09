@@ -43,7 +43,7 @@ func (web *impl) ListenAndServeWithConfig(conf *Configuration) Interface {
 		return web
 	}
 
-	return web.Serve(listener)
+	return web.ServeWithId(listener, web.cfg.ID)
 }
 
 // ListenAndServeTLSWithConfig Настройка сервера с использованием переданной конфигурации в режиме TLS, открытие
@@ -66,7 +66,7 @@ func (web *impl) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls
 		return web
 	}
 
-	return web.ServeTLS(listener, tlsConfig)
+	return web.ServeTLSWithId(listener, tlsConfig, web.cfg.ID)
 }
 
 // ListenersSystemdWithoutNames Возвращает срез net.Listener сокетов переданных в процесс веб сервера из systemd.

@@ -8,6 +8,10 @@ import (
 
 // Interface Интерфейс пакета.
 type Interface interface {
+	// ID Уникальный идентификатор сервера.
+	// Если идентификатор не был указан в конфигурации, создаётся при запуске.
+	ID() string
+
 	// Handler Назначение обработчика запросов ВЕБ сервера.
 	// Обработчик необходимо назначить до запуска ВЕБ сервера.
 	Handler(handler http.Handler) Interface
@@ -53,9 +57,17 @@ type Interface interface {
 	// Serve Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener.
 	Serve(net.Listener) Interface
 
+	// ServeWithId Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener с
+	// указанием ID сервера.
+	ServeWithId(ltn net.Listener, id string) Interface
+
 	// ServeTLS Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener с
 	// использованием TLS.
 	ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface
+
+	// ServeTLSWithId Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener с
+	// использованием TLS и указанием ID сервера.
+	ServeTLSWithId(ltn net.Listener, tlsConfig *tls.Config, id string) Interface
 
 	// Wait Блокируемая функция ожидания завершения веб сервера, если он запущен.
 	// Если сервер не запущен, функция завершается немедленно.

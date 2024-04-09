@@ -7,7 +7,11 @@ import (
 
 // Interface Интерфейс пакета.
 type Interface interface {
-	// ФУНКЦИЯ СЕРВЕРА
+	// ФУНКЦИИ СЕРВЕРА
+
+	// ID Уникальный идентификатор сервера.
+	// Если идентификатор не был указан в конфигурации, создаётся при запуске.
+	ID() string
 
 	// Handler Назначение основной функции TCP или сокет сервера. Функция должна назначаться до запуска сервера.
 	Handler(fn HandlerFn) Interface
@@ -48,7 +52,7 @@ type Interface interface {
 	// из службы linux - systemd.
 	ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) (ret []net.Listener, err error)
 
-	// ListenersSystemdTLSWithNames Возвращает карту срезов net.nnlistener для TLS сокетов переданных в процесс сервера
+	// ListenersSystemdTLSWithNames Возвращает карту срезов net.listener для TLS сокетов переданных в процесс сервера
 	// из службы linux - systemd.
 	ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (ret map[string][]net.Listener, err error)
 
@@ -67,8 +71,16 @@ type Interface interface {
 	// Serve Запуск функции сервера для входящих соединений на основе переданного слушателя net.Listener.
 	Serve(net.Listener) Interface
 
+	// ServeWithId Запуск функции сервера для входящих соединений на основе переданного слушателя net.Listener с
+	// указанием ID сервера.
+	ServeWithId(ltn net.Listener, id string) Interface
+
 	// ServeUdp Запуск функции сервера для входящих UDP пакетов на основе переданного слушателя net.PacketConn.
 	ServeUdp(lpc net.PacketConn) Interface
+
+	// ServeUdpWithId Запуск функции сервера для входящих UDP пакетов на основе переданного слушателя net.PacketConn с
+	// указанием ID сервера.
+	ServeUdpWithId(lpc net.PacketConn, id string) Interface
 
 	// Wait Блокируемая функция ожидания завершения веб сервера, если он запущен.
 	// Если сервер не запущен, функция завершается немедленно.

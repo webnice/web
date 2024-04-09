@@ -48,7 +48,7 @@ func TestImpl_MakeServer(t *testing.T) {
 	if isTls {
 		t.Errorf("функция makeServer(%v), isTls: %t, ожидалось: %t", nil, isTls, false)
 	}
-	if srv.TLSNextProto != nil {
+	if srv != nil && srv.TLSNextProto != nil {
 		t.Errorf("функция makeServer(%v), TLSNextProto не равно: %v", nil, nil)
 	}
 }

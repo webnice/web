@@ -1,6 +1,8 @@
 github.com/go-chi/chi/v5 v5.0.10 h1:rLz5avzKpjqxrYwXNfmjkrYYXOyLJd37pz53UFHC6vk=
 github.com/go-chi/chi/v5 v5.0.10/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/webnice/dic v1.0.0 h1:HqLrt/ZFxIsHmLSThvcD8XJQIhfS8BZR8/XtjEtY3N4=
 github.com/webnice/dic v1.0.0/go.mod h1:1uJ/a1/bfQeSE1oE7UnOe7jW9omfR2qUlEnXV0pDnmY=
-github.com/webnice/net v1.1.2 h1:23H/iv/D2FTiR+LhnQVqswYoPw5GqxUhIYqZ+fQAK+Y=
-github.com/webnice/net v1.1.2/go.mod h1:e2rs89rmvDS5Ety6pfwLxNZhFTPBI2unj5WszXcN8VA=
+github.com/webnice/net v1.1.4 h1:G4ayg5QLhgp0uClJLpkYSEVLqlckinshSIuDsy+DbCk=
+github.com/webnice/net v1.1.4/go.mod h1:yUNRjm6/t3IeL4ak4J9DhUEEuAZ9GZ2y/BYWx5I6USc=

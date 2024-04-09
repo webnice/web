@@ -21,6 +21,10 @@ func New() Interface {
 	return web
 }
 
+// ID Уникальный идентификатор сервера.
+// Если идентификатор не был указан в конфигурации, создаётся при запуске.
+func (web *impl) ID() string { return web.net.ID() }
+
 // Handler Назначение обработчика запросов ВЕБ сервера.
 // Обработчик необходимо назначить до запуска ВЕБ сервера.
 func (web *impl) Handler(handler http.Handler) Interface { web.handler = handler; return web }
@@ -45,9 +49,21 @@ func (web *impl) Error() error {
 // Serve Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener.
 func (web *impl) Serve(ltn net.Listener) Interface { return web.ServeTLS(ltn, nil) }
 
+// ServeWithId Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener с
+// указанием ID сервера.
+func (web *impl) ServeWithId(ltn net.Listener, id string) Interface {
+	return web.ServeTLSWithId(ltn, nil, id)
+}
+
 // ServeTLS Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener с
 // использованием TLS.
 func (web *impl) ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface {
+	return web.ServeTLSWithId(ltn, tlsConfig, "")
+}
+
+// ServeTLSWithId Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener с
+// использованием TLS и указанием ID сервера.
+func (web *impl) ServeTLSWithId(ltn net.Listener, tlsConfig *tls.Config, id string) Interface {
 	var (
 		listener net.Listener
 		isTls    bool
@@ -62,6 +78,7 @@ func (web *impl) ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface {
 
 		web.cfg, web.err = parseAddress(ltn.Addr().String())
 	}
+	web.cfg.ID, web.cfg.Configuration.ID = id, id
 
 	// TODO: Сделать поддержку PROXY Protocol через "github.com/webnice/web/v3/proxyp", conf.ProxyProtocol
 
@@ -72,7 +89,7 @@ func (web *impl) ServeTLS(ltn net.Listener, tlsConfig *tls.Config) Interface {
 		listener = tls.NewListener(ltn, tlsConfig)
 	}
 	web.net.Handler(web.server.Serve)
-	web.net.Serve(listener)
+	web.net.ServeWithId(listener, web.cfg.ID)
 
 	return web
 }
