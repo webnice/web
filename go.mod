@@ -2,9 +2,7 @@ module github.com/webnice/web/v3
 
 go 1.22
 
-toolchain go1.23.3
-
-require github.com/webnice/net v1.3.0
+require github.com/webnice/net v1.3.1
 
 require github.com/webnice/dic v1.2.1
 

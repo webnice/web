@@ -15,7 +15,7 @@
     github.com/webnice/net
     github.com/pires/go-proxyproto
 
-#### Install
+#### Подключение
 ```bash
 go get github.com/webnice/web/v3
 ```
