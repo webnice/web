@@ -32,3 +32,6 @@ func (sso *tStatus) IsEqualCode(c int) bool { return sso.code == c }
 
 // String Интерфейс Stringify. Статус HTTP ответа в виде строки.
 func (sso *tStatus) String() string { return fmt.Sprintf("%s", sso.status) }
+
+// Bytes Статус HTTP ответа в виде среза байт.
+func (sso *tStatus) Bytes() []byte { return []byte(sso.String()) }

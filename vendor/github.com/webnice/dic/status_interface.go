@@ -16,6 +16,9 @@ type IStatus interface {
 
 	// String Полностью весть MIME тип с подтипом и опциями.
 	String() string
+
+	// Bytes Статус HTTP ответа в виде среза байт.
+	Bytes() []byte
 }
 
 // Структура объекта статуса HTTP ответа.

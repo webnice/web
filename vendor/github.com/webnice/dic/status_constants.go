@@ -121,6 +121,8 @@ type Statuses struct {
 	TooEarly IStatus
 	// UpgradeRequired Статус: "Upgrade Required", код: 426. RFC9110, 15.5.22. Клиенту необходимо обновить протокол запроса. В заголовке ответа сервера Upgrade и Connection возвращаются указания, которые должен выполнить клиент для успешности запроса.
 	UpgradeRequired IStatus
+	// Unassigned Статус: "Not assigned", код: 427. WebDesk, Получены корректные данные запроса, но значения обязательных полей не установлены.
+	Unassigned IStatus
 	// PreconditionRequired Статус: "Precondition Required", код: 428. RFC6585, 3. Сервер требует от клиента выполнить запрос с указанием заголовков Range и If-Match.
 	PreconditionRequired IStatus
 	// TooManyRequests Статус: "Too Many Requests", код: 429. RFC6585, 4. Слишком много запросов от клиента к ресурсу. В ответе сервера возвращается заголовок Retry-After с указанием времени, по истечении которого, можно повторить запрос к серверу.
@@ -265,6 +267,7 @@ func init() {
 		FailedDependency:              &tStatus{status: "Failed Dependency", code: 424},
 		TooEarly:                      &tStatus{status: "Too Early", code: 425},
 		UpgradeRequired:               &tStatus{status: "Upgrade Required", code: 426},
+		Unassigned:                    &tStatus{status: "Not assigned", code: 427},
 		PreconditionRequired:          &tStatus{status: "Precondition Required", code: 428},
 		TooManyRequests:               &tStatus{status: "Too Many Requests", code: 429},
 		RequestHeaderFieldsTooLarge:   &tStatus{status: "Request Header Fields Too Large", code: 431},

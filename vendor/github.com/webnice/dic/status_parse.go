@@ -28,6 +28,28 @@ func ParseStatusString(s string) IStatus {
 	return sso
 }
 
+// ParseStatusCode Разбор числового кода в объект статуса HTTP ответа.
+func ParseStatusCode(code int) IStatus {
+	var (
+		sso *tStatus
+		tss *tStatus
+		rv  reflect.Value
+		n   int
+	)
+
+	rv = reflect.ValueOf(singletonStatus)
+	for n = 0; n < rv.NumField(); n++ {
+		if tss = rv.Field(n).Interface().(*tStatus); tss.Code() == code {
+			sso = tss
+		}
+	}
+	if sso == nil {
+		return nil
+	}
+
+	return sso
+}
+
 // NewStatus Создание объекта под интерфейс IStatus, функция предназначена для формирования настраиваемых справочников.
 func NewStatus(status string, code int) IStatus {
 	var (

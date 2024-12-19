@@ -13,6 +13,7 @@
 
     github.com/webnice/dic
     github.com/webnice/net
+    github.com/pires/go-proxyproto
 
 #### Install
 ```bash
