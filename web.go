@@ -70,18 +70,10 @@ func (web *impl) ServeTLSWithId(ltn net.Listener, tlsConfig *tls.Config, id stri
 	)
 
 	if web.cfg == nil {
-		//
-
-		//defaultConfiguration(conf)
-
-		//
-
 		web.cfg, web.err = parseAddress(ltn.Addr().String())
+		defaultConfiguration(web.cfg)
 	}
 	web.cfg.ID, web.cfg.Configuration.ID = id, id
-
-	// TODO: Сделать поддержку PROXY Protocol через "github.com/webnice/web/v3/proxyp", conf.ProxyProtocol
-
 	if web.server, isTls = web.makeServer(tlsConfig); web.Error() != nil {
 		return web
 	}

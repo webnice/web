@@ -3,6 +3,7 @@ package web
 import (
 	"net"
 	"strings"
+	"time"
 )
 
 // Разбор адреса, определение порта через net.LookupPort, в том числе портов заданных как ":http"
@@ -31,4 +32,13 @@ func parseAddress(addr string) (ret *Configuration, err error) {
 	}
 
 	return
+}
+
+// Заполнение конфигурации значениями по умолчанию.
+func defaultConfiguration(cfg *Configuration) {
+	const defaultShutdownTimeout = time.Duration(30) * time.Second
+
+	if cfg.ShutdownTimeout == 0 {
+		cfg.ShutdownTimeout = defaultShutdownTimeout
+	}
 }

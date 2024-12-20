@@ -2,6 +2,7 @@ package web
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"testing"
@@ -60,7 +61,7 @@ KoZIzj0EAwIDaAAwZQIwUDdaraaLyrL2+Lmj0xTvPI4+zUJ2qVPcVMgzKiElDCk+
 }
 
 func TestImpl_ListenAndServeTLS_Ok(t *testing.T) {
-	const testAddress = `localhost:8088`
+	const testAddress = "127.0.0.1:8088"
 	var (
 		err error
 		key *tmpFile
@@ -84,7 +85,7 @@ func TestImpl_ListenAndServeTLS_Ok(t *testing.T) {
 }
 
 func TestImpl_ListenAndServeTLS_Port(t *testing.T) {
-	const invalidAddress = `:170000`
+	const invalidAddress = ":170000"
 	var (
 		key *tmpFile
 		crt *tmpFile
@@ -129,6 +130,7 @@ func TestImpl_ListenAndServeTLSWithConfig(t *testing.T) {
 }
 
 func TestImpl_NewListenerTLS(t *testing.T) {
+	const testHost, testPort1, testPort2 = "127.0.0.1", 8088, 8188
 	var (
 		err error
 		web Interface
@@ -140,18 +142,15 @@ func TestImpl_NewListenerTLS(t *testing.T) {
 
 	key, crt = newTmpFile(getKeyEcdsa()), newTmpFile(getCrtEcdsa())
 	defer func() { key.Clean(); crt.Clean() }()
-	cfg = new(Configuration)
-
-	cfg.Host, cfg.Port = "localhost", 8088
-	//defaultConfiguration(cfg)
-
+	cfg, err = parseAddress(fmt.Sprintf("%s:%d", testHost, testPort1))
+	defaultConfiguration(cfg)
 	web = New().
 		Handler(getTestHandlerFn(t))
 	if lst, err = web.
 		NewListenerTLS(cfg, nil); err == nil {
 		t.Errorf("функция NewListenerTLS(), функция повреждена")
 	}
-	cfg.TLSPrivateKeyPEM, cfg.TLSPublicKeyPEM, cfg.Port = key.Filename, crt.Filename, 8188
+	cfg.TLSPrivateKeyPEM, cfg.TLSPublicKeyPEM, cfg.Port = key.Filename, crt.Filename, testPort2
 	if lst, err = web.
 		NewListenerTLS(cfg, nil); err != nil {
 		t.Errorf("функция NewListenerTLS(), ошибка: %v, ожидалось: %v", err, nil)
@@ -168,8 +167,8 @@ func TestImpl_NewListenerTLS(t *testing.T) {
 
 func TestImpl_NewListenerTLS_AlreadyRunning(t *testing.T) {
 	const (
-		testAddress1 = `localhost:18080`
-		testAddress2 = `localhost:18081`
+		testAddress1 = "127.0.0.1:18080"
+		testAddress2 = "127.0.0.1:18081"
 	)
 	var (
 		web Interface

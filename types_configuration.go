@@ -63,15 +63,6 @@ type Configuration struct {
 	// Если установлено значение "ложь", запросы передаются контроллеру и обрабатываются обычным образом.
 	// Default value: false - запросы передаются контроллеру.
 	DisableGeneralOptionsHandler bool `yaml:"DisableGeneralOptionsHandler" json:"disable_general_options_handler"`
-
-	// ProxyProtocol Включение прокси-протокола.
-	// Прокси-протокол позволяет веб-серверу получать информацию о подключении клиента, передаваемую через
-	// прокси-серверы и средства балансировки нагрузки, такие как Nginx, HAProxy, Amazon Elastic Load
-	// Balancer (ELB) и многие другие.
-	// С помощью прокси-протокола веб-сервер может узнать IP-адрес клиента для HTTP, SSL, HTTP/2, SPDY, WebSocket, TCP
-	// запросов приходящих от прокси сервера.
-	// Default value: false
-	ProxyProtocol bool `yaml:"ProxyProtocol" json:"proxy_protocol"`
 }
 
 /**
