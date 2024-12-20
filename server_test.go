@@ -12,7 +12,7 @@ import (
 )
 
 func TestImpl_MakeServer(t *testing.T) {
-	const testAddress = `localhost:18080`
+	const testAddress = "localhost:18080"
 	var (
 		web   *impl
 		srv   *http.Server

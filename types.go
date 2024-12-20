@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	netTcp        = `tcp`
-	netTcp4       = `tcp4`
-	netTcp6       = `tcp6`
-	netUnix       = `unix`
-	netUnixPacket = `unixpacket`
-	netSocket     = `socket`
-	netSystemd    = `systemd`
+	netTcp        = "tcp"
+	netTcp4       = "tcp4"
+	netTcp6       = "tcp6"
+	netUnix       = "unix"
+	netUnixPacket = "unixpacket"
+	netSocket     = "socket"
+	netSystemd    = "systemd"
 )
 
 // Справочники реализованы в отдельной библиотеке. Но есть две причины их появления тут:

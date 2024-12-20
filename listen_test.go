@@ -14,7 +14,7 @@ func getTestHandlerFn(t *testing.T) (ret http.Handler) {
 }
 
 func TestNew_InvalidAddress(t *testing.T) {
-	const invalidAddress = `:170000`
+	const invalidAddress = ":170000"
 	var web Interface
 
 	web = New().
@@ -44,8 +44,8 @@ func TestNew_NoConfiguration(t *testing.T) {
 
 func TestImpl_ListenAndServe_AlreadyRunning(t *testing.T) {
 	const (
-		testAddress1 = `localhost:18080`
-		testAddress2 = `localhost:18081`
+		testAddress1 = ":18080"
+		testAddress2 = ":18081"
 	)
 	var web Interface
 
@@ -73,8 +73,8 @@ func TestImpl_ListenAndServe_AlreadyRunning(t *testing.T) {
 
 func TestImpl_ListenAndServe_Wait(t *testing.T) {
 	const (
-		testAddress1 = `localhost:1080`
-		testAddress2 = `.test.socket`
+		testAddress1 = "127.0.0.1:1080"
+		testAddress2 = ".test.socket"
 		ticTimeout   = time.Second / 4
 	)
 	var (

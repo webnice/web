@@ -1,4 +1,3 @@
-// Package web
 package web
 
 import (
@@ -65,11 +64,11 @@ type Configuration struct {
 	// Default value: false - запросы передаются контроллеру.
 	DisableGeneralOptionsHandler bool `yaml:"DisableGeneralOptionsHandler" json:"disable_general_options_handler"`
 
-	// TODO Сделать загрузку данных по прокси протоколу.
-	// ProxyProtocol Включение прокси протокола.
-	// Прокси протокол позволяет веб-серверу получать информацию о подключении клиента, передаваемую через
-	// прокси-серверы и средства балансировки нагрузки, такие как HAProxy, Amazon Elastic Load Balancer (ELB) и другие.
-	// С помощью прокси протокола веб-сервер может узнать IP-адрес клиента для HTTP, SSL, HTTP/2, SPDY, WebSocket, TCP
+	// ProxyProtocol Включение прокси-протокола.
+	// Прокси-протокол позволяет веб-серверу получать информацию о подключении клиента, передаваемую через
+	// прокси-серверы и средства балансировки нагрузки, такие как Nginx, HAProxy, Amazon Elastic Load
+	// Balancer (ELB) и многие другие.
+	// С помощью прокси-протокола веб-сервер может узнать IP-адрес клиента для HTTP, SSL, HTTP/2, SPDY, WebSocket, TCP
 	// запросов приходящих от прокси сервера.
 	// Default value: false
 	ProxyProtocol bool `yaml:"ProxyProtocol" json:"proxy_protocol"`
@@ -106,9 +105,10 @@ type Configuration struct {
             ## Default value: ""
             Socket: !!str "run/example.sock"
 
-            ## Файловые разрешения доступа к юникс сокету, при его использовании.
-            ## Default value: "640"
-            SocketMode: !!int 640
+            ## Файловые разрешения доступа к юникс-сокету.
+            ## Значение задаётся в восьмеричной системе и не должно превышать 32 бита.
+            ## Default value: "0666"
+            SocketMode: !!str "0666"
 
             ## Режим открытия сокета, возможные значения: tcp, tcp4, tcp6, unix, unixpacket, socket, systemd.
             ## udp, udp4, udp6 - Сервер поднимается на указанном Host:Port;
@@ -133,6 +133,20 @@ type Configuration struct {
             ## Применяется только для TCP соединений, для UDP не используется.
             ## Default value: ""
             TLSPrivateKeyPEM: !!str "/etc/application/certificate.key"
+
+            ## Включение прокси-протокола.
+            ## Прокси-протокол позволяет серверу получать информацию о подключении клиента, передаваемую через
+            ## прокси-серверы и средства балансировки нагрузки, такие как Nginx, HAProxy, Amazon Elastic Load
+            ## Balancer (ELB) и многие другие.
+            ## Поддерживаются запросы с реализацией прокси протокола версий 1 и 2.
+            ## PROXY protocol: https://www.haproxy.org/download/2.3/doc/proxy-protocol.txt.
+            ## Default value: false
+            ProxyProtocol: !!bool false
+
+            ## Максимальное время ожидания получения данных о клиенте через прокси-протокол.
+            ## Время ожидание используется только при включённом прокси-протоколе.
+            ## Default value: 0s - no timeout
+            ProxyProtocolReadHeaderTimeout: 0s
 
       ## Список всех доменов, на которые отвечает сервер.
       ## Если не пусто, то для всех других доменов будет ответ "Requested host unavailable".
@@ -186,14 +200,6 @@ type Configuration struct {
       ## Если установлено значение "ложь", запросы передаются контроллеру и обрабатываются обычным образом.
       ## Default value: false - запросы передаются контроллеру.
       DisableGeneralOptionsHandler: !!bool false
-
-      ## Включение прокси протокола.
-      ## Прокси протокол позволяет веб-серверу получать информацию о подключении клиента, передаваемую через
-      ## прокси-серверы и средства балансировки нагрузки, такие как HAProxy, Amazon Elastic Load Balancer (ELB) и другие.
-      ## С помощью прокси протокола веб-сервер может узнать IP-адрес клиента для HTTP, SSL, HTTP/2, SPDY, WebSocket, TCP
-      ## запросов приходящих от прокси сервера.
-      ## Default value: false
-      ProxyProtocol: !!bool false
 
 
 **/
