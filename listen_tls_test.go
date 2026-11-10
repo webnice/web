@@ -1,11 +1,14 @@
 package web
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"testing"
+	"time"
 
 	wnet "github.com/webnice/net"
 )
@@ -162,6 +165,130 @@ func TestImpl_NewListenerTLS(t *testing.T) {
 	if err = web.Stop().
 		Error(); err != nil {
 		t.Errorf("функция Stop(), ошибка: %v, ожидалось: %v", err, nil)
+	}
+}
+
+// getTestHTTPSClient Функция возвращает HTTP клиента для тестирования TLS серверов, доверяющего любому
+// сертификату сервера.
+func getTestHTTPSClient(timeout time.Duration) *http.Client {
+	return &http.Client{
+		Timeout: timeout,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+}
+
+// requestTestHTTPS Выполнение тестового HTTPS запроса к серверу, проверка кода ответа.
+func requestTestHTTPS(address string) (err error) {
+	var resp *http.Response
+
+	if resp, err = getTestHTTPSClient(time.Second * 5).Get("https://" + address + "/"); err != nil {
+		err = fmt.Errorf("функция Get(), ошибка: %w", err)
+		return
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode != http.StatusOK {
+		err = fmt.Errorf("функция Get(), код ответа: %d, ожидалось: %d", resp.StatusCode, http.StatusOK)
+	}
+
+	return
+}
+
+// Проверка полного цикла HTTPS запроса к серверу запущенному функцией ListenAndServeTLS().
+func TestImpl_ListenAndServeTLS_Request(t *testing.T) {
+	const testAddress = "127.0.0.1:18443"
+	var (
+		key *tmpFile
+		crt *tmpFile
+		web Interface
+	)
+
+	key, crt = newTmpFile(getKeyEcdsa()), newTmpFile(getCrtEcdsa())
+	defer func() { key.Clean(); crt.Clean() }()
+	web = New().
+		Handler(getTestHandlerFn(t)).
+		ListenAndServeTLS(testAddress, crt.Filename, key.Filename, nil)
+	defer web.Stop()
+	if web.Error() != nil {
+		t.Fatalf("функция ListenAndServeTLS(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+	}
+	if err := requestTestHTTPS(testAddress); err != nil {
+		t.Errorf("%v", err)
+	}
+}
+
+// Запуск сервера в режиме TLS через функцию Serve() с незащищённым слушателем: оборачивание слушателя в TLS
+// выполняется функцией ServeTLSWithId().
+func TestImpl_ServeTLSPlainListener_Request(t *testing.T) {
+	const testAddress = "127.0.0.1:18444"
+	var (
+		err      error
+		key      *tmpFile
+		crt      *tmpFile
+		web      Interface
+		listener net.Listener
+	)
+
+	key, crt = newTmpFile(getKeyEcdsa()), newTmpFile(getCrtEcdsa())
+	defer func() { key.Clean(); crt.Clean() }()
+	web = New()
+	web.Handler(getTestHandlerFn(t))
+	web.(*impl).cfg = &Configuration{
+		Configuration: wnet.Configuration{
+			Host:             "127.0.0.1",
+			Port:             18444,
+			TLSPublicKeyPEM:  crt.Filename,
+			TLSPrivateKeyPEM: key.Filename,
+		},
+	}
+	if listener, err = web.NewListener(web.(*impl).cfg); err != nil {
+		t.Fatalf("функция NewListener(), ошибка: %v, ожидалось: %v", err, nil)
+	}
+	web.Serve(listener)
+	defer web.Stop()
+	if web.Error() != nil {
+		t.Fatalf("функция Serve(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+	}
+	if err = requestTestHTTPS(testAddress); err != nil {
+		t.Errorf("%v", err)
+	}
+}
+
+// Запуск сервера через функцию Serve() со слушателем, уже находящимся в режиме TLS: повторное оборачивание
+// слушателя в TLS выполняться не должно.
+func TestImpl_NewListenerTLS_Request(t *testing.T) {
+	const testAddress = "127.0.0.1:18445"
+	var (
+		err      error
+		key      *tmpFile
+		crt      *tmpFile
+		web      Interface
+		listener net.Listener
+		cfg      *Configuration
+	)
+
+	key, crt = newTmpFile(getKeyEcdsa()), newTmpFile(getCrtEcdsa())
+	defer func() { key.Clean(); crt.Clean() }()
+	web = New().Handler(getTestHandlerFn(t))
+	cfg = &Configuration{
+		Configuration: wnet.Configuration{
+			Host:             "127.0.0.1",
+			Port:             18445,
+			TLSPublicKeyPEM:  crt.Filename,
+			TLSPrivateKeyPEM: key.Filename,
+		},
+	}
+	if listener, err = web.NewListenerTLS(cfg, nil); err != nil {
+		t.Fatalf("функция NewListenerTLS(), ошибка: %v, ожидалось: %v", err, nil)
+	}
+	web.Serve(listener)
+	defer web.Stop()
+	if web.Error() != nil {
+		t.Fatalf("функция Serve(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+	}
+	if err = requestTestHTTPS(testAddress); err != nil {
+		t.Errorf("%v", err)
 	}
 }
 

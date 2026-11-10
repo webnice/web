@@ -2,11 +2,12 @@ package web
 
 import (
 	"net"
+	"reflect"
 	"strings"
 	"time"
 )
 
-// Разбор адреса, определение порта через net.LookupPort, в том числе портов заданных как ":http"
+// Разбор адреса, определение порта через net.LookupPort, в том числе портов заданных как ":http".
 func parseAddress(addr string) (ret *Configuration, err error) {
 	const bColon = ":"
 	var (
@@ -30,6 +31,23 @@ func parseAddress(addr string) (ret *Configuration, err error) {
 	default:
 		err = nil
 	}
+
+	return
+}
+
+// isTLSListener Проверка того, что слушатель соединений уже обёрнут в TLS режим.
+// Тип слушателя TLS из пакета "crypto/tls" не экспортируется, поэтому проверка выполняется по пакету типа.
+func isTLSListener(ltn net.Listener) (ok bool) {
+	const pkgTls = "crypto/tls"
+	var tp = reflect.TypeOf(ltn)
+
+	if tp == nil {
+		return
+	}
+	for tp.Kind() == reflect.Ptr {
+		tp = tp.Elem()
+	}
+	ok = tp.PkgPath() == pkgTls
 
 	return
 }

@@ -26,7 +26,8 @@ func (web *impl) makeServer(tlsConfig *tls.Config) (ret *http.Server, isTLS bool
 		WriteTimeout:                 web.cfg.WriteTimeout,
 		IdleTimeout:                  web.cfg.IdleTimeout,
 		MaxHeaderBytes:               web.cfg.MaxHeaderBytes,
-		TLSNextProto:                 make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+		// Пустая не-nil карта отключает автоматическое согласование протокола HTTP/2.
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 	}
 	if web.cfg.TLSPrivateKeyPEM == "" || web.cfg.TLSPublicKeyPEM == "" {
 		ret.TLSNextProto, isTLS = nil, false

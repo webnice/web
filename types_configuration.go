@@ -18,29 +18,29 @@ type Configuration struct {
 	Domain []string `yaml:"Domain" json:"domain"`
 
 	// ReadTimeout Время ожидания запроса включая ReadHeaderTimeout.
-	// Если не указано или рано 0 - таймаута нет.
+	// Если не указано или равно 0 - таймаута нет.
 	// Default value: 0 - no timeout
 	ReadTimeout time.Duration `yaml:"ReadTimeout" json:"read_timeout"`
 
 	// ReadHeaderTimeout Время ожидания заголовка запроса.
-	// Если не указано или рано 0 - таймаута нет.
+	// Если не указано или равно 0 - таймаута нет.
 	// Default value: 0 - no timeout
 	ReadHeaderTimeout time.Duration `yaml:"ReadHeaderTimeout" json:"read_header_timeout"`
 
 	// WriteTimeout Время ожидания выдачи ответа.
-	// Если не указано или рано 0 - таймаута нет.
+	// Если не указано или равно 0 - таймаута нет.
 	// Default value: 0 - no timeout
 	WriteTimeout time.Duration `yaml:"WriteTimeout" json:"write_timeout"`
 
 	// IdleTimeout Максимальное время ожидания следующего входящего соединения для открытого сокета, до его закрытия.
 	// Используется при включённом keep-alives.
-	// Если не указано или рано 0 - таймаута нет
+	// Если не указано или равно 0 - таймаута нет
 	// Default value: 0 - no timeout
 	IdleTimeout time.Duration `yaml:"IdleTimeout" json:"idle_timeout"`
 
 	// ShutdownTimeout Максимальное время ожидания завершения работы веб сервера до начала принудительного обрыва
 	// соединений и остановки процессов.
-	// Если не указано или рано 0 - таймаута нет.
+	// Если не указано или равно 0 - таймаута нет.
 	// Default value: 30s
 	ShutdownTimeout time.Duration `yaml:"ShutdownTimeout" json:"shutdown_timeout" default-value:"30s"`
 
@@ -57,8 +57,8 @@ type Configuration struct {
 	// Default value: false - keep alive are enabled.
 	KeepAliveDisable bool `yaml:"KeepAliveDisable" json:"keep_alive_disable"`
 
-	// DisableGeneralOptionsHandler Отключение обработки HTTP запросов методом OPTION.
-	// Если установлено значение "истина", на все запросы методом OPTION сервер отвечает кодом 200 и передаёт в
+	// DisableGeneralOptionsHandler Отключение обработки HTTP запросов методом OPTIONS.
+	// Если установлено значение "истина", на все запросы методом OPTIONS сервер отвечает кодом 200 и передаёт в
 	// заголовке Content-Length значение 0.
 	// Если установлено значение "ложь", запросы передаются контроллеру и обрабатываются обычным образом.
 	// Default value: false - запросы передаются контроллеру.
@@ -147,29 +147,29 @@ type Configuration struct {
       - !!str "example.domain.tld"
 
       ## Время ожидания запроса включая ReadHeaderTimeout.
-      ## Если не указано или рано 0 - таймаута нет.
+      ## Если не указано или равно 0 - таймаута нет.
       ## Default value: 0 - no timeout
       ReadTimeout: 0s
 
       ## Время ожидания заголовка запроса.
-      ## Если не указано или рано 0 - таймаута нет.
+      ## Если не указано или равно 0 - таймаута нет.
       ## Default value: 0 - no timeout
       ReadHeaderTimeout: 0s
 
       ## Время ожидания выдачи ответа.
-      ## Если не указано или рано 0 - таймаута нет.
+      ## Если не указано или равно 0 - таймаута нет.
       ## Default value: 0 - no timeout
       WriteTimeout: 0s
 
       ## Максимальное время ожидания следующего входящего соединения для открытого сокета, до его закрытия.
       ## Используется при включённом keep-alives.
-      ## Если не указано или рано 0 - таймаута нет
+      ## Если не указано или равно 0 - таймаута нет
       ## Default value: 0 - no timeout
       IdleTimeout: 0s
 
       ## Максимальное время ожидания завершения работы веб сервера до начала принудительного обрыва
       ## соединений и остановки процессов.
-      ## Если не указано или рано 0 - таймаута нет.
+      ## Если не указано или равно 0 - таймаута нет.
       ## Default value: 30s
       ShutdownTimeout: 30s
 
@@ -185,8 +185,8 @@ type Configuration struct {
       ## Default value: false - оставаться в живых включён.
       KeepAliveDisable: !!bool false
 
-      ## Отключение обработки HTTP запросов методом OPTION.
-      ## Если установлено значение "истина", на все запросы методом OPTION сервер отвечает кодом 200 и передаёт в
+      ## Отключение обработки HTTP запросов методом OPTIONS.
+      ## Если установлено значение "истина", на все запросы методом OPTIONS сервер отвечает кодом 200 и передаёт в
       ## заголовке Content-Length значение 0.
       ## Если установлено значение "ложь", запросы передаются контроллеру и обрабатываются обычным образом.
       ## Default value: false - запросы передаются контроллеру.

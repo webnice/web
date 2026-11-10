@@ -10,7 +10,11 @@ import (
 )
 
 func getTestHandlerFn(t *testing.T) (ret http.Handler) {
-	return chi.NewMux()
+	var mux = chi.NewMux()
+
+	mux.Get("/", func(w http.ResponseWriter, r *http.Request) { _, _ = w.Write([]byte("ok")) })
+
+	return mux
 }
 
 func TestNew_InvalidAddress(t *testing.T) {
@@ -68,6 +72,24 @@ func TestImpl_ListenAndServe_AlreadyRunning(t *testing.T) {
 		ListenAndServe(testAddress1). // Запуск сервера, который уже запущен.
 		Error(), Errors().AlreadyRunning()) {
 		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалось: %v", web.Error(), Errors().AlreadyRunning())
+	}
+}
+
+func TestImpl_NewListener_NoConfiguration(t *testing.T) {
+	var web Interface
+
+	web = New()
+	if _, err := web.NewListener(nil); !errors.Is(err, Errors().NoConfiguration()) {
+		t.Errorf("функция NewListener(), ошибка: %v, ожидалось: %v", err, Errors().NoConfiguration())
+	}
+}
+
+func TestImpl_NewListenerTLS_NoConfiguration(t *testing.T) {
+	var web Interface
+
+	web = New()
+	if _, err := web.NewListenerTLS(nil, nil); !errors.Is(err, Errors().NoConfiguration()) {
+		t.Errorf("функция NewListenerTLS(), ошибка: %v, ожидалось: %v", err, Errors().NoConfiguration())
 	}
 }
 

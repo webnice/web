@@ -4,13 +4,13 @@ github.com/go-chi/chi/v5
 # github.com/google/uuid v1.6.0
 ## explicit
 github.com/google/uuid
-# github.com/pires/go-proxyproto v0.8.0
-## explicit; go 1.18
+# github.com/pires/go-proxyproto v0.16.0
+## explicit; go 1.26.9
 github.com/pires/go-proxyproto
-# github.com/webnice/dic v1.2.1
+# github.com/webnice/dic v1.3.1
 ## explicit; go 1.22
 github.com/webnice/dic
-# github.com/webnice/net v1.3.1
-## explicit; go 1.19
+# github.com/webnice/net v1.4.0
+## explicit; go 1.26.9
 github.com/webnice/net
 # github.com/webnice/kit/v4 => /Users/kallisto/Projects/lib/github.com/webnice/kit

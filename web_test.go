@@ -6,7 +6,6 @@ import (
 
 	wnet "github.com/webnice/net"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
@@ -67,7 +66,7 @@ func TestImpl_ServeWithId(t *testing.T) {
 
 	id = uuid.NewString()
 	web = New().(*impl)
-	web.Handler(chi.NewMux())
+	web.Handler(getTestHandlerFn(t))
 	web.(*impl).cfg = &Configuration{
 		Configuration: wnet.Configuration{
 			Host: "localhost",
@@ -75,10 +74,45 @@ func TestImpl_ServeWithId(t *testing.T) {
 		},
 	}
 	listener, err = web.NewListener(web.(*impl).cfg)
+	if err != nil {
+		t.Fatalf("функция NewListener(), ошибка: %v, ожидалось: %v", err, nil)
+	}
 	if web.ServeWithId(listener, id); web.Error() != nil {
-		t.Errorf("функция ServeWithId(), ошибка: %v, ожидалась: %v", err, nil)
+		t.Errorf("функция ServeWithId(), ошибка: %v, ожидалось: %v", web.Error(), nil)
 	}
 	defer web.Stop()
+	if web.ID() != id {
+		t.Errorf("функция ID(), вернулось: %q, ожидалось: %q", web.ID(), id)
+	}
+}
+
+// Запуск сервера через функцию Serve() без указания ID не должен изменять ID переданный в конфигурации.
+func TestImpl_ServeConfiguredID(t *testing.T) {
+	var (
+		err      error
+		id       string
+		web      Interface
+		listener net.Listener
+	)
+
+	id = uuid.NewString()
+	web = New().(*impl)
+	web.Handler(getTestHandlerFn(t))
+	web.(*impl).cfg = &Configuration{
+		Configuration: wnet.Configuration{
+			ID:   id,
+			Host: "localhost",
+			Port: 18082,
+		},
+	}
+	if listener, err = web.NewListener(web.(*impl).cfg); err != nil {
+		t.Fatalf("функция NewListener(), ошибка: %v, ожидалось: %v", err, nil)
+	}
+	web.Serve(listener)
+	defer web.Stop()
+	if web.Error() != nil {
+		t.Errorf("функция Serve(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+	}
 	if web.ID() != id {
 		t.Errorf("функция ID(), вернулось: %q, ожидалось: %q", web.ID(), id)
 	}

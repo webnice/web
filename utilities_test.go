@@ -1,9 +1,35 @@
 package web
 
 import (
+	"crypto/tls"
 	"errors"
+	"net"
 	"testing"
 )
+
+func TestIsTLSListener(t *testing.T) {
+	var (
+		err    error
+		ltn    net.Listener
+		tlsLtn net.Listener
+	)
+
+	if isTLSListener(nil) {
+		t.Errorf("функция isTLSListener(nil), вернулось: true, ожидалось: false")
+	}
+	if ltn, err = net.Listen(netTcp, "127.0.0.1:0"); err != nil {
+		t.Fatalf("функция net.Listen(), ошибка: %v, ожидалось: %v", err, nil)
+	}
+	defer func() { _ = ltn.Close() }()
+	if isTLSListener(ltn) {
+		t.Errorf("функция isTLSListener(), незащищённый слушатель определён как TLS")
+	}
+	tlsLtn = tls.NewListener(ltn, new(tls.Config))
+	defer func() { _ = tlsLtn.Close() }()
+	if !isTLSListener(tlsLtn) {
+		t.Errorf("функция isTLSListener(), TLS слушатель не определён как TLS")
+	}
+}
 
 func TestParseAddress(t *testing.T) {
 	var (
