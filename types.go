@@ -9,6 +9,7 @@ import (
 	wnet "github.com/webnice/net"
 )
 
+//goland:noinspection GoUnusedConst
 const (
 	netTcp        = "tcp"
 	netTcp4       = "tcp4"

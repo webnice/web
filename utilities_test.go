@@ -7,6 +7,30 @@ import (
 	"testing"
 )
 
+func TestEnsureHTTP2CipherSuites(t *testing.T) {
+	var (
+		ciphers []uint16
+		updated []uint16
+	)
+
+	// Пустой список шифров не изменяется.
+	if updated = ensureHTTP2CipherSuites(nil); len(updated) != 0 {
+		t.Errorf("функция ensureHTTP2CipherSuites(nil), список шифров: %v, ожидалось: %v", updated, nil)
+	}
+	// Список шифров, содержащий шифр, обязательный для HTTP/2, не изменяется.
+	ciphers = []uint16{tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384}
+	if updated = ensureHTTP2CipherSuites(ciphers); len(updated) != len(ciphers) {
+		t.Errorf("функция ensureHTTP2CipherSuites(), список шифров: %v, ожидалось: %v", updated, ciphers)
+	}
+	// Список шифров без шифров, обязательных для HTTP/2, дополняется.
+	ciphers = []uint16{tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384}
+	updated = ensureHTTP2CipherSuites(ciphers)
+	if len(updated) != len(ciphers)+len(http2RequiredCipherSuites) {
+		t.Errorf("функция ensureHTTP2CipherSuites(), список шифров: %v, ожидалось: %v + обязательные шифры HTTP/2",
+			updated, ciphers)
+	}
+}
+
 func TestIsTLSListener(t *testing.T) {
 	var (
 		err    error
