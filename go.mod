@@ -2,9 +2,9 @@ module github.com/webnice/web/v3
 
 go 1.26.9
 
-require github.com/webnice/net v1.4.0
+require github.com/webnice/net v1.4.1
 
-require github.com/webnice/dic v1.3.1
+require github.com/webnice/dic v1.4.0
 
 require github.com/go-chi/chi/v5 v5.5.0
 

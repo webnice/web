@@ -1,7 +1,6 @@
 # dic
 
 [![GoDoc](https://godoc.org/github.com/webnice/dic?status.png)](http://godoc.org/github.com/webnice/dic)
-[![Go Report Card](https://goreportcard.com/badge/github.com/webnice/dic)](https://goreportcard.com/report/github.com/webnice/dic)
 [![Coverage Status](https://coveralls.io/repos/github/webnice/dic/badge.svg?branch=master%0Av1)](https://coveralls.io/github/webnice/dic?branch=master%0Av1)
 
 #### Описание
@@ -65,8 +64,10 @@ func main() {
 	result = hcc.IsEqual(mch)
 	fmt.Printf("Является ли заголовок %q эквивалентным заголовку %q? Ответ: %t\n", hcc, mch, result)
 }
+```
 
 Результат:
+```text
 Является ли заголовок "My-Custom/Header-1" эквивалентным заголовку "Accept-Patch"? Ответ: false
 Является ли заголовок "Header-Second/Custom" эквивалентным заголовку "My-Custom/Header-1"? Ответ: false
 ```
