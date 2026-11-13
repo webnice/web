@@ -4,8 +4,8 @@
 
 Микро сборка для создания управляемого веб сервера на основе net/http.
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/webnice/web/v3.svg)](https://pkg.go.dev/github.com/webnice/web/v3)
-[![Coverage Status](https://coveralls.io/repos/github/webnice/web/badge.svg?branch=master%0Av3)](https://coveralls.io/github/webnice/web?branch=master%0Av3)
+[![Go Reference](https://pkg.go.dev/badge/github.com/webnice/web/v4.svg)](https://pkg.go.dev/github.com/webnice/web/v4)
+[![Coverage Status](https://coveralls.io/repos/github/webnice/web/badge.svg?branch=master%0Av4)](https://coveralls.io/github/webnice/web?branch=master%0Av4)
 
 ## Описание
 
@@ -38,13 +38,13 @@
 ## Установка
 
 ```
-go get -u github.com/webnice/web/v3
+go get -u github.com/webnice/web/v4
 ```
 
 Подключение:
 
 ```
-import "github.com/webnice/web/v3"
+import "github.com/webnice/web/v4"
 ```
 
 #### Зависимости
@@ -93,7 +93,7 @@ srv.ListenAndServeWithConfig(&web.Configuration{
 ```
 
 Полный список полей конфигурации с описанием находится в документации пакета
-(https://pkg.go.dev/github.com/webnice/web/v3#Configuration), пример YAML конфигурации приведён в исходном
+(https://pkg.go.dev/github.com/webnice/web/v4#Configuration), пример YAML конфигурации приведён в исходном
 коде файла types_configuration.go.
 
 ### TLS и HTTP/2
@@ -228,7 +228,7 @@ var myHeader = &myHeaders{
 - `Errors` — справочник ошибок;
 - `Error` — последняя ошибка веб сервера или библиотеки `github.com/webnice/net`.
 
-Полное описание методов интерфейса доступно в документации пакета: https://pkg.go.dev/github.com/webnice/web/v3.
+Полное описание методов интерфейса доступно в документации пакета: https://pkg.go.dev/github.com/webnice/web/v4.
 
 ## Тестирование
 

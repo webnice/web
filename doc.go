@@ -178,6 +178,6 @@ HTTP2MaxReceiveBufferPerStream, HTTP2SendPingTimeout, HTTP2PingTimeout и HTTP2W
 		XRequestID: dic.NewHeader("X-Request-Id"),
 	}
 
-Полное описание методов интерфейса пакета: https://pkg.go.dev/github.com/webnice/web/v3.
+Полное описание методов интерфейса пакета: https://pkg.go.dev/github.com/webnice/web/v4.
 */
 package web
