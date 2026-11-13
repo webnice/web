@@ -9,8 +9,6 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	wnet "github.com/webnice/net"
 )
 
 const testSchemeHTTPS = "https://"
@@ -138,10 +136,8 @@ func TestImpl_ListenAndServeTLSWithConfig(t *testing.T) {
 	}
 	// Запуск сервера с конфигурацией, не содержащей TLS ключей.
 	cfg = &Configuration{
-		Configuration: wnet.Configuration{
-			Host: testHostLocal,
-			Port: testPort,
-		},
+		Host: testHostLocal,
+		Port: testPort,
 	}
 	if web = web.
 		ListenAndServeTLSWithConfig(cfg, nil); web.Error() == nil {
@@ -265,6 +261,7 @@ func TestImpl_ServeTLSPlainListener_Request(t *testing.T) {
 		tplRequest    = "%v"
 		testAddress   = "127.0.0.1:18444"
 		testHostIP    = "127.0.0.1"
+		testHostPort  = 18444
 	)
 	var (
 		err      error
@@ -279,12 +276,10 @@ func TestImpl_ServeTLSPlainListener_Request(t *testing.T) {
 	web = New()
 	web.Handler(getTestHandlerFn(t))
 	web.(*impl).cfg = &Configuration{
-		Configuration: wnet.Configuration{
-			Host:             testHostIP,
-			Port:             18444,
-			TLSPublicKeyPEM:  crt.Filename,
-			TLSPrivateKeyPEM: key.Filename,
-		},
+		Host:             testHostIP,
+		Port:             testHostPort,
+		TLSPublicKeyPEM:  crt.Filename,
+		TLSPrivateKeyPEM: key.Filename,
 	}
 	if listener, err = web.NewListener(web.(*impl).cfg); err != nil {
 		t.Fatalf(tplFatalError, err, nil)
@@ -322,12 +317,10 @@ func TestImpl_NewListenerTLS_Request(t *testing.T) {
 	defer func() { key.Clean(); crt.Clean() }()
 	web = New().Handler(getTestHandlerFn(t))
 	cfg = &Configuration{
-		Configuration: wnet.Configuration{
-			Host:             testHostIP,
-			Port:             18445,
-			TLSPublicKeyPEM:  crt.Filename,
-			TLSPrivateKeyPEM: key.Filename,
-		},
+		Host:             testHostIP,
+		Port:             18445,
+		TLSPublicKeyPEM:  crt.Filename,
+		TLSPrivateKeyPEM: key.Filename,
 	}
 	if listener, err = web.NewListenerTLS(cfg, nil); err != nil {
 		t.Fatalf(tplFatalError, err, nil)

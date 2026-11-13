@@ -22,6 +22,8 @@
 - TLS из коробки, протокол HTTP/2 включён по умолчанию для TLS соединений, поддержка h2c (незашифрованный
   HTTP/2, prior knowledge), настройка лимита потоков;
 - Ограничение максимального размера тела запроса с ответом 413 Request Entity Too Large;
+- Ограничение списка доменов, на которые отвечает сервер, с фильтрацией по SNI и заголовку Host
+  (статус 434 Requested Host Unavailable);
 - Поддержка прокси-протокола версии 1 и 2, реализованного в HAProxy, nginx и других балансировщиках;
 - Корректное завершение работы сервера с учётом значения ShutdownTimeout;
 - Справочники MIME типов, HTTP методов, заголовков и статусов ответов;
@@ -30,7 +32,8 @@
 
 ## Требования
 
-- Go 1.26 или новее (используются `http.Protocols`, `http.HTTP2Config`, `errors.AsType`).
+- Go 1.27 или новее (используются `http.Protocols`, `http.HTTP2Config`, `http.MaxHeaderValueCount`,
+  `errors.AsType`).
 
 ## Установка
 
@@ -49,6 +52,7 @@ import "github.com/webnice/web/v3"
 ```
 github.com/webnice/dic
 github.com/webnice/net
+golang.org/x/net               (преобразование доменов в punycode)
 github.com/go-chi/chi/v5      (используется в тестах)
 github.com/google/uuid         (используется в тестах)
 github.com/pires/go-proxyproto (косвенная зависимость)
@@ -106,6 +110,42 @@ if err := web.New().Handler(mux).
 h2c и ограничение количества потоков настраиваются полями `HTTP2Disable`, `HTTP2UnencryptedEnable` и
 `HTTP2MaxConcurrentStreams` конфигурации.
 
+### Ограничение списка доменов
+
+Сервер отвечает только на домены из списка Domain конфигурации. Фильтрация выполняется дважды: на
+этапе TLS handshake по SNI и по заголовку Host запроса. Домены указываются в человекочитаемом виде,
+сравнение выполняется в punycode, поддерживаются wildcard-шаблоны:
+
+```
+srv := web.New().Handler(mux)
+srv.ListenAndServeWithConfig(&web.Configuration{
+	Configuration: wnet.Configuration{
+		Host:             "0.0.0.0",
+		Port:             8443,
+		TLSPublicKeyPEM:  "/etc/application/certificate.pub",
+		TLSPrivateKeyPEM: "/etc/application/certificate.key",
+	},
+	Domain: []string{"example.com", "*.example.org", "домен.рф"},
+})
+```
+
+Домен с портом сравнивается с портом, домен без порта - без порта. Для не разрешённых доменов
+сервер отвечает статусом 434 Requested Host Unavailable и закрывает соединение.
+
+### Настройка TLS
+
+Произвольная конфигурация TLS передаётся полем TLSConfig, требование клиентского сертификата
+(mTLS) настраивается полями TLSClientAuth и TLSClientCAs. Приоритет источников конфигурации TLS:
+аргумент функции запуска, затем поле TLSConfig, затем ключи PEM:
+
+```
+srv := web.New().Handler(mux)
+srv.ListenAndServeTLSWithConfig(&web.Configuration{
+	Configuration: wnet.Configuration{Host: "0.0.0.0", Port: 8443},
+	TLSConfig:     &tls.Config{GetCertificate: certBySNI},
+}, nil)
+```
+
 ### Graceful shutdown
 
 ```
@@ -147,10 +187,28 @@ srv.Clean() // очистка последней ошибки
 ### Справочники
 
 ```
-web.Mime.TextHtml.String()     // справочник MIME типов: "text/html;charset=UTF-8"
-web.Method.Get.String()        // справочник HTTP методов запросов: "GET"
+web.Mime.TextHtml.String()      // справочник MIME типов: "text/html;charset=UTF-8"
+web.Method.Get.String()         // справочник HTTP методов запросов: "GET"
 web.Header.ContentType.String() // справочник заголовков: "Content-Type"
-web.Status.NotFound.String()   // справочник статусов HTTP ответов: "Not Found"
+web.Status.NotFound.String()    // справочник статусов HTTP ответов: "Not Found"
+web.File.MimeByExtension(".png").String()       // справочник MIME типов файлов: "image/png"
+web.File.MimeByFilename("example.txt").String() // "text/plain"
+```
+
+Справочники дополняются пользовательскими данными через встраивание, например собственный
+справочник заголовков:
+
+```
+// myHeaders Структура справочника заголовков с пользовательскими заголовками.
+type myHeaders struct {
+	dic.Headers
+	XRequestID dic.IHeader // Заголовок X-Request-Id.
+}
+
+var myHeader = &myHeaders{
+	Headers:    dic.Header(),
+	XRequestID: dic.NewHeader("X-Request-Id"),
+}
 ```
 
 ## Интерфейс пакета

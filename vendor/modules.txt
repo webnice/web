@@ -13,3 +13,12 @@ github.com/webnice/dic
 # github.com/webnice/net v1.4.1
 ## explicit; go 1.26.9
 github.com/webnice/net
+# golang.org/x/net v0.62.0
+## explicit; go 1.26.0
+golang.org/x/net/idna
+# golang.org/x/text v0.43.0
+## explicit; go 1.26.0
+golang.org/x/text/secure/bidirule
+golang.org/x/text/transform
+golang.org/x/text/unicode/bidi
+golang.org/x/text/unicode/norm

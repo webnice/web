@@ -8,3 +8,7 @@ github.com/webnice/dic v1.4.0 h1:QykGh77eGLS1rKniZ2F+HFRMGtw0Dfdi4s7j1smCtLw=
 github.com/webnice/dic v1.4.0/go.mod h1:1eM1bn5o2yKM5hlpGZ+LJDHihK1Iuk/VSvcAq0dHQk0=
 github.com/webnice/net v1.4.1 h1:GcI0+ZxAOfcFmb3MaEiWFdSdBqlsCKWQmYYXcX8BTAU=
 github.com/webnice/net v1.4.1/go.mod h1:/gtCYwRLSEzFrYUJxsRZB3RgEmYHV2uw+Lb1oNT9lO4=
+golang.org/x/net v0.62.0 h1:18ELalfM5+XNRwzM2nYqXsZQ9ByS1uhj2O/U7+5jqRY=
+golang.org/x/net v0.62.0/go.mod h1:WgDCOTH8iwtB66T4/GfI94AHo/hhdb7Hah9NDseQfiI=
+golang.org/x/text v0.43.0 h1:1QivrlhwAsnMOcqgOdl9my7s9OyZl8O5/UGUTJVXoWc=
+golang.org/x/text v0.43.0/go.mod h1:hbSIYA/amXcRXTFSZqh8tWHEoqRvvbKPJ2uz/KU+a+s=

@@ -1,20 +1,32 @@
 package web
 
 import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"log"
+	"net"
+	"net/http"
 	"time"
 
-	"github.com/webnice/net"
+	wnet "github.com/webnice/net"
 )
 
 // Configuration Структура конфигурации веб сервера.
 type Configuration struct {
 	// Описание сетевого или локального доступа к серверу.
-	net.Configuration `yaml:"Network" json:"network"`
+	wnet.Configuration `yaml:"Network" json:"network"`
 
-	// TODO Сделать ограничение по доменам.
-	// Domains Список всех доменов, на которые отвечает сервер.
-	// Если не пусто, то для всех других доменов будет ответ "Requested host unavailable".
-	// Default value: [] - all domain
+	// Domain Список доменов, на которые отвечает сервер. Пустой список - ответ на любой домен.
+	// Домены указываются в человекочитаемом виде, сравнение выполняется в punycode, поэтому домены
+	// национальных алфавитов указываются как есть, например "домен.рф".
+	// Домен может быть указан с портом (например "example.com:8443") - тогда сравнение выполняется с портом,
+	// без порта - сравнение выполняется без порта.
+	// Wildcard-шаблон "*.example.com" совпадает с любым количеством поддоменов, но не с самим доменом.
+	// Фильтрация выполняется дважды: на этапе TLS handshake по SNI и по заголовку Host запроса.
+	// Для доменов не входящих в список сервер отвечает статусом 434 Requested Host Unavailable
+	// и закрывает соединение.
+	// Default value: [] - все домена
 	Domain []string `yaml:"Domain" json:"domain"`
 
 	// ReadTimeout Время ожидания запроса включая ReadHeaderTimeout.
@@ -80,6 +92,116 @@ type Configuration struct {
 	// Если не указано или равно 0 - используется значение по умолчанию.
 	// Default value: 0 - значение по умолчанию
 	HTTP2MaxConcurrentStreams int `yaml:"HTTP2MaxConcurrentStreams" json:"http2_max_concurrent_streams"`
+
+	// HTTP2MaxDecoderHeaderTableSize Максимальный размер таблицы декодирования заголовков HTTP/2.
+	// Если не указано или равно 0 - используется значение по умолчанию.
+	// Default value: 0 - значение по умолчанию
+	HTTP2MaxDecoderHeaderTableSize int `yaml:"HTTP2MaxDecoderHeaderTableSize" json:"http2_max_decoder_header_table_size"`
+
+	// HTTP2MaxEncoderHeaderTableSize Максимальный размер таблицы кодирования заголовков HTTP/2.
+	// Если не указано или равно 0 - используется значение по умолчанию.
+	// Default value: 0 - значение по умолчанию
+	HTTP2MaxEncoderHeaderTableSize int `yaml:"HTTP2MaxEncoderHeaderTableSize" json:"http2_max_encoder_header_table_size"`
+
+	// HTTP2MaxReadFrameSize Максимальный размер читаемого кадра HTTP/2, от 16 KiB до 16 MiB.
+	// Если не указано или равно 0 - используется значение по умолчанию.
+	// Default value: 0 - значение по умолчанию
+	HTTP2MaxReadFrameSize int `yaml:"HTTP2MaxReadFrameSize" json:"http2_max_read_frame_size"`
+
+	// HTTP2MaxReceiveBufferPerConnection Максимальный размер буфера приёма данных HTTP/2 соединения, не менее 64 KiB.
+	// Если не указано или равно 0 - используется значение по умолчанию.
+	// Default value: 0 - значение по умолчанию
+	HTTP2MaxReceiveBufferPerConnection int `yaml:"HTTP2MaxReceiveBufferPerConnection" json:"http2_max_receive_buffer_per_connection"`
+
+	// HTTP2MaxReceiveBufferPerStream Максимальный размер буфера приёма данных потока HTTP/2.
+	// Если не указано или равно 0 - используется значение по умолчанию.
+	// Default value: 0 - значение по умолчанию
+	HTTP2MaxReceiveBufferPerStream int `yaml:"HTTP2MaxReceiveBufferPerStream" json:"http2_max_receive_buffer_per_stream"`
+
+	// HTTP2SendPingTimeout Интервал проверки соединения HTTP/2 кадром PING при отсутствии принятых кадров.
+	// Если не указано или равно 0 - проверка не выполняется.
+	// Default value: 0 - проверка не выполняется
+	HTTP2SendPingTimeout time.Duration `yaml:"HTTP2SendPingTimeout" json:"http2_send_ping_timeout"`
+
+	// HTTP2PingTimeout Время ожидания ответа на кадр PING, после которого соединение HTTP/2 закрывается.
+	// Если не указано или равно 0 - используется значение по умолчанию 15 секунд.
+	// Default value: 0 - значение по умолчанию
+	HTTP2PingTimeout time.Duration `yaml:"HTTP2PingTimeout" json:"http2_ping_timeout"`
+
+	// HTTP2WriteByteTimeout Время ожидания записи данных HTTP/2, после которого соединение закрывается.
+	// Защита от медленных клиентов.
+	// Если не указано или равно 0 - тайм-аута нет.
+	// Default value: 0 - no timeout
+	HTTP2WriteByteTimeout time.Duration `yaml:"HTTP2WriteByteTimeout" json:"http2_write_byte_timeout"`
+
+	// MaxHeaderValueCount Максимальное количество значений одного заголовка запроса.
+	// Защита от запросов с чрезмерным количеством значений заголовков.
+	// Если не указано или равно 0 - используется значение по умолчанию 500.
+	// Default value: 0 - значение по умолчанию
+	MaxHeaderValueCount int `yaml:"MaxHeaderValueCount" json:"max_header_value_count"`
+
+	// DisableClientPriority Отключение приоритизации запросов HTTP/2 клиента.
+	// Default value: false - приоритизация включена.
+	DisableClientPriority bool `yaml:"DisableClientPriority" json:"disable_client_priority"`
+
+	// HTTP1FullDuplexEnable Включение полнодуплексного режима HTTP/1: чтение тела запроса одновременно
+	// с записью ответа. Применяется только к HTTP/1 соединениям.
+	// Default value: false - полнодуплексный режим отключён.
+	HTTP1FullDuplexEnable bool `yaml:"HTTP1FullDuplexEnable" json:"http1_full_duplex_enable"`
+
+	// KeepAliveEnable Включение TCP keep-alive проб для принятых соединений.
+	// Если не указано и остальные поля keep-alive не указаны - используется поведение операционной системы.
+	// Default value: false
+	KeepAliveEnable bool `yaml:"KeepAliveEnable" json:"keep_alive_enable"`
+
+	// KeepAliveIdle Время бездействия соединения до первой keep-alive пробы.
+	// Default value: 0 - значение по умолчанию операционной системы
+	KeepAliveIdle time.Duration `yaml:"KeepAliveIdle" json:"keep_alive_idle"`
+
+	// KeepAliveInterval Интервал между keep-alive пробами.
+	// Default value: 0 - значение по умолчанию операционной системы
+	KeepAliveInterval time.Duration `yaml:"KeepAliveInterval" json:"keep_alive_interval"`
+
+	// KeepAliveCount Максимальное количество не отвеченных keep-alive проб до закрытия соединения.
+	// Default value: 0 - значение по умолчанию операционной системы
+	KeepAliveCount int `yaml:"KeepAliveCount" json:"keep_alive_count"`
+
+	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////// //
+	// ПЕРЕМЕННЫЕ КОНФИГУРАЦИИ КОТОРЫЕ НАСТРАИВАЮТ ИЗ ПРОГРАММНОГО КОДА И НЕ ЧИТАЮТСЯ ИЗ КОНФИГУРАЦИИ YAML ИЛИ JSON   //
+	// ////////////////////////////////////////////////////////////////////////////////////////////////////////////// //
+
+	// ErrorLog Журнал внутренних ошибок сервера. Если не указан, используется стандартный журнал log.
+	// Default value: nil
+	ErrorLog *log.Logger `yaml:"-" json:"-"`
+
+	// ConnState Функция, вызываемая при изменении состояния соединения. Используется для метрик
+	// и тонкой настройки принятых соединений.
+	// Default value: nil
+	ConnState func(net.Conn, http.ConnState) `yaml:"-" json:"-"`
+
+	// BaseContext Функция создания базового контекста сервера.
+	// Default value: nil
+	BaseContext func(net.Listener) context.Context `yaml:"-" json:"-"`
+
+	// ConnContext Функция изменения контекста принятого соединения.
+	// Default value: nil
+	ConnContext func(context.Context, net.Conn) context.Context `yaml:"-" json:"-"`
+
+	// TLSConfig Базовая конфигурация TLS соединения: SNI, версии протокола, шифры, кривые, mTLS,
+	// session tickets, проверка сертификатов клиента и другие настройки tls.Config.
+	// Если не указана, конфигурация TLS создаётся по ключам TLSPublicKeyPEM и TLSPrivateKeyPEM.
+	// Default value: nil
+	TLSConfig *tls.Config `yaml:"-" json:"-"`
+
+	// TLSClientAuth Требование и проверка сертификата клиента (mTLS).
+	// Применяется если конфигурация TLSConfig не указана или если её поле ClientAuth не изменено.
+	// Default value: 0 - клиентский сертификат не запрашивается.
+	TLSClientAuth tls.ClientAuthType `yaml:"-" json:"-"`
+
+	// TLSClientCAs Пул сертификатов удостоверяющих центров, которыми подписываются клиентские
+	// сертификаты при проверке mTLS.
+	// Default value: nil
+	TLSClientCAs *x509.CertPool `yaml:"-" json:"-"`
 }
 
 /**
@@ -156,12 +278,18 @@ type Configuration struct {
             ## Default value: 0s - no timeout
             ProxyProtocolReadHeaderTimeout: 0s
 
-      ## Список всех доменов, на которые отвечает сервер.
-      ## Если не пусто, то для всех других доменов будет ответ "Requested host unavailable".
-      ## Default value: [] - любое имя домена.
+      ## Список доменов, на которые отвечает сервер. Домены указываются в человекочитаемом виде,
+      ## сравнение выполняется в punycode. Домен с портом сравнивается с портом, без порта - без порта.
+      ## Wildcard-шаблон "*.example.com" совпадает с любым количеством поддоменов.
+      ## Фильтрация выполняется дважды: на этапе TLS handshake по SNI и по заголовку Host запроса.
+      ## Для не разрешённых доменов сервер отвечает статусом 434 Requested Host Unavailable.
+      ## Default value: [] - все домена.
       Domain:
       - !!str "localhost"
+      - !!str "localhost:8080"
       - !!str "example.domain.tld"
+      - !!str "*.example.domain.tld"
+      - !!str "домен.рф"
 
       ## Время ожидания запроса включая ReadHeaderTimeout.
       ## Если не указано или равно 0 - тайм-аута нет.
@@ -225,5 +353,64 @@ type Configuration struct {
       ## Default value: 0 - значение по умолчанию
       HTTP2MaxConcurrentStreams: !!int 0
 
+      ## Максимальный размер таблицы декодирования заголовков HTTP/2.
+      ## Default value: 0 - значение по умолчанию
+      HTTP2MaxDecoderHeaderTableSize: !!int 0
+
+      ## Максимальный размер таблицы кодирования заголовков HTTP/2.
+      ## Default value: 0 - значение по умолчанию
+      HTTP2MaxEncoderHeaderTableSize: !!int 0
+
+      ## Максимальный размер читаемого кадра HTTP/2, от 16 KiB до 16 MiB.
+      ## Default value: 0 - значение по умолчанию
+      HTTP2MaxReadFrameSize: !!int 0
+
+      ## Максимальный размер буфера приёма данных HTTP/2 соединения, не менее 64 KiB.
+      ## Default value: 0 - значение по умолчанию
+      HTTP2MaxReceiveBufferPerConnection: !!int 0
+
+      ## Максимальный размер буфера приёма данных потока HTTP/2.
+      ## Default value: 0 - значение по умолчанию
+      HTTP2MaxReceiveBufferPerStream: !!int 0
+
+      ## Интервал проверки соединения HTTP/2 кадром PING при отсутствии принятых кадров.
+      ## Default value: 0s - проверка не выполняется
+      HTTP2SendPingTimeout: 0s
+
+      ## Время ожидания ответа на кадр PING, после которого соединение HTTP/2 закрывается.
+      ## Default value: 0s - значение по умолчанию
+      HTTP2PingTimeout: 0s
+
+      ## Время ожидания записи данных HTTP/2, после которого соединение закрывается.
+      ## Default value: 0s - таймаута нет
+      HTTP2WriteByteTimeout: 0s
+
+      ## Максимальное количество значений одного заголовка запроса.
+      ## Default value: 0 - значение по умолчанию 500
+      MaxHeaderValueCount: !!int 0
+
+      ## Отключение приоритизации запросов HTTP/2 клиента.
+      ## Default value: false - приоритизация включена.
+      DisableClientPriority: !!bool false
+
+      ## Включение полнодуплексного режима HTTP/1.
+      ## Default value: false - полнодуплексный режим отключён.
+      HTTP1FullDuplexEnable: !!bool false
+
+      ## Включение TCP keep-alive проб для принятых соединений.
+      ## Default value: false
+      KeepAliveEnable: !!bool false
+
+      ## Время бездействия соединения до первой keep-alive пробы.
+      ## Default value: 0s - значение по умолчанию операционной системы
+      KeepAliveIdle: 0s
+
+      ## Интервал между keep-alive пробами.
+      ## Default value: 0s - значение по умолчанию операционной системы
+      KeepAliveInterval: 0s
+
+      ## Максимальное количество не отвеченных keep-alive проб до закрытия соединения.
+      ## Default value: 0 - значение по умолчанию операционной системы
+      KeepAliveCount: !!int 0
 
 **/

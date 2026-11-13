@@ -97,12 +97,40 @@ func (web *impl) ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (map[string
 	return web.listenersSystemdTLSWithNames(tlsConfig)
 }
 
+// Применение настроек TCP keep-alive к конфигурации слушателя соединений.
+func (web *impl) applyKeepAliveConfig(conf *Configuration) {
+	// Отключение keep-alive по конфигурации.
+	if conf.KeepAliveDisable {
+		if conf.ListenConfig == nil {
+			conf.ListenConfig = new(net.ListenConfig)
+		}
+		conf.ListenConfig.KeepAlive = -1
+		conf.ListenConfig.KeepAliveConfig.Enable = false
+
+		return
+	}
+	// Настройка keep-alive: если ни одно поле не указано, используется поведение операционной системы.
+	if !conf.KeepAliveEnable && conf.KeepAliveIdle == 0 && conf.KeepAliveInterval == 0 && conf.KeepAliveCount == 0 {
+		return
+	}
+	if conf.ListenConfig == nil {
+		conf.ListenConfig = new(net.ListenConfig)
+	}
+	conf.ListenConfig.KeepAliveConfig = net.KeepAliveConfig{
+		Enable:   true,
+		Idle:     conf.KeepAliveIdle,
+		Interval: conf.KeepAliveInterval,
+		Count:    conf.KeepAliveCount,
+	}
+}
+
 // NewListener Создание нового слушателя соединений net.Listener на основе конфигурации веб сервера.
 func (web *impl) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	if conf == nil {
 		err = Errors().NoConfiguration.Bind()
 		return
 	}
+	web.applyKeepAliveConfig(conf)
 	if web.net.IsRunning() {
 		err = Errors().AlreadyRunning.Bind()
 		return
@@ -119,6 +147,7 @@ func (web *impl) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret
 		err = Errors().NoConfiguration.Bind()
 		return
 	}
+	web.applyKeepAliveConfig(conf)
 	if web.net.IsRunning() {
 		err = Errors().AlreadyRunning.Bind()
 		return

@@ -43,13 +43,25 @@ func maxBodyBytesHandler(h http.Handler, n int64) http.Handler {
 	})
 }
 
+// Включение полнодуплексного режима HTTP/1 для соединения: чтение тела запроса одновременно с записью ответа.
+func http1FullDuplexHandler(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Ошибка ожидается для HTTP/2 соединений: полнодуплексный режим доступен только в HTTP/1.
+		_ = http.NewResponseController(w).EnableFullDuplex()
+		h.ServeHTTP(w, r)
+	})
+}
+
 // Применение настроек из конфигурации к стандартному веб серверу.
 func (web *impl) makeServer(tlsConfig *tls.Config) (ret *http.Server, isTLS bool) {
 	const (
 		http11 = "http/1.1"
 		proto2 = "h2"
 	)
-	var handler http.Handler
+	var (
+		df      *domainFilter
+		handler http.Handler
+	)
 
 	if web.handler == nil {
 		web.err = Errors().HandlerIsNotSet.Bind()
@@ -59,10 +71,20 @@ func (web *impl) makeServer(tlsConfig *tls.Config) (ret *http.Server, isTLS bool
 		web.err = Errors().NoConfiguration.Bind()
 		return
 	}
-	// Ограничение максимального размера тела запроса.
+	// Фильтр разрешённых доменов, применяется к TLS handshake и к обработке запросов.
+	if df = newDomainFilter(web.cfg.Domain); df.empty() {
+		df = nil
+	}
+	// Цепочка обработки запросов: ограничение доменов, ограничение размера тела, полнодуплексный режим.
 	handler = web.handler
+	if df != nil {
+		handler = df.handler(handler)
+	}
 	if n := int64(web.cfg.MaxBodyBytes); n > 0 {
 		handler = maxBodyBytesHandler(handler, n)
+	}
+	if web.cfg.HTTP1FullDuplexEnable {
+		handler = http1FullDuplexHandler(handler)
 	}
 	ret = &http.Server{
 		Handler:                      handler,
@@ -73,6 +95,12 @@ func (web *impl) makeServer(tlsConfig *tls.Config) (ret *http.Server, isTLS bool
 		WriteTimeout:                 web.cfg.WriteTimeout,
 		IdleTimeout:                  web.cfg.IdleTimeout,
 		MaxHeaderBytes:               web.cfg.MaxHeaderBytes,
+		MaxHeaderValueCount:          web.cfg.MaxHeaderValueCount,
+		DisableClientPriority:        web.cfg.DisableClientPriority,
+		ConnState:                    web.cfg.ConnState,
+		ErrorLog:                     web.cfg.ErrorLog,
+		BaseContext:                  web.cfg.BaseContext,
+		ConnContext:                  web.cfg.ConnContext,
 	}
 	// Настройка протоколов HTTP. HTTP/1 всегда включён.
 	ret.Protocols = new(http.Protocols)
@@ -86,18 +114,43 @@ func (web *impl) makeServer(tlsConfig *tls.Config) (ret *http.Server, isTLS bool
 	// Настройка протокола HTTP/2.
 	if ret.Protocols.HTTP2() || ret.Protocols.UnencryptedHTTP2() {
 		ret.HTTP2 = &http.HTTP2Config{
-			MaxConcurrentStreams: web.cfg.HTTP2MaxConcurrentStreams,
+			MaxConcurrentStreams:          web.cfg.HTTP2MaxConcurrentStreams,
+			MaxDecoderHeaderTableSize:     web.cfg.HTTP2MaxDecoderHeaderTableSize,
+			MaxEncoderHeaderTableSize:     web.cfg.HTTP2MaxEncoderHeaderTableSize,
+			MaxReadFrameSize:              web.cfg.HTTP2MaxReadFrameSize,
+			MaxReceiveBufferPerConnection: web.cfg.HTTP2MaxReceiveBufferPerConnection,
+			MaxReceiveBufferPerStream:     web.cfg.HTTP2MaxReceiveBufferPerStream,
+			SendPingTimeout:               web.cfg.HTTP2SendPingTimeout,
+			PingTimeout:                   web.cfg.HTTP2PingTimeout,
+			WriteByteTimeout:              web.cfg.HTTP2WriteByteTimeout,
 		}
 	}
-	if web.cfg.TLSPrivateKeyPEM == "" || web.cfg.TLSPublicKeyPEM == "" {
-		isTLS = false
-		return
-	}
-	// Конфигурация TLS по умолчанию.
+	// Конфигурация TLS по убыванию приоритета: переданная аргументом, затем конфигурация из Configuration,
+	// затем конфигурация, созданная по ключам PEM. Если ни один источник не доступен, сервер работает
+	// без шифрования.
 	if tlsConfig == nil {
+		tlsConfig = web.cfg.TLSConfig
+	}
+	if tlsConfig == nil {
+		if web.cfg.TLSPrivateKeyPEM == "" || web.cfg.TLSPublicKeyPEM == "" {
+			isTLS = false
+			return
+		}
 		if tlsConfig, web.err = web.net.NewTLSConfigDefault(web.cfg.TLSPublicKeyPEM, web.cfg.TLSPrivateKeyPEM); web.err != nil {
 			return
 		}
+	}
+	// Требование и проверка клиентского сертификата (mTLS).
+	// Явно заданный пользователем ClientAuth конфигурации TLS не переопределяется.
+	if web.cfg.TLSClientAuth != 0 && tlsConfig.ClientAuth == 0 {
+		tlsConfig.ClientAuth = web.cfg.TLSClientAuth
+	}
+	if web.cfg.TLSClientCAs != nil {
+		tlsConfig.ClientCAs = web.cfg.TLSClientCAs
+	}
+	// Фильтрация доменов на этапе TLS handshake по SNI.
+	if df != nil {
+		web.wrapSNIConfig(tlsConfig, df)
 	}
 	// Порядок протоколов определяет предпочтение сервера при согласовании ALPN.
 	if ret.Protocols.HTTP2() {
@@ -110,4 +163,22 @@ func (web *impl) makeServer(tlsConfig *tls.Config) (ret *http.Server, isTLS bool
 	ret.TLSConfig, isTLS = tlsConfig, true
 
 	return
+}
+
+// Обёртка функции GetConfigForClient конфигурации TLS: фильтрация домена по SNI с сохранением
+// пользовательской функции, если она назначена.
+func (web *impl) wrapSNIConfig(tlsConfig *tls.Config, df *domainFilter) {
+	var userGetConfigForClient = tlsConfig.GetConfigForClient
+
+	tlsConfig.GetConfigForClient = func(hello *tls.ClientHelloInfo) (*tls.Config, error) {
+		var err error
+		if _, err = df.sniFilter(hello); err != nil {
+			return nil, err
+		}
+		if userGetConfigForClient != nil {
+			return userGetConfigForClient(hello)
+		}
+
+		return nil, nil
+	}
 }

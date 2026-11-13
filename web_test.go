@@ -5,8 +5,6 @@ import (
 	"net"
 	"testing"
 
-	wnet "github.com/webnice/net"
-
 	"github.com/google/uuid"
 )
 
@@ -15,6 +13,7 @@ func TestImpl_IdGenerate(t *testing.T) {
 		tplErrorNotExpected = "функция ListenAndServeWithConfig(), ошибка: %v, ожидалось: %v"
 		tplIdIsEmpty        = "функция ID(), ошибка, ожидалось не пустое значение"
 		testHostLocal       = "localhost"
+		testPortLocal       = 10180
 		testModeTcp         = "tcp"
 	)
 	var web Interface
@@ -22,11 +21,9 @@ func TestImpl_IdGenerate(t *testing.T) {
 	web = New().
 		Handler(getTestHandlerFn(t))
 	web.ListenAndServeWithConfig(&Configuration{
-		Configuration: wnet.Configuration{
-			Host: testHostLocal,
-			Port: 10180,
-			Mode: testModeTcp,
-		},
+		Host: testHostLocal,
+		Port: testPortLocal,
+		Mode: testModeTcp,
 	})
 	defer web.Stop()
 	if web.Error() != nil {
@@ -42,6 +39,7 @@ func TestImpl_IdStatic(t *testing.T) {
 		tplErrorNotExpected = "функция ListenAndServeWithConfig(), ошибка: %v, ожидалось: %v"
 		tplIdNotEqual       = "функция ID(), вернулось: %q, ожидалось: %q"
 		testHostLocal       = "localhost"
+		testPortLocal       = 10180
 		testModeTcp         = "tcp"
 	)
 	var (
@@ -53,12 +51,10 @@ func TestImpl_IdStatic(t *testing.T) {
 	web = New().
 		Handler(getTestHandlerFn(t))
 	web.ListenAndServeWithConfig(&Configuration{
-		Configuration: wnet.Configuration{
-			ID:   id,
-			Host: testHostLocal,
-			Port: 10180,
-			Mode: testModeTcp,
-		},
+		ID:   id,
+		Host: testHostLocal,
+		Port: testPortLocal,
+		Mode: testModeTcp,
 	})
 	defer web.Stop()
 	if web.Error() != nil {
@@ -75,6 +71,7 @@ func TestImpl_ServeWithId(t *testing.T) {
 		tplServeError       = "функция ServeWithId(), ошибка: %v, ожидалось: %v"
 		tplIdNotEqual       = "функция ID(), вернулось: %q, ожидалось: %q"
 		testHostLocal       = "localhost"
+		testPortLocal       = 18080
 	)
 	var (
 		err      error
@@ -87,10 +84,8 @@ func TestImpl_ServeWithId(t *testing.T) {
 	web = New().(*impl)
 	web.Handler(getTestHandlerFn(t))
 	web.(*impl).cfg = &Configuration{
-		Configuration: wnet.Configuration{
-			Host: testHostLocal,
-			Port: 18080,
-		},
+		Host: testHostLocal,
+		Port: testPortLocal,
 	}
 	if listener, err = web.NewListener(web.(*impl).cfg); err != nil {
 		t.Fatalf(tplNewListenerError, err, nil)
@@ -124,11 +119,9 @@ func TestImpl_ServeConfiguredID(t *testing.T) {
 	web = New().(*impl)
 	web.Handler(getTestHandlerFn(t))
 	web.(*impl).cfg = &Configuration{
-		Configuration: wnet.Configuration{
-			ID:   id,
-			Host: testHostLocal,
-			Port: testPort,
-		},
+		ID:   id,
+		Host: testHostLocal,
+		Port: testPort,
 	}
 	if listener, err = web.NewListener(web.(*impl).cfg); err != nil {
 		t.Fatalf(tplNewListenerError, err, nil)

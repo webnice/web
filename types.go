@@ -27,9 +27,12 @@ var (
 
 	// Status Справочник статусов HTTP ответов.
 	Status = dic.Status()
+
+	// File Справочник MIME типов расширений имён файлов.
+	File = dic.File()
 )
 
-var _, _, _, _ = Mime, Method, Header, Status
+var _, _, _, _, _ = Mime, Method, Header, Status, File
 
 // Объект сущности пакета.
 type impl struct {
