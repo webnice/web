@@ -9,18 +9,17 @@ import (
 )
 
 // New Конструктор объекта сущности пакета, возвращается интерфейс пакета.
-//
-//goland:noinspection GoUnusedExportedFunction
 func New() Interface {
-	var web = &impl{
-		net: wnet.New(),
-	}
-	web.listenersSystemdWithoutNames = web.net.ListenersSystemdWithoutNames
-	web.listenersSystemdWithNames = web.net.ListenersSystemdWithNames
-	web.listenersSystemdTLSWithoutNames = web.net.ListenersSystemdTLSWithoutNames
-	web.listenersSystemdTLSWithNames = web.net.ListenersSystemdTLSWithNames
+	var ret *impl
 
-	return web
+	ret = &impl{net: wnet.New()}
+	// Функции systemd невозможно протестировать в обычных условиях, поэтому они выделены в поля объекта.
+	ret.listenersSystemdWithoutNames = ret.net.ListenersSystemdWithoutNames
+	ret.listenersSystemdWithNames = ret.net.ListenersSystemdWithNames
+	ret.listenersSystemdTLSWithoutNames = ret.net.ListenersSystemdTLSWithoutNames
+	ret.listenersSystemdTLSWithNames = ret.net.ListenersSystemdTLSWithNames
+
+	return ret
 }
 
 // ID Уникальный идентификатор сервера.
@@ -39,13 +38,18 @@ func (web *impl) Errors() *Error { return errSingleton }
 
 // Error Функция возвращает последнюю ошибку веб сервера или библиотеки "github.com/webnice/net", на которой
 // основан ВЕБ сервер.
-func (web *impl) Error() error {
-	switch web.err {
-	case nil:
-		return web.net.Error()
-	default:
-		return web.err
+// Ошибка библиотеки "github.com/webnice/net" приводится к справочнику ошибок пакета для сравнения ошибок
+// функцией errors.Is().
+func (web *impl) Error() (ret error) {
+	switch {
+	case web.err != nil:
+		ret = web.err
+	case web.net.Error() != nil:
+		// Приведение ошибки библиотеки "github.com/webnice/net" к справочнику ошибок пакета.
+		ret = Errors().ParseError(web.net.Error(), errSingleton)
 	}
+
+	return
 }
 
 // Serve Запуск веб сервера для входящих соединений на основе переданного слушателя net.Listener.
@@ -71,21 +75,23 @@ func (web *impl) ServeTLSWithId(ltn net.Listener, tlsConfig *tls.Config, id stri
 		isTls    bool
 	)
 
+	// Создание конфигурации по умолчанию на основе адреса слушателя.
 	if web.cfg == nil {
 		web.cfg, web.err = parseAddress(ltn.Addr().String())
 		defaultConfiguration(web.cfg)
 	}
+	// Назначение идентификатора сервера, если он передан.
 	if id != "" {
 		web.cfg.ID = id
 	}
 	if web.server, isTls = web.makeServer(tlsConfig); web.Error() != nil {
 		return web
 	}
+	// Оборачивание слушателя в TLS режим, если слушатель ещё не обёрнут, например, слушатель полученный из
+	// функций ListenersSystemdTLSWithoutNames() или ListenersSystemdTLSWithNames().
+	// Конфигурация TLS берётся из объекта сервера, там находится переданная или созданная по умолчанию
+	// конфигурация.
 	if listener = ltn; isTls && !isTLSListener(ltn) {
-		// Повторное оборачивание не требуется, если слушатель уже в режиме TLS, например, получен из
-		// ListenersSystemdTLSWithoutNames() или ListenersSystemdTLSWithNames().
-		// Конфигурация TLS берётся из объекта сервера, там находится переданная или созданная по умолчанию
-		// конфигурация.
 		listener = tls.NewListener(ltn, web.server.TLSConfig)
 	}
 	web.net.Handler(web.server.Serve)

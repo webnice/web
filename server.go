@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-// maxBodyBytesReader Обёртка тела запроса, ограничивающая его размер и отвечающая ошибкой
-// 413 Request Entity Too Large при превышении лимита.
+// Обёртка тела запроса, ограничивающая его размер и отвечающая ошибкой 413 Request Entity Too Large
+// при превышении лимита.
 type maxBodyBytesReader struct {
 	w http.ResponseWriter
 	r io.ReadCloser
@@ -17,9 +17,7 @@ type maxBodyBytesReader struct {
 // Read Чтение тела запроса.
 func (mbr *maxBodyBytesReader) Read(p []byte) (n int, err error) {
 	if n, err = mbr.r.Read(p); err != nil {
-		var errMax *http.MaxBytesError
-		if //goland:noinspection GoFixErrorsAsType
-		errors.As(err, &errMax) {
+		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
 			// Лимит размера тела запроса превышен. Ответ 413 возможен если обработчик ещё не начал ответ.
 			http.Error(mbr.w, http.StatusText(http.StatusRequestEntityTooLarge), http.StatusRequestEntityTooLarge)
 		}
@@ -31,12 +29,14 @@ func (mbr *maxBodyBytesReader) Read(p []byte) (n int, err error) {
 // Close Закрытие тела запроса.
 func (mbr *maxBodyBytesReader) Close() error { return mbr.r.Close() }
 
-// maxBodyBytesHandler Ограничение максимального размера тела запроса в n байт с ответом ошибкой
-// 413 Request Entity Too Large при превышении лимита.
+// Ограничение максимального размера тела запроса в n байт с ответом ошибкой 413 Request Entity Too Large
+// при превышении лимита.
 func maxBodyBytesHandler(h http.Handler, n int64) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var r2 = new(http.Request)
+		var r2 *http.Request
 
+		// Ограничение размера тела запроса без изменения исходного запроса.
+		r2 = new(http.Request)
 		*r2 = *r
 		r2.Body = &maxBodyBytesReader{w: w, r: http.MaxBytesReader(w, r.Body, n)}
 		h.ServeHTTP(w, r2)
@@ -52,11 +52,11 @@ func (web *impl) makeServer(tlsConfig *tls.Config) (ret *http.Server, isTLS bool
 	var handler http.Handler
 
 	if web.handler == nil {
-		web.err = Errors().HandlerIsNotSet()
+		web.err = Errors().HandlerIsNotSet.Bind()
 		return
 	}
 	if web.cfg == nil {
-		web.err = Errors().NoConfiguration()
+		web.err = Errors().NoConfiguration.Bind()
 		return
 	}
 	// Ограничение максимального размера тела запроса.
@@ -95,8 +95,7 @@ func (web *impl) makeServer(tlsConfig *tls.Config) (ret *http.Server, isTLS bool
 	}
 	// Конфигурация TLS по умолчанию.
 	if tlsConfig == nil {
-		tlsConfig, web.err = web.net.NewTLSConfigDefault(web.cfg.TLSPublicKeyPEM, web.cfg.TLSPrivateKeyPEM)
-		if web.err != nil {
+		if tlsConfig, web.err = web.net.NewTLSConfigDefault(web.cfg.TLSPublicKeyPEM, web.cfg.TLSPrivateKeyPEM); web.err != nil {
 			return
 		}
 	}

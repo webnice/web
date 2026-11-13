@@ -1,58 +1,80 @@
 package web
 
-import wnet "github.com/webnice/net"
+import "github.com/webnice/dic"
 
-// Все ошибки определены как константы.
+// Коды ошибок.
 const (
-	cHandlerIsNotSet = "Не установлен обработчик запросов ВЕБ сервера."
+	eAlreadyRunning uint8 = iota + 1
+	eNoConfiguration
+	eListenSystemdPID
+	eListenSystemdFDS
+	eListenSystemdNotFound
+	eListenSystemdQuantityNotMatch
+	eTLSIsNil
+	eServerHandlerIsNotSet
+	eHandlerIsNotSet
 )
 
-// Константы указываются в объектах в качестве фиксированного адреса на протяжении всего времени работы приложения.
-// Ошибки могут сравниваться по содержимому, по указателю и т.д.
-var (
-	errSingleton       = &Error{}
-	errHandlerIsNotSet = err(cHandlerIsNotSet)
+// Текстовые значения кодов ошибок на основном языке приложения.
+// Ошибки дублируют ошибки библиотеки "github.com/webnice/net", текстовые значения должны совпадать с ними.
+const (
+	cAlreadyRunning                = "Сервер уже запущен."
+	cNoConfiguration               = "Конфигурация сервера отсутствует либо равна nil."
+	cListenSystemdPID              = "Переменная окружения LISTEN_PID пустая, либо содержит неверное значение."
+	cListenSystemdFDS              = "Переменная окружения LISTEN_FDS пустая, либо содержит неверное значение."
+	cListenSystemdNotFound         = "Получение сокета systemd по имени, имя не найдено."
+	cListenSystemdQuantityNotMatch = "Полученное количество LISTEN_FDS не соответствует переданному LISTEN_FDNAMES."
+	cTLSIsNil                      = "Конфигурация TLS сервера пустая."
+	cServerHandlerIsNotSet         = "Не установлен обработчик основной функции TCP сервера."
+	cHandlerIsNotSet               = "Не установлен обработчик запросов ВЕБ сервера."
 )
 
-type (
-	// Error Объект справочника ошибок пакета.
-	Error struct{}
-	err   string
-)
+// Error Структура справочника ошибок.
+type Error struct {
+	dic.Errors
 
-// Error Реализация встроенного интерфейса error.
-func (e err) Error() string { return string(e) }
+	// AlreadyRunning Сервер уже запущен.
+	AlreadyRunning dic.IError
+
+	// NoConfiguration Конфигурация сервера отсутствует либо равна nil.
+	NoConfiguration dic.IError
+
+	// ListenSystemdPID Переменная окружения LISTEN_PID пустая, либо содержит неверное значение.
+	ListenSystemdPID dic.IError
+
+	// ListenSystemdFDS Переменная окружения LISTEN_FDS пустая, либо содержит неверное значение.
+	ListenSystemdFDS dic.IError
+
+	// ListenSystemdNotFound Получение сокета systemd по имени, имя не найдено.
+	ListenSystemdNotFound dic.IError
+
+	// ListenSystemdQuantityNotMatch Полученное количество LISTEN_FDS не соответствует переданному LISTEN_FDNAMES.
+	ListenSystemdQuantityNotMatch dic.IError
+
+	// TLSIsNil Конфигурация TLS сервера пустая.
+	TLSIsNil dic.IError
+
+	// ServerHandlerIsNotSet Не установлен обработчик основной функции TCP сервера.
+	ServerHandlerIsNotSet dic.IError
+
+	// HandlerIsNotSet Не установлен обработчик запросов ВЕБ сервера.
+	HandlerIsNotSet dic.IError
+}
+
+// Ошибки справочника создаются один раз, с фиксированным адресом якоря, ошибки могут сравниваться по
+// содержимому, по указателю и т.д.
+var errSingleton = &Error{
+	Errors:                        dic.Error(),
+	AlreadyRunning:                dic.NewError(cAlreadyRunning).CodeU8().Set(eAlreadyRunning),
+	NoConfiguration:               dic.NewError(cNoConfiguration).CodeU8().Set(eNoConfiguration),
+	ListenSystemdPID:              dic.NewError(cListenSystemdPID).CodeU8().Set(eListenSystemdPID),
+	ListenSystemdFDS:              dic.NewError(cListenSystemdFDS).CodeU8().Set(eListenSystemdFDS),
+	ListenSystemdNotFound:         dic.NewError(cListenSystemdNotFound).CodeU8().Set(eListenSystemdNotFound),
+	ListenSystemdQuantityNotMatch: dic.NewError(cListenSystemdQuantityNotMatch).CodeU8().Set(eListenSystemdQuantityNotMatch),
+	TLSIsNil:                      dic.NewError(cTLSIsNil).CodeU8().Set(eTLSIsNil),
+	ServerHandlerIsNotSet:         dic.NewError(cServerHandlerIsNotSet).CodeU8().Set(eServerHandlerIsNotSet),
+	HandlerIsNotSet:               dic.NewError(cHandlerIsNotSet).CodeU8().Set(eHandlerIsNotSet),
+}
 
 // Errors Справочник ошибок.
 func Errors() *Error { return errSingleton }
-
-// ОШИБКИ.
-
-// AlreadyRunning Сервер уже запущен.
-func (e *Error) AlreadyRunning() error { return wnet.Errors().AlreadyRunning() }
-
-// NoConfiguration Конфигурация сервера отсутствует либо равна nil.
-func (e *Error) NoConfiguration() error { return wnet.Errors().NoConfiguration() }
-
-// ListenSystemdPID Переменная окружения LISTEN_PID пустая, либо содержит не верное значение.
-func (e *Error) ListenSystemdPID() error { return wnet.Errors().ListenSystemdPID() }
-
-// ListenSystemdFDS Переменная окружения LISTEN_FDS пустая, либо содержит не верное значение.
-func (e *Error) ListenSystemdFDS() error { return wnet.Errors().ListenSystemdFDS() }
-
-// ListenSystemdNotFound Получение сокета systemd по имени, имя не найдено.
-func (e *Error) ListenSystemdNotFound() error { return wnet.Errors().ListenSystemdNotFound() }
-
-// ListenSystemdQuantityNotMatch Полученное количество LISTEN_FDS не соответствует переданному LISTEN_FDNAMES.
-func (e *Error) ListenSystemdQuantityNotMatch() error {
-	return wnet.Errors().ListenSystemdQuantityNotMatch()
-}
-
-// TLSIsNil Конфигурация TLS сервера пустая.
-func (e *Error) TLSIsNil() error { return wnet.Errors().TLSIsNil() }
-
-// ServerHandlerIsNotSet Не установлен обработчик основной функции TCP сервера.
-func (e *Error) ServerHandlerIsNotSet() error { return wnet.Errors().ServerHandlerIsNotSet() }
-
-// HandlerIsNotSet Не установлен обработчик запросов ВЕБ сервера.
-func (e *Error) HandlerIsNotSet() error { return &errHandlerIsNotSet }

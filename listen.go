@@ -10,9 +10,11 @@ import (
 func (web *impl) ListenAndServe(addr string) Interface {
 	var conf *Configuration
 
+	// Разбор адреса и запуск сервера с конфигурацией по умолчанию.
 	if conf, web.err = parseAddress(addr); web.err != nil {
 		return web
 	}
+
 	return web.ListenAndServeWithConfig(conf)
 }
 
@@ -21,6 +23,7 @@ func (web *impl) ListenAndServe(addr string) Interface {
 func (web *impl) ListenAndServeTLS(addr string, certFile string, keyFile string, tlsConfig *tls.Config) Interface {
 	var conf *Configuration
 
+	// Разбор адреса и запуск сервера с конфигурацией по умолчанию в режиме TLS.
 	if conf, web.err = parseAddress(addr); web.err != nil {
 		return web
 	}
@@ -35,10 +38,11 @@ func (web *impl) ListenAndServeWithConfig(conf *Configuration) Interface {
 	var listener net.Listener
 
 	if conf == nil {
-		web.err = Errors().NoConfiguration()
+		web.err = Errors().NoConfiguration.Bind()
 		return web
 	}
 	web.cfg = conf
+	// Открытие адреса или сокета на прослушивание.
 	if listener, web.err = web.NewListener(web.cfg); web.err != nil {
 		return web
 	}
@@ -52,16 +56,17 @@ func (web *impl) ListenAndServeTLSWithConfig(conf *Configuration, tlsConfig *tls
 	var listener net.Listener
 
 	if conf == nil {
-		web.err = Errors().NoConfiguration()
+		web.err = Errors().NoConfiguration.Bind()
 		return web
 	}
 	web.cfg = conf
+	// Конфигурация TLS по умолчанию, если TLS конфигурация не передана.
 	if tlsConfig == nil {
-		tlsConfig, web.err = web.net.NewTLSConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM)
-		if web.err != nil {
+		if tlsConfig, web.err = web.net.NewTLSConfigDefault(conf.TLSPublicKeyPEM, conf.TLSPrivateKeyPEM); web.err != nil {
 			return web
 		}
 	}
+	// Открытие адреса или сокета на прослушивание в режиме TLS.
 	if listener, web.err = web.NewListenerTLS(web.cfg, tlsConfig); web.err != nil {
 		return web
 	}
@@ -86,8 +91,8 @@ func (web *impl) ListenersSystemdTLSWithoutNames(tlsConfig *tls.Config) ([]net.L
 	return web.listenersSystemdTLSWithoutNames(tlsConfig)
 }
 
-// ListenersSystemdTLSWithNames Возвращает карту срезов net.Listener для TLS сокетов переданных в процесс веб сервера
-// из systemd.
+// ListenersSystemdTLSWithNames Возвращает карту срезов net.Listener для TLS сокетов переданных в процесс веб
+// сервера из systemd.
 func (web *impl) ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (map[string][]net.Listener, error) {
 	return web.listenersSystemdTLSWithNames(tlsConfig)
 }
@@ -95,11 +100,11 @@ func (web *impl) ListenersSystemdTLSWithNames(tlsConfig *tls.Config) (map[string
 // NewListener Создание нового слушателя соединений net.Listener на основе конфигурации веб сервера.
 func (web *impl) NewListener(conf *Configuration) (ret net.Listener, err error) {
 	if conf == nil {
-		err = Errors().NoConfiguration()
+		err = Errors().NoConfiguration.Bind()
 		return
 	}
 	if web.net.IsRunning() {
-		err = Errors().AlreadyRunning()
+		err = Errors().AlreadyRunning.Bind()
 		return
 	}
 	ret, _, err = web.net.NewListener(&conf.Configuration)
@@ -111,11 +116,11 @@ func (web *impl) NewListener(conf *Configuration) (ret net.Listener, err error) 
 // веб сервера.
 func (web *impl) NewListenerTLS(conf *Configuration, tlsConfig *tls.Config) (ret net.Listener, err error) {
 	if conf == nil {
-		err = Errors().NoConfiguration()
+		err = Errors().NoConfiguration.Bind()
 		return
 	}
 	if web.net.IsRunning() {
-		err = Errors().AlreadyRunning()
+		err = Errors().AlreadyRunning.Bind()
 		return
 	}
 	ret, _, err = web.net.NewListenerTLS(&conf.Configuration, tlsConfig)

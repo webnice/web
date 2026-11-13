@@ -11,47 +11,69 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+//goland:noinspection HttpUrlsUsage
+const (
+	testRouteRoot    = "/"
+	testResponseBody = "ok"
+	testModeSocket   = "socket"
+	testAddressEmpty = ""
+	testSchemeHTTP   = "http://"
+)
+
+// Тестовый обработчик запросов: отвечает 200 OK на корневой маршрут.
 func getTestHandlerFn(_ *testing.T) (ret http.Handler) {
 	var mux = chi.NewMux()
 
-	mux.Get("/", func(w http.ResponseWriter, r *http.Request) { _, _ = w.Write([]byte("ok")) })
+	mux.Get(testRouteRoot, func(w http.ResponseWriter, r *http.Request) { _, _ = w.Write([]byte(testResponseBody)) })
 
 	return mux
 }
 
 func TestNew_InvalidAddress(t *testing.T) {
-	const invalidAddress = ":170000"
+	const (
+		tplAddressNotChecked = "функция ListenAndServe(), не корректная проверка адреса"
+		invalidAddress       = ":170000"
+	)
 	var web Interface
 
 	web = New().
 		ListenAndServe(invalidAddress)
 	if web.Error() == nil {
-		t.Errorf("функция ListenAndServe(), не корректная проверка адреса")
+		t.Error(tplAddressNotChecked)
 	}
 	web = New().
 		ListenAndServeTLS(invalidAddress, "", "", nil)
 	if web.Error() == nil {
-		t.Errorf("функция ListenAndServe(), не корректная проверка адреса")
+		t.Error(tplAddressNotChecked)
 	}
 }
 
 func TestNew_NoConfiguration(t *testing.T) {
-	var web = New()
+	const (
+		tplAddressNotChecked = "функция ListenAndServeWithConfig(), не корректная проверка конфигурации"
+		tplWrongError        = "функция ListenAndServeWithConfig(), получена не корректная ошибка"
+	)
+	var web Interface
 
+	web = New()
 	web.ListenAndServeWithConfig(nil)
 	defer web.Stop()
 	if web.Error() == nil {
-		t.Errorf("функция ListenAndServe(), не корректная проверка адреса")
+		t.Error(tplAddressNotChecked)
 	}
-	if !errors.Is(web.Error(), Errors().NoConfiguration()) {
-		t.Errorf("функция ListenAndServe(), получена не корректная ошибка")
+	if !errors.Is(web.Error(), Errors().NoConfiguration.Bind()) {
+		t.Error(tplWrongError)
 	}
 }
 
+//goland:noinspection DuplicatedCode
 func TestImpl_ListenAndServe_AlreadyRunning(t *testing.T) {
 	const (
-		testAddress1 = ":18080"
-		testAddress2 = ":18081"
+		tplErrorNotExpected = "функция ListenAndServe(), ошибка: %v, ожидалось: %v"
+		tplErrorExpected    = "функция ListenAndServe(), ошибка: %v, ожидалось: %v"
+		tplWrongError       = "функция ListenAndServe(), получена не корректная ошибка"
+		testAddress1        = ":18080"
+		testAddress2        = ":18081"
 	)
 	var web Interface
 
@@ -60,38 +82,42 @@ func TestImpl_ListenAndServe_AlreadyRunning(t *testing.T) {
 		ListenAndServe(testAddress1)
 	defer web.Stop()
 	if web.Error() != nil {
-		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+		t.Errorf(tplErrorNotExpected, web.Error(), nil)
 	}
+	// Повторный запуск сервера, сервер уже запущен.
 	web.ListenAndServe(testAddress2)
 	if web.Error() == nil {
-		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалось: %v", web.Error(), Errors().AlreadyRunning())
+		t.Errorf(tplErrorExpected, web.Error(), Errors().AlreadyRunning.Bind())
 	}
-	if !errors.Is(web.Error(), Errors().AlreadyRunning()) {
-		t.Errorf("функция ListenAndServe(), не корректная ошибка")
+	if !errors.Is(web.Error(), Errors().AlreadyRunning.Bind()) {
+		t.Error(tplWrongError)
 	}
+	// Запуск сервера после очистки последней ошибки, сервер уже запущен.
 	if !errors.Is(web.
-		Clean().                      // Очистка последней ошибки.
-		ListenAndServe(testAddress1). // Запуск сервера, который уже запущен.
-		Error(), Errors().AlreadyRunning()) {
-		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалось: %v", web.Error(), Errors().AlreadyRunning())
+		Clean().
+		ListenAndServe(testAddress1).
+		Error(), Errors().AlreadyRunning.Bind()) {
+		t.Errorf(tplErrorExpected, web.Error(), Errors().AlreadyRunning.Bind())
 	}
 }
 
 func TestImpl_NewListener_NoConfiguration(t *testing.T) {
+	const tplErrorNotEqual = "функция NewListener(), ошибка: %v, ожидалось: %v"
 	var web Interface
 
 	web = New()
-	if _, err := web.NewListener(nil); !errors.Is(err, Errors().NoConfiguration()) {
-		t.Errorf("функция NewListener(), ошибка: %v, ожидалось: %v", err, Errors().NoConfiguration())
+	if _, err := web.NewListener(nil); !errors.Is(err, Errors().NoConfiguration.Bind()) {
+		t.Errorf(tplErrorNotEqual, err, Errors().NoConfiguration.Bind())
 	}
 }
 
 func TestImpl_NewListenerTLS_NoConfiguration(t *testing.T) {
+	const tplErrorNotEqual = "функция NewListenerTLS(), ошибка: %v, ожидалось: %v"
 	var web Interface
 
 	web = New()
-	if _, err := web.NewListenerTLS(nil, nil); !errors.Is(err, Errors().NoConfiguration()) {
-		t.Errorf("функция NewListenerTLS(), ошибка: %v, ожидалось: %v", err, Errors().NoConfiguration())
+	if _, err := web.NewListenerTLS(nil, nil); !errors.Is(err, Errors().NoConfiguration.Bind()) {
+		t.Errorf(tplErrorNotEqual, err, Errors().NoConfiguration.Bind())
 	}
 }
 
@@ -100,11 +126,15 @@ func TestImpl_NewListenerTLS_NoConfiguration(t *testing.T) {
 //goland:noinspection ALL
 func TestImpl_ListenAndServe_MaxBodyBytes(t *testing.T) {
 	const (
-		testAddress  = "127.0.0.1:18450"
-		testLimit    = 4
-		testBodyOk   = "1234"
-		testBodyBig  = "12345"
-		testResponse = http.StatusRequestEntityTooLarge
+		tplFatalError = "функция ListenAndServeWithConfig(), ошибка: %v, ожидалось: %v"
+		tplNewRequest = "функция NewRequest(), ошибка: %v"
+		tplDoError    = "функция Do(), ошибка: %v"
+		tplWrongCode  = "функция Do(), код ответа: %d, ожидалось: %d"
+		testAddress   = "127.0.0.1:18450"
+		testLimit     = 4
+		testBodyOk    = "1234"
+		testBodyBig   = "12345"
+		testResponse  = http.StatusRequestEntityTooLarge
 	)
 	var (
 		err      error
@@ -120,48 +150,54 @@ func TestImpl_ListenAndServe_MaxBodyBytes(t *testing.T) {
 			// Превышение лимита размера тела запроса, сервер отвечает ошибкой 413.
 			return
 		}
-		_, _ = w.Write([]byte("ok"))
+		_, _ = w.Write([]byte(testResponseBody))
 	})
-	cfg, _ = parseAddress(testAddress)
+	if cfg, err = parseAddress(testAddress); err != nil {
+		t.Fatalf(tplFatalError, err, nil)
+	}
 	cfg.MaxBodyBytes = testLimit
 	web = New().
 		Handler(handler).
 		ListenAndServeWithConfig(cfg)
 	defer web.Stop()
 	if web.Error() != nil {
-		t.Fatalf("функция ListenAndServeWithConfig(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+		t.Fatalf(tplFatalError, web.Error(), nil)
 	}
 	// Тело запроса меньше лимита: код ответа 200.
-	if request, err = http.NewRequest(http.MethodPost, "http://"+testAddress+"/", strings.NewReader(testBodyOk)); err != nil {
-		t.Fatalf("функция NewRequest(), ошибка: %v", err)
+	if request, err = http.NewRequest(http.MethodPost, testSchemeHTTP+testAddress+testRouteRoot, strings.NewReader(testBodyOk)); err != nil {
+		t.Fatalf(tplNewRequest, err)
 	}
 	if response, err = http.DefaultClient.Do(request); err != nil {
-		t.Fatalf("функция Do(), ошибка: %v", err)
+		t.Fatalf(tplDoError, err)
 	}
 	_ = response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		t.Errorf("функция Do(), код ответа: %d, ожидалось: %d", response.StatusCode, http.StatusOK)
+		t.Errorf(tplWrongCode, response.StatusCode, http.StatusOK)
 	}
 	// Тело запроса больше лимита: код ответа 413.
-	if request, err = http.NewRequest(http.MethodPost, "http://"+testAddress+"/", strings.NewReader(testBodyBig)); err != nil {
-		t.Fatalf("функция NewRequest(), ошибка: %v", err)
+	if request, err = http.NewRequest(http.MethodPost, testSchemeHTTP+testAddress+testRouteRoot, strings.NewReader(testBodyBig)); err != nil {
+		t.Fatalf(tplNewRequest, err)
 	}
 	if response, err = http.DefaultClient.Do(request); err != nil {
-		t.Fatalf("функция Do(), ошибка: %v", err)
+		t.Fatalf(tplDoError, err)
 	}
 	_ = response.Body.Close()
 	if response.StatusCode != testResponse {
-		t.Errorf("функция Do(), код ответа: %d, ожидалось: %d", response.StatusCode, testResponse)
+		t.Errorf(tplWrongCode, response.StatusCode, testResponse)
 	}
 }
 
+//goland:noinspection DuplicatedCode
 func TestImpl_ListenAndServe_Wait(t *testing.T) {
 	const (
-		testAddress1 = "127.0.0.1:1080"
-		testAddress2 = ".test.socket"
-		ticTimeout   = time.Second / 4
+		tplErrorNotExpected = "функция ListenAndServe(), ошибка: %v, ожидалась: %v"
+		tplWaitBroken       = "функция Wait() повреждена"
+		testAddress1        = "127.0.0.1:1080"
+		testAddress2        = ".test.socket"
+		ticTimeout          = time.Second / 4
 	)
 	var (
+		err  error
 		tic  *time.Ticker
 		cou  uint32
 		web  Interface
@@ -172,8 +208,9 @@ func TestImpl_ListenAndServe_Wait(t *testing.T) {
 		Handler(getTestHandlerFn(t)).
 		ListenAndServe(testAddress1)
 	if web.Error() != nil {
-		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалась: %v", web.Error(), nil)
+		t.Errorf(tplErrorNotExpected, web.Error(), nil)
 	}
+	// Остановка сервера по таймеру.
 	go func() {
 		tic = time.NewTicker(ticTimeout)
 		defer tic.Stop()
@@ -187,17 +224,21 @@ func TestImpl_ListenAndServe_Wait(t *testing.T) {
 	}()
 	web.Wait()
 	if cou <= 4 {
-		t.Errorf("функция Wait() повреждена")
+		t.Error(tplWaitBroken)
 	}
+	// Проверка ожидания завершения сервера на UNIX сокете.
 	web = New().
 		Handler(getTestHandlerFn(t))
-	conf, _ = parseAddress("")
-	conf.Mode = "socket"
+	if conf, err = parseAddress(testAddressEmpty); err != nil {
+		t.Fatalf(tplErrorNotExpected, err, nil)
+	}
+	conf.Mode = testModeSocket
 	conf.Socket = testAddress2
 	web.ListenAndServeWithConfig(conf)
 	if web.Error() != nil {
-		t.Errorf("функция ListenAndServe(), ошибка: %v, ожидалась: %v", web.Error(), nil)
+		t.Errorf(tplErrorNotExpected, web.Error(), nil)
 	}
+	// Остановка сервера по таймеру.
 	go func() {
 		tic = time.NewTicker(ticTimeout)
 		defer tic.Stop()
@@ -211,6 +252,6 @@ func TestImpl_ListenAndServe_Wait(t *testing.T) {
 	}()
 	web.Wait()
 	if cou <= 4 {
-		t.Errorf("функция Wait() повреждена")
+		t.Error(tplWaitBroken)
 	}
 }

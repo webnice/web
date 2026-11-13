@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"net"
 	"testing"
 
@@ -10,27 +11,39 @@ import (
 )
 
 func TestImpl_IdGenerate(t *testing.T) {
+	const (
+		tplErrorNotExpected = "функция ListenAndServeWithConfig(), ошибка: %v, ожидалось: %v"
+		tplIdIsEmpty        = "функция ID(), ошибка, ожидалось не пустое значение"
+		testHostLocal       = "localhost"
+		testModeTcp         = "tcp"
+	)
 	var web Interface
 
 	web = New().
 		Handler(getTestHandlerFn(t))
 	web.ListenAndServeWithConfig(&Configuration{
 		Configuration: wnet.Configuration{
-			Host: "localhost",
+			Host: testHostLocal,
 			Port: 10180,
-			Mode: "tcp",
+			Mode: testModeTcp,
 		},
 	})
 	defer web.Stop()
 	if web.Error() != nil {
-		t.Errorf("функция ListenAndServeWithConfig(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+		t.Errorf(tplErrorNotExpected, web.Error(), nil)
 	}
 	if web.ID() == "" {
-		t.Errorf("функция ID(), ошибка, ожидалось не пустое значение")
+		t.Error(tplIdIsEmpty)
 	}
 }
 
 func TestImpl_IdStatic(t *testing.T) {
+	const (
+		tplErrorNotExpected = "функция ListenAndServeWithConfig(), ошибка: %v, ожидалось: %v"
+		tplIdNotEqual       = "функция ID(), вернулось: %q, ожидалось: %q"
+		testHostLocal       = "localhost"
+		testModeTcp         = "tcp"
+	)
 	var (
 		id  string
 		web Interface
@@ -42,21 +55,27 @@ func TestImpl_IdStatic(t *testing.T) {
 	web.ListenAndServeWithConfig(&Configuration{
 		Configuration: wnet.Configuration{
 			ID:   id,
-			Host: "localhost",
+			Host: testHostLocal,
 			Port: 10180,
-			Mode: "tcp",
+			Mode: testModeTcp,
 		},
 	})
 	defer web.Stop()
 	if web.Error() != nil {
-		t.Errorf("функция ListenAndServeWithConfig(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+		t.Errorf(tplErrorNotExpected, web.Error(), nil)
 	}
 	if web.ID() != id {
-		t.Errorf("функция ID(), вернулось: %q, ожидалось: %q", web.ID(), id)
+		t.Errorf(tplIdNotEqual, web.ID(), id)
 	}
 }
 
 func TestImpl_ServeWithId(t *testing.T) {
+	const (
+		tplNewListenerError = "функция NewListener(), ошибка: %v, ожидалось: %v"
+		tplServeError       = "функция ServeWithId(), ошибка: %v, ожидалось: %v"
+		tplIdNotEqual       = "функция ID(), вернулось: %q, ожидалось: %q"
+		testHostLocal       = "localhost"
+	)
 	var (
 		err      error
 		id       string
@@ -69,25 +88,31 @@ func TestImpl_ServeWithId(t *testing.T) {
 	web.Handler(getTestHandlerFn(t))
 	web.(*impl).cfg = &Configuration{
 		Configuration: wnet.Configuration{
-			Host: "localhost",
+			Host: testHostLocal,
 			Port: 18080,
 		},
 	}
-	listener, err = web.NewListener(web.(*impl).cfg)
-	if err != nil {
-		t.Fatalf("функция NewListener(), ошибка: %v, ожидалось: %v", err, nil)
+	if listener, err = web.NewListener(web.(*impl).cfg); err != nil {
+		t.Fatalf(tplNewListenerError, err, nil)
 	}
 	if web.ServeWithId(listener, id); web.Error() != nil {
-		t.Errorf("функция ServeWithId(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+		t.Errorf(tplServeError, web.Error(), nil)
 	}
 	defer web.Stop()
 	if web.ID() != id {
-		t.Errorf("функция ID(), вернулось: %q, ожидалось: %q", web.ID(), id)
+		t.Errorf(tplIdNotEqual, web.ID(), id)
 	}
 }
 
 // Запуск сервера через функцию Serve() без указания ID не должен изменять ID переданный в конфигурации.
 func TestImpl_ServeConfiguredID(t *testing.T) {
+	const (
+		tplNewListenerError = "функция NewListener(), ошибка: %v, ожидалось: %v"
+		tplServeError       = "функция Serve(), ошибка: %v, ожидалось: %v"
+		tplIdNotEqual       = "функция ID(), вернулось: %q, ожидалось: %q"
+		testHostLocal       = "localhost"
+		testPort            = 18082
+	)
 	var (
 		err      error
 		id       string
@@ -101,19 +126,36 @@ func TestImpl_ServeConfiguredID(t *testing.T) {
 	web.(*impl).cfg = &Configuration{
 		Configuration: wnet.Configuration{
 			ID:   id,
-			Host: "localhost",
-			Port: 18082,
+			Host: testHostLocal,
+			Port: testPort,
 		},
 	}
 	if listener, err = web.NewListener(web.(*impl).cfg); err != nil {
-		t.Fatalf("функция NewListener(), ошибка: %v, ожидалось: %v", err, nil)
+		t.Fatalf(tplNewListenerError, err, nil)
 	}
 	web.Serve(listener)
 	defer web.Stop()
 	if web.Error() != nil {
-		t.Errorf("функция Serve(), ошибка: %v, ожидалось: %v", web.Error(), nil)
+		t.Errorf(tplServeError, web.Error(), nil)
 	}
 	if web.ID() != id {
-		t.Errorf("функция ID(), вернулось: %q, ожидалось: %q", web.ID(), id)
+		t.Errorf(tplIdNotEqual, web.ID(), id)
+	}
+}
+
+// Проверка получения ошибки библиотеки "github.com/webnice/net" через функцию Error() при отсутствии
+// собственной ошибки пакета.
+func TestImpl_ErrorFromNet(t *testing.T) {
+	const tplErrorNotEqual = "функция Error(), ошибка: %v, ожидалось: %v"
+	var web *impl
+
+	web = New().(*impl)
+	if web.Error() != nil {
+		t.Fatalf(tplErrorNotEqual, web.Error(), nil)
+	}
+	// Формирование ошибки внутри библиотеки "github.com/webnice/net" без ошибки пакета.
+	web.net.ListenAndServeWithConfig(nil)
+	if !errors.Is(web.Error(), Errors().NoConfiguration.Bind()) {
+		t.Errorf(tplErrorNotEqual, web.Error(), Errors().NoConfiguration.Bind())
 	}
 }

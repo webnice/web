@@ -28,6 +28,7 @@ func parseAddress(addr string) (ret *Configuration, err error) {
 	if n, err = net.LookupPort(netTcp, strings.Join(sp[1:], bColon)); err != nil {
 		return
 	}
+	// Ошибка разрешения имени хоста в IP адрес не считается ошибкой разбора адреса.
 	ret.Host, ret.Port = sp[0], uint16(n)
 	switch sp, err = net.LookupHost(sp[0]); err {
 	case nil:
@@ -39,18 +40,18 @@ func parseAddress(addr string) (ret *Configuration, err error) {
 	return
 }
 
-// http2RequiredCipherSuites Шифры, обязательные для работы протокола HTTP/2.
+// Шифры, обязательные для работы протокола HTTP/2.
 var http2RequiredCipherSuites = []uint16{
 	tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 	tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 }
 
-// ensureHTTP2CipherSuites Проверка списка шифров TLS на наличие хотя бы одного шифра, обязательного для
-// протокола HTTP/2. Если ни одного обязательного шифра в списке нет, они добавляются.
+// Проверка списка шифров TLS на наличие хотя бы одного шифра, обязательного для протокола HTTP/2.
+// Если ни одного обязательного шифра в списке нет, они добавляются.
 func ensureHTTP2CipherSuites(cipherSuites []uint16) (ret []uint16) {
 	ret = cipherSuites
 	if len(ret) == 0 {
-		// Пустой список шифров означает использование списка по умолчанию, он совместим с HTTP/2.
+		// Пустой список шифров означает использование списка шифров по умолчанию, он совместим с HTTP/2.
 		return
 	}
 	for _, cipher := range http2RequiredCipherSuites {
@@ -63,16 +64,17 @@ func ensureHTTP2CipherSuites(cipherSuites []uint16) (ret []uint16) {
 	return
 }
 
-// isTLSListener Проверка того, что слушатель соединений уже обёрнут в TLS режим.
+// Проверка того, что слушатель соединений уже обёрнут в TLS режим.
 // Тип слушателя TLS из пакета "crypto/tls" не экспортируется, поэтому проверка выполняется по пакету типа.
 func isTLSListener(ltn net.Listener) (ok bool) {
 	const pkgTls = "crypto/tls"
-	var tp = reflect.TypeOf(ltn)
+	var tp reflect.Type
 
+	tp = reflect.TypeOf(ltn)
 	if tp == nil {
 		return
 	}
-	for tp.Kind() == reflect.Ptr {
+	for tp.Kind() == reflect.Pointer {
 		tp = tp.Elem()
 	}
 	ok = tp.PkgPath() == pkgTls
