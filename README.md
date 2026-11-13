@@ -1,7 +1,7 @@
 # web
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/webnice/web/v3.svg)](https://pkg.go.dev/github.com/webnice/web/v3)
-[![Coverage Status](https://coveralls.io/repos/github/webnice/web/badge.svg?branch=master)](https://coveralls.io/github/webnice/web?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/webnice/web/badge.svg?branch=master%0Av3)](https://coveralls.io/github/webnice/web?branch=master%0Av3)
 
 #### Описание
 

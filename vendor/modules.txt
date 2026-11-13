@@ -1,5 +1,5 @@
-# github.com/go-chi/chi/v5 v5.5.0
-## explicit; go 1.24
+# github.com/go-chi/chi/v5 v5.0.10
+## explicit; go 1.14
 github.com/go-chi/chi/v5
 # github.com/google/uuid v1.6.0
 ## explicit
@@ -13,4 +13,3 @@ github.com/webnice/dic
 # github.com/webnice/net v1.4.1
 ## explicit; go 1.26.9
 github.com/webnice/net
-# github.com/webnice/kit/v4 => /Users/kallisto/Projects/lib/github.com/webnice/kit
