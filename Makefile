@@ -1,6 +1,6 @@
 ## Инструментарий проектов webnice - единый Makefile.
 ## (c)Alex Geer <monoflash@gmail.com>
-## Версия: 12.11.2026.
+## Версия: 14.11.2026.
 
 ## Вычисление текущей директории проекта.
 export DIR := $(strip $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST)))))
