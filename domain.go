@@ -20,8 +20,9 @@ var domainIDNA = idna.New(idna.StrictDomainName(true), idna.ValidateLabels(true)
 
 // Фильтр разрешённых доменов: нормализованные списки доменов конфигурации.
 type domainFilter struct {
-	hosts     []string // Домены без порта.
-	hostPorts []string // Домены с портом.
+	hosts     []string                      // Домены без порта.
+	hostPorts []string                      // Домены с портом.
+	refused   func(host, remoteAddr string) // Функция оповещения об отказе в обслуживании запроса.
 }
 
 // Создание фильтра доменов: домены конфигурации преобразуются в punycode и разделяются на домены с портом
@@ -109,8 +110,9 @@ func matchDomainPattern(pattern, host string) bool {
 // Фильтрация домена на этапе TLS handshake по SNI. Вернётся ошибка, если домен не разрешён конфигурацией.
 func (df *domainFilter) sniFilter(hello *tls.ClientHelloInfo) (*tls.Config, error) {
 	var (
-		err  error
-		host string
+		err        error
+		host       string
+		remoteAddr string
 	)
 
 	if hello.ServerName == "" {
@@ -124,6 +126,13 @@ func (df *domainFilter) sniFilter(hello *tls.ClientHelloInfo) (*tls.Config, erro
 	}
 	if df.matchByHost(host) {
 		return nil, nil
+	}
+	// Домен не разрешён конфигурацией.
+	if hello.Conn != nil && hello.Conn.RemoteAddr() != nil {
+		remoteAddr = hello.Conn.RemoteAddr().String()
+	}
+	if df.refused != nil {
+		safeCallRefused(df.refused, hello.ServerName, remoteAddr)
 	}
 
 	return nil, fmt.Errorf(tplDomainAbort, hello.ServerName)
@@ -154,6 +163,9 @@ func (df *domainFilter) handler(h http.Handler) http.Handler {
 			return
 		}
 		// Домен не разрешён конфигурацией.
+		if df.refused != nil {
+			safeCallRefused(df.refused, r.Host, r.RemoteAddr)
+		}
 		w.Header().Set(Header.Connection.String(), "close")
 		w.WriteHeader(Status.RequestedHostUnavailable.Code())
 		_, _ = w.Write([]byte(Status.RequestedHostUnavailable.String()))

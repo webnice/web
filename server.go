@@ -75,6 +75,10 @@ func (web *impl) makeServer(tlsConfig *tls.Config) (ret *http.Server, isTLS bool
 	if df = newDomainFilter(web.cfg.Domain); df.empty() {
 		df = nil
 	}
+	// Назначение функции оповещения об отказе в обслуживании запроса из-за не разрешённого домена.
+	if df != nil {
+		df.refused = web.cfg.DomainRefused
+	}
 	// Цепочка обработки запросов: ограничение доменов, ограничение размера тела, полнодуплексный режим.
 	handler = web.handler
 	if df != nil {

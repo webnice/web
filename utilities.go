@@ -2,8 +2,10 @@ package web
 
 import (
 	"crypto/tls"
+	"log"
 	"net"
 	"reflect"
+	"runtime"
 	"slices"
 	"strings"
 	"time"
@@ -89,4 +91,37 @@ func defaultConfiguration(cfg *Configuration) {
 	if cfg.ShutdownTimeout == 0 {
 		cfg.ShutdownTimeout = defaultShutdownTimeout
 	}
+}
+
+// Безопасный вызов внешней функции refused.
+func safeCallRefused(fn func(string, string), host, remoteAddr string) {
+	const errPanic = "Паника: %q\nСтек вызовов, в момент паники:\n%s."
+
+	// Функция защиты от паники.
+	defer func() {
+		if e := recover(); e != nil {
+			log.Printf(errPanic, e, stackShort())
+		}
+	}()
+	fn(host, remoteAddr)
+}
+
+// Загрузка стека с увеличением буфера до тех пор, пока весь стек не поместится в буфер.
+func stackShort() (ret []byte) {
+	const defaultBufferLength int = 1 << 16 // Размер буфера по умолчанию для среза байт - cap=64 килобайта.
+	var (
+		buf []byte
+		all bool
+	)
+
+	buf = make([]byte, defaultBufferLength)
+	for {
+		if n := runtime.Stack(buf, all); n < len(buf) {
+			ret = buf[:n]
+			break
+		}
+		buf = make([]byte, len(buf)*2)
+	}
+
+	return
 }

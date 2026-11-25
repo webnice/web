@@ -3,6 +3,7 @@ package web
 import (
 	"crypto/tls"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -85,6 +86,8 @@ func TestDomainFilterHandler(t *testing.T) {
 		tplWrongHeader   = "функция ServeHTTP(), заголовок Connection: %q, ожидалось: %q"
 		tplNewRequest    = "функция NewRequest(), ошибка: %v"
 		tplReadAll       = "функция ReadAll(), ошибка: %v"
+		tplRefusedFired  = "функция оповещения об отказе, вызвана для разрешённого домена"
+		tplRefusedHost   = "функция оповещения об отказе, домен: %q, ожидалось: %q"
 		testBodyOK       = "ok"
 		testHostDenied   = "denied.example.com"
 		testHostAllowed  = "allowed.example.com"
@@ -95,14 +98,17 @@ func TestDomainFilterHandler(t *testing.T) {
 		testHostInvalid  = "exa mple.com"
 	)
 	var (
-		df   *domainFilter
-		rec  *httptest.ResponseRecorder
-		req  *http.Request
-		body []byte
-		err  error
+		df          *domainFilter
+		rec         *httptest.ResponseRecorder
+		req         *http.Request
+		body        []byte
+		err         error
+		refusedHost string
 	)
 
 	df = newDomainFilter([]string{"allowed.example.com", "*.allowed.example.org", "allowed.example.com:8443", "домен.рф"})
+	// Назначение функции оповещения об отказе в обслуживании запроса.
+	df.refused = func(host, _ string) { refusedHost = host }
 	var handler = df.handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(testBodyOK))
 	}))
@@ -152,6 +158,10 @@ func TestDomainFilterHandler(t *testing.T) {
 	if rec.Code != http.StatusOK {
 		t.Errorf(tplWrongCode, rec.Code, http.StatusOK)
 	}
+	// Оповещение об отказе не вызывалось для разрешённых доменов.
+	if refusedHost != "" {
+		t.Error(tplRefusedFired)
+	}
 	// Запрещённый домен: статус 434, закрытие соединения.
 	rec = httptest.NewRecorder()
 	if req, err = http.NewRequest(http.MethodGet, testSchemeHTTP+testHostDenied+testRouteRoot, nil); err != nil {
@@ -170,20 +180,51 @@ func TestDomainFilterHandler(t *testing.T) {
 	if string(body) != Status.RequestedHostUnavailable.String() {
 		t.Errorf(tplWrongBody, string(body), Status.RequestedHostUnavailable.String())
 	}
+	// Проверка оповещения об отказе с запрошенным доменом.
+	if refusedHost != testHostDenied {
+		t.Errorf(tplRefusedHost, refusedHost, testHostDenied)
+	}
 }
+
+// Заглушка сетевого адреса удалённой стороны.
+type stubAddr string
+
+// Network Сеть заглушки адреса.
+func (sa stubAddr) Network() string { return netTcp }
+
+// String Строковое представление заглушки адреса.
+func (sa stubAddr) String() string { return string(sa) }
+
+// Заглушка соединения с фиксированным адресом удалённой стороны.
+type stubConn struct {
+	net.Conn
+	addr net.Addr
+}
+
+// RemoteAddr Адрес удалённой стороны заглушки соединения.
+func (sc stubConn) RemoteAddr() net.Addr { return sc.addr }
 
 // Проверка фильтрации домена на этапе TLS handshake по SNI.
 func TestDomainFilterSNI(t *testing.T) {
 	const (
 		tplErrorExpected = "функция sniFilter(), ошибка не вернулась"
 		tplErrorNotExp   = "функция sniFilter(), ошибка: %v, ожидалось: %v"
+		tplRefusedFired  = "функция оповещения об отказе, вызвана для разрешённого домена"
+		tplRefusedHost   = "функция оповещения об отказе, домен: %q, ожидалось: %q"
+		tplRefusedAddr   = "функция оповещения об отказе, адрес удалённой стороны: %q, ожидалось: %q"
+		testRemoteAddr   = "192.0.2.1:1234"
 	)
 	var (
-		df  *domainFilter
-		err error
+		df          *domainFilter
+		hello       *tls.ClientHelloInfo
+		err         error
+		refusedHost string
+		refusedAddr string
 	)
 
 	df = newDomainFilter([]string{"allowed.example.com", "*.allowed.example.org"})
+	// Назначение функции оповещения об отказе в обслуживании запроса.
+	df.refused = func(host, remoteAddr string) { refusedHost, refusedAddr = host, remoteAddr }
 	// Домен не указан, проверка пропускается.
 	if _, err = df.sniFilter(&tls.ClientHelloInfo{}); err != nil {
 		t.Errorf(tplErrorNotExp, err, nil)
@@ -196,9 +237,29 @@ func TestDomainFilterSNI(t *testing.T) {
 	if _, err = df.sniFilter(&tls.ClientHelloInfo{ServerName: "www.allowed.example.org"}); err != nil {
 		t.Errorf(tplErrorNotExp, err, nil)
 	}
+	// Оповещение об отказе не вызывалось для разрешённых доменов.
+	if refusedHost != "" {
+		t.Error(tplRefusedFired)
+	}
 	// Запрещённый домен.
 	if _, err = df.sniFilter(&tls.ClientHelloInfo{ServerName: "denied.example.com"}); err == nil {
 		t.Errorf(tplErrorExpected)
+	}
+	// Проверка оповещения об отказе с запрошенным доменом.
+	if refusedHost != "denied.example.com" {
+		t.Errorf(tplRefusedHost, refusedHost, "denied.example.com")
+	}
+	// Запрещённый домен с установленным соединением: оповещение об отказе получает адрес удалённой стороны.
+	refusedHost, refusedAddr = "", ""
+	hello = &tls.ClientHelloInfo{ServerName: "denied.example.com", Conn: stubConn{addr: stubAddr(testRemoteAddr)}}
+	if _, err = df.sniFilter(hello); err == nil {
+		t.Errorf(tplErrorExpected)
+	}
+	if refusedHost != "denied.example.com" {
+		t.Errorf(tplRefusedHost, refusedHost, "denied.example.com")
+	}
+	if refusedAddr != testRemoteAddr {
+		t.Errorf(tplRefusedAddr, refusedAddr, testRemoteAddr)
 	}
 	// Не корректный домен пропускается без блокировки.
 	if _, err = df.sniFilter(&tls.ClientHelloInfo{ServerName: "exa mple.com"}); err != nil {
@@ -215,22 +276,29 @@ func TestImpl_ListenAndServe_Domain(t *testing.T) {
 		tplWrongCode    = "функция Get(), код ответа: %d, ожидалось: %d"
 		tplNewRequest   = "функция NewRequest(), ошибка: %v"
 		tplDoError      = "функция Do(), ошибка: %v"
+		tplRefusedFired = "функция оповещения об отказе, вызвана для разрешённого домена"
+		tplRefusedHost  = "функция оповещения об отказе, домен: %q, ожидалось: %q"
+		tplRefusedAddr  = "функция оповещения об отказе, адрес удалённой стороны пустой"
 		testAddress     = "127.0.0.1:18451"
 		testHostAllowed = "allowed.example.com"
 		testHostDenied  = "denied.example.com"
 	)
 	var (
-		err error
-		web Interface
-		cfg *Configuration
-		req *http.Request
-		rsp *http.Response
+		err         error
+		web         Interface
+		cfg         *Configuration
+		req         *http.Request
+		rsp         *http.Response
+		refusedHost string
+		refusedAddr string
 	)
 
 	if cfg, err = parseAddress(testAddress); err != nil {
 		t.Fatalf(tplFatalError, err, nil)
 	}
 	cfg.Domain = []string{"allowed.example.com"}
+	// Назначение функции оповещения об отказе в обслуживании запроса.
+	cfg.DomainRefused = func(host, remoteAddr string) { refusedHost, refusedAddr = host, remoteAddr }
 	web = New().
 		Handler(getTestHandlerFn(t)).
 		ListenAndServeWithConfig(cfg)
@@ -250,6 +318,10 @@ func TestImpl_ListenAndServe_Domain(t *testing.T) {
 	if rsp.StatusCode != http.StatusOK {
 		t.Errorf(tplWrongCode, rsp.StatusCode, http.StatusOK)
 	}
+	// Оповещение об отказе не вызывалось для разрешённого домена.
+	if refusedHost != "" {
+		t.Error(tplRefusedFired)
+	}
 	// Запрос на запрещённый домен: заголовок Host передаётся напрямую.
 	if req, err = http.NewRequest(http.MethodGet, testSchemeHTTP+testAddress+testRouteRoot, nil); err != nil {
 		t.Fatalf(tplNewRequest, err)
@@ -261,6 +333,13 @@ func TestImpl_ListenAndServe_Domain(t *testing.T) {
 	_ = rsp.Body.Close()
 	if rsp.StatusCode != Status.RequestedHostUnavailable.Code() {
 		t.Errorf(tplWrongCode, rsp.StatusCode, Status.RequestedHostUnavailable.Code())
+	}
+	// Проверка оповещения об отказе с запрошенным доменом и адресом удалённой стороны.
+	if refusedHost != testHostDenied {
+		t.Errorf(tplRefusedHost, refusedHost, testHostDenied)
+	}
+	if refusedAddr == "" {
+		t.Error(tplRefusedAddr)
 	}
 }
 

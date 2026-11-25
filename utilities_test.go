@@ -1,9 +1,13 @@
 package web
 
 import (
+	"bytes"
 	"crypto/tls"
 	"errors"
+	"log"
 	"net"
+	"os"
+	"strings"
 	"testing"
 )
 
@@ -115,5 +119,58 @@ func TestParseAddress(t *testing.T) {
 		if cfg != nil && tests[n].port != cfg.Port {
 			t.Errorf(tplPort, tests[n].id, tests[n].addr, cfg.Port, tests[n].port)
 		}
+	}
+}
+
+// Проверка безопасного вызова функции оповещения об отказе в обслуживании запроса.
+func TestSafeCallRefused(t *testing.T) {
+	const (
+		tplArgsNotEqual   = "аргументы функции оповещения об отказе: %q, %q, ожидалось: %q, %q"
+		tplPanicNotLogged = "функция safeCallRefused(), паника не записана в журнал"
+		tplStackNotLogged = "функция safeCallRefused(), стек вызовов не записан в журнал"
+		testHost          = "denied.example.com"
+		testRemoteAddr    = "192.0.2.1:1234"
+		testPanicText     = "тестовая паника"
+		testStackMark     = "goroutine "
+	)
+	var (
+		buf        bytes.Buffer
+		host       string
+		remoteAddr string
+	)
+
+	// Вызов функции без паники: аргументы передаются без изменений.
+	safeCallRefused(func(h, r string) { host, remoteAddr = h, r }, testHost, testRemoteAddr)
+	if host != testHost || remoteAddr != testRemoteAddr {
+		t.Errorf(tplArgsNotEqual, host, remoteAddr, testHost, testRemoteAddr)
+	}
+	// Перенаправление журнала в буфер на время проверки перехвата паники.
+	log.SetOutput(&buf)
+	defer log.SetOutput(os.Stderr)
+	// Паника внутри функции перехватывается, в журнал записываются паника и стек вызовов.
+	safeCallRefused(func(_, _ string) { panic(testPanicText) }, testHost, testRemoteAddr)
+	if !strings.Contains(buf.String(), testPanicText) {
+		t.Error(tplPanicNotLogged)
+	}
+	if !strings.Contains(buf.String(), testStackMark) {
+		t.Error(tplStackNotLogged)
+	}
+}
+
+// Проверка загрузки стека вызовов.
+func TestStackShort(t *testing.T) {
+	const (
+		tplStackEmpty = "функция stackShort(), стек вызовов пустой"
+		tplStackMark  = "функция stackShort(), стек вызовов не содержит маркер горутины"
+		testStackMark = "goroutine "
+	)
+	var stack []byte
+
+	stack = stackShort()
+	if len(stack) == 0 {
+		t.Error(tplStackEmpty)
+	}
+	if !strings.Contains(string(stack), testStackMark) {
+		t.Error(tplStackMark)
 	}
 }
